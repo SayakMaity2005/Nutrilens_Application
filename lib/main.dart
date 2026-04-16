@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
+import 'cores/constants/themes.dart';
+import 'home_screen/home_screen.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const NutrilensApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // This widget is the root of your application.
+class NutrilensApp extends StatelessWidget {
+  const NutrilensApp({super.key});
   @override
   Widget build(BuildContext context) {
+    // TODO: implement build
     return MaterialApp(
-      title: 'Nutrilens Test',
-      theme: ThemeData(
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
-      ),
+      // initialRoute: "Nutrients Tracker",
+      debugShowCheckedModeBanner: false,
+      darkTheme: AppTheme.darkTheme,
+      theme: AppTheme.lightTheme,
+      themeMode: ThemeMode.system,
+      // home: InitialScreen(),
+      // home: InputScreen(),
+      home: HomeScreen(),
     );
   }
 }
