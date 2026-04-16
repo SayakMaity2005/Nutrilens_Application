@@ -8,6 +8,7 @@ import 'package:nutrilens_test/cores/constants/text_styles.dart';
 // import 'package:nutrilens_test/home_screen/homepages/dashboard/intake_select.dart' hide IntakeRound;
 
 import '../../../cores/custom_datatypes/custom_classes.dart';
+import 'ai_custom_recipe.dart';
 import 'intake_select.dart';
 
 class Dashboard extends StatefulWidget {
@@ -691,12 +692,12 @@ class _DashboardState extends State<Dashboard> {
                           //   //     _consumedIntermediateIntake['energy']! + 400;
                           //
                           // });
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //     builder: (context) => AiCustomRecipe(),
-                          //   ),
-                          // );
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AiCustomRecipe(),
+                            ),
+                          );
                         },
                         child: Container(
                           // height: 20,

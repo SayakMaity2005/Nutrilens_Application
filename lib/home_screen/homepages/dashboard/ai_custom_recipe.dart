@@ -1,9 +1,9 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:nutrients_tracker/cores/constants/colors.dart';
-import 'package:nutrients_tracker/cores/constants/text_styles.dart';
-import 'package:nutrients_tracker/custom_widget_library/animated_button.dart';
+import 'package:nutrilens_test/cores/constants/colors.dart';
+import 'package:nutrilens_test/cores/constants/text_styles.dart';
+import 'package:nutrilens_test/custom_widget_library/animated_button.dart';
 
 class AiCustomRecipe extends StatefulWidget {
   const AiCustomRecipe({super.key});
