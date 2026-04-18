@@ -28,6 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final screenSize = MediaQuery.of(context).size;
     final screenHeight = screenSize.height;
     final screenWidth = screenSize.width;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
     final palette = Theme.of(context).extension<AppPalette>()!;
 
     // TODO: implement build
@@ -97,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: Container(
         margin: EdgeInsetsGeometry.symmetric(horizontal: 22),
         child: NavigationBar(
-          height: 80, // for pixel 9 pro it was 54
+          height: 80 - bottomPadding, // for pixel 9 pro it was 54
           destinations: [
             NavigationDestination(
               icon: Icon(Icons.home_outlined, size: 28),
