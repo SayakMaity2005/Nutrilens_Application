@@ -106,6 +106,9 @@ class _WaterWaveState extends State<WaterWave>
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final screenHeight = size.height;
+    final screenWidth = size.width;
     return AnimatedBuilder(
       animation: controller,
       builder: (context, child) {
@@ -116,16 +119,16 @@ class _WaterWaveState extends State<WaterWave>
                 color1: Color(0xFFDEECF4),
                 color2: Color(0xFFBCDCEF),
                 shift: 1.2,),
-              size: Size(double.infinity, 130),
+              size: Size(screenWidth, 130),
             ),
             CustomPaint(
               painter: WavePainter(
                 animationValue: controller.value,
                 color1: Color(0xFFBCDCEF),
-                color2: Color(0xFF3FB4E8),
+                color2: Color(0xFF4FB6E4),
                 shift: 0,
               ),
-              size: Size(double.infinity, 130),
+              size: Size(screenWidth, 130),
             ),
           ],
         );

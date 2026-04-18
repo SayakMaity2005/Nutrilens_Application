@@ -998,7 +998,7 @@ class _DashboardState extends State<Dashboard> {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(16),
                     // child: Positioned.fill(child: WaterWave()),
-                    child: Expanded(child: WaterWave()),
+                    child: WaterWave(),
                   ),
                   // RotatingIcon(),
                   Container(
