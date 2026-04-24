@@ -1,4 +1,4 @@
-# nutrilens_test
+# Nutrilens
 
 A new Flutter project.
 

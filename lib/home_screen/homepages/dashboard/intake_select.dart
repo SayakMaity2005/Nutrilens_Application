@@ -8,7 +8,8 @@ import 'package:nutrilens_test/custom_widget_library/animated_button.dart';
 import '../../../cores/custom_datatypes/custom_classes.dart';
 
 class IntakeSelect extends StatefulWidget {
-  const IntakeSelect({super.key});
+  final int intakeRoundIndex;
+  const IntakeSelect({super.key, required this.intakeRoundIndex});
   @override
   State<StatefulWidget> createState() => _IntakeSelectState();
 }
@@ -94,6 +95,7 @@ class _IntakeSelectState extends State<IntakeSelect>
   void initState() {
     // TODO: implement initState
     super.initState();
+    _currIntakeRoundIndex = widget.intakeRoundIndex;
     _tabController = TabController(length: 4, vsync: this);
     _allIntakes['lunch'] = _availableBreakfastIntakes;
   }

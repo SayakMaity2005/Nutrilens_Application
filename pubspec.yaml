@@ -62,6 +62,7 @@ flutter:
   assets:
     - assets/first_screen_bg_image.jpg
     - assets/recipe_bg_image.jpg
+    - assets/glass_of_water_image.png
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

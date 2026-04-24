@@ -16,7 +16,7 @@ class NutrilensApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       darkTheme: AppTheme.darkTheme,
       theme: AppTheme.lightTheme,
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.light,
       // home: InitialScreen(),
       // home: InputScreen(),
       home: HomeScreen(),

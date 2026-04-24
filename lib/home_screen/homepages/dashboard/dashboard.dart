@@ -3,13 +3,11 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:nutrilens_test/cores/constants/colors.dart';
 import 'package:nutrilens_test/cores/constants/text_styles.dart';
-// import 'package:nutrilens_test/home_screen/homepages/dashboard/ai_custom_recipe.dart'
-//     hide IntakeRound;
-// import 'package:nutrilens_test/home_screen/homepages/dashboard/intake_select.dart' hide IntakeRound;
+import 'package:nutrilens_test/custom_widget_library/wavy_animated_progress.dart';
+import 'package:nutrilens_test/home_screen/homepages/dashboard/ai_custom_recipe.dart';
+import 'package:nutrilens_test/home_screen/homepages/dashboard/intake_select.dart';
 
 import '../../../cores/custom_datatypes/custom_classes.dart';
-import 'ai_custom_recipe.dart';
-import 'intake_select.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -77,6 +75,10 @@ class _DashboardState extends State<Dashboard> {
   final WorkoutRound _workoutRound = WorkoutRound();
   int _energyBurned = 0;
   int _energyBurnedIntermediate = 0;
+
+  int _requiredWater = 2250;
+  int _drinkedWater = 0;
+  int _waterCupSize = 250;
 
   @override
   void initState() {
@@ -237,7 +239,7 @@ class _DashboardState extends State<Dashboard> {
                             },
                             child: Container(
                               height: 64,
-                              width: 52,
+                              width: screenWidth / 7 - 6,
                               decoration: BoxDecoration(
                                 color:
                                     isSameDate(
@@ -839,7 +841,8 @@ class _DashboardState extends State<Dashboard> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => IntakeSelect(),
+                            builder: (context) =>
+                                IntakeSelect(intakeRoundIndex: i),
                           ),
                         );
                       },
@@ -940,6 +943,135 @@ class _DashboardState extends State<Dashboard> {
                       style: AppTextStyle.heading6.copyWith(
                         color: Colors.white,
                       ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            SizedBox(height: 14),
+            // Water section
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: screenWidth - 244,
+              children: [
+                Text('Water', style: AppTextStyle.heading3),
+                SizedBox(
+                  width: 120,
+                  child: GestureDetector(
+                    onTap: () {},
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      // spacing: 8,
+                      children: [
+                        Text(
+                          'More',
+                          style: AppTextStyle.heading6.copyWith(
+                            color: Color(0xFF888888),
+                          ),
+                        ),
+                        Icon(Icons.chevron_right, color: Color(0xFF888888)),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            SizedBox(height: 14),
+            // water section
+            Container(
+              // height: 70,
+              width: screenWidth,
+              margin: EdgeInsetsGeometry.symmetric(horizontal: 16, vertical: 4),
+              // padding: EdgeInsetsGeometry.symmetric(
+              //   // horizontal: 16,
+              //   vertical: 16,
+              // ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: BoxBorder.all(color: Color(0xFFE1E9FF), width: 1),
+              ),
+              child: Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    // child: Positioned.fill(child: WaterWave()),
+                    child: WaterWave(),
+                  ),
+                  // RotatingIcon(),
+                  Container(
+                    padding: EdgeInsetsGeometry.symmetric(
+                      // horizontal: 16,
+                      vertical: 16,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      spacing: screenWidth - 250,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              spacing: 2,
+                              children: [
+                                Text(
+                                  _drinkedWater.toString(),
+                                  style: AppTextStyle.heading1.copyWith(
+                                    color: Color(0xFF050F2C),
+                                  ),
+                                ),
+                                Text(
+                                  'ml',
+                                  style: AppTextStyle.heading6.copyWith(
+                                    color: Color(0xFF050F2C),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Text(
+                              'Goal ${_requiredWater}ml',
+                              style: AppTextStyle.primaryBoldText.copyWith(
+                                color: Color(0xFF888888),
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Container(
+                              padding: EdgeInsetsGeometry.symmetric(
+                                horizontal: 6,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Color(0xFFEDEDED),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                '1 cup = ${_waterCupSize}ml',
+                                style: AppTextStyle.extraSmallText.copyWith(
+                                  color: Color(0xFF555555),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          height: 80,
+                          width: 50,
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              image: AssetImage(
+                                'assets/glass_of_water_image.png',
+                              ),
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.add_rounded,
+                            size: 28,
+                            color: Color(0xFF2A3145),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
