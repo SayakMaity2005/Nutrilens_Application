@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:nutrients_tracker/cores/constants/text_styles.dart';
-import 'package:nutrients_tracker/custom_widget_library/animated_button.dart';
+import 'package:nutrients_test/cores/constants/text_styles.dart';
+import 'package:nutrients_test/custom_widget_library/animated_button.dart';
 
 class EditBudget extends StatefulWidget {
   final Map<String, int> requiredIntake;
