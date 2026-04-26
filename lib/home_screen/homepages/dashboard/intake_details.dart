@@ -134,16 +134,247 @@ class _IntakeDetailsState extends State<IntakeDetails> {
                       ),
                     ],
                   ),
-
+                  Column(
+                    spacing: 16,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            height: 10,
+                            width: 10,
+                            margin: EdgeInsetsGeometry.all(5),
+                            decoration: BoxDecoration(
+                              color: Color(0xFF31C339),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            spacing: 4,
+                            children: [
+                              Text(
+                                'Carbs',
+                                style: AppTextStyle.primaryBoldText.copyWith(
+                                  color: Color(0xFF555555),
+                                ),
+                              ),
+                              Row(
+                                spacing: 8,
+                                children: [
+                                  Text(
+                                    '${_selectIntake.carbs().toStringAsFixed(1)}g',
+                                    style: AppTextStyle.heading5.copyWith(
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: EdgeInsetsGeometry.symmetric(
+                                      horizontal: 8,
+                                      vertical: 3,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Color(0xFFEAEAEA),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: Text(
+                                      '${_pieChartDataMap['carbs']!.toStringAsFixed(1)}%',
+                                      style: AppTextStyle.primaryBoldText
+                                          .copyWith(color: Color(0xFF555555)),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            height: 10,
+                            width: 10,
+                            margin: EdgeInsetsGeometry.all(5),
+                            decoration: BoxDecoration(
+                              color: Colors.orange,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            spacing: 4,
+                            children: [
+                              Text(
+                                'Protein',
+                                style: AppTextStyle.primaryBoldText.copyWith(
+                                  color: Color(0xFF555555),
+                                ),
+                              ),
+                              Row(
+                                spacing: 8,
+                                children: [
+                                  Text(
+                                    '${_selectIntake.protein().toStringAsFixed(1)}g',
+                                    style: AppTextStyle.heading5.copyWith(
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: EdgeInsetsGeometry.symmetric(
+                                      horizontal: 8,
+                                      vertical: 3,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Color(0xFFEAEAEA),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: Text(
+                                      '${_pieChartDataMap['protein']!.toStringAsFixed(1)}%',
+                                      style: AppTextStyle.primaryBoldText
+                                          .copyWith(color: Color(0xFF555555)),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            height: 10,
+                            width: 10,
+                            margin: EdgeInsetsGeometry.all(5),
+                            decoration: BoxDecoration(
+                              color: Colors.amber,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            spacing: 4,
+                            children: [
+                              Text(
+                                'Fat',
+                                style: AppTextStyle.primaryBoldText.copyWith(
+                                  color: Color(0xFF555555),
+                                ),
+                              ),
+                              Row(
+                                spacing: 8,
+                                children: [
+                                  Text(
+                                    '${_selectIntake.fat().toStringAsFixed(1)}g',
+                                    style: AppTextStyle.heading5.copyWith(
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: EdgeInsetsGeometry.symmetric(
+                                      horizontal: 8,
+                                      vertical: 3,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Color(0xFFEAEAEA),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: Text(
+                                      '${_pieChartDataMap['fat']!.toStringAsFixed(1)}%',
+                                      style: AppTextStyle.primaryBoldText
+                                          .copyWith(color: Color(0xFF555555)),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
-
-
+            // Ingredients
+            Container(
+              width: screenWidth,
+              margin: EdgeInsetsGeometry.all(16),
+              padding: EdgeInsetsGeometry.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 6,
+                children: [
+                  Text('Ingredients', style: AppTextStyle.heading4),
+                  SizedBox(height: 10),
+                  if (_selectIntake.ingredients().isEmpty)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'No ingredients mentioned!',
+                          style: AppTextStyle.primaryText.copyWith(
+                            color: Color(0xFF999999),
+                          ),
+                        ),
+                      ],
+                    ),
+                  for (int i = 0; i < _selectIntake.ingredients().length; i++)
+                    Text(
+                      '${i + 1}. ${_selectIntake.ingredients()[i]}',
+                      style: AppTextStyle.primaryText.copyWith(
+                        color: Color(0xFF555555),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            // Recipe
+            Container(
+              width: screenWidth,
+              margin: EdgeInsetsGeometry.all(16),
+              padding: EdgeInsetsGeometry.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 6,
+                children: [
+                  Text('Recipe', style: AppTextStyle.heading4),
+                  SizedBox(height: 10),
+                  if (_selectIntake.ingredients().isEmpty)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'No recipe mentioned!',
+                          style: AppTextStyle.primaryText.copyWith(
+                            color: Color(0xFF999999),
+                          ),
+                        ),
+                      ],
+                    ),
+                  Text(
+                    _selectIntake.recipe(),
+                    style: AppTextStyle.primaryText.copyWith(
+                      color: Color(0xFF555555),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
-
+    // extendBodyBehindAppBar: true,
   }
 }
