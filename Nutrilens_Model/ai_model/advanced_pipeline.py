@@ -77,20 +77,23 @@ class NutrilensAdvancedPipeline:
             15: 2.0  # south_indian_breakfast
         }
 
-    def estimate_calories_regression(self, class_id, bbox_width, bbox_height):
+    def estimate_calories_regression(self, class_id, bbox_width, bbox_height, img_width, img_height):
         """
         Pseudo-Regression Model:
-        Estimates calories based on the area of the bounding box.
-        A true regression model would train a small Neural Network on (class, width, height) -> calories.
+        Estimates calories based on the relative area of the bounding box compared to the whole image.
         """
         area = bbox_width * bbox_height
-        # Normalizing area to prevent absurd numbers, assuming an 800x800 base image
-        normalized_area = area / (800 * 800)
+        img_area = img_width * img_height
+        
+        # Normalize relative to the actual image size (0.0 to 1.0)
+        # Prevents a 4K photo of an apple from returning 10,000 calories!
+        normalized_area = area / img_area
         
         base_factor = self.calorie_base.get(int(class_id), 2.0)
         
         # Simple polynomial regression curve representation: c = factor * (area^1.2) * multiplier
-        estimated_calories = base_factor * (normalized_area ** 1.2) * 5000 
+        # Max realistic calories for a full screen plate of food is ~800, not 5000
+        estimated_calories = base_factor * (normalized_area ** 1.2) * 800 
         return max(10, round(estimated_calories)) # Minimum 10 calories
 
     def process_image(self, image_input):
@@ -136,18 +139,19 @@ class NutrilensAdvancedPipeline:
                     # Override YOLO's generic class with the specific CNN class
                     fine_grained_cls_name = self.cnn_class_names[cnn_class_idx]
                     
-                # --- REGRESSION CALORIE ESTIMATION ---
-                w = x2 - x1
-                h = y2 - y1
-                estimated_calories = self.estimate_calories_regression(cls_id, w, h)
-                
-                detections.append({
-                    "yolo_class": cls_name,
-                    "fine_grained_class": fine_grained_cls_name,
-                    "confidence": conf,
-                    "bbox": [x1, y1, x2, y2],
-                    "estimated_calories": estimated_calories
-                })
+                    # Calculate dynamic calories based on relative size
+                    img_h, img_w = img.shape[:2]
+                    box_w = x2 - x1
+                    box_h = y2 - y1
+                    estimated_calories = self.estimate_calories_regression(cls_id, box_w, box_h, img_w, img_h)
+                    
+                    detections.append({
+                        "yolo_class": cls_name,
+                        "fine_grained_class": fine_grained_cls_name,
+                        "confidence": conf,
+                        "bbox": [x1, y1, x2, y2],
+                        "estimated_calories": estimated_calories
+                    })
                 
                 # Draw on image
                 cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)

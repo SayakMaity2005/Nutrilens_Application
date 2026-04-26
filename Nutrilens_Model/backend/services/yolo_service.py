@@ -24,7 +24,7 @@ class YOLOService:
             # Initialize the advanced pipeline model only once
             try:
                 # Use fine-tuned yolo weights and cnn weights
-                yolo_weights = r"d:\Projects\Nutrilens_front\Nutrilens_Application\Nutrilens_Model\runs\detect\Nutrilens\IndianFoodV2_Optimized\weights\best.pt"
+                yolo_weights = r"d:\Projects\Nutrilens_front\runs\detect\IndianFood_92Class\weights\best.pt"
                 cnn_weights = r"d:\Projects\Nutrilens_front\Nutrilens_Application\Nutrilens_Model\best_cnn_stage2.pth"
                 cls._model = NutrilensAdvancedPipeline(yolo_weights_path=yolo_weights, cnn_weights_path=cnn_weights)
                 print(f"Nutrilens Advanced Pipeline loaded successfully")

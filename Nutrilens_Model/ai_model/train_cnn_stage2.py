@@ -6,7 +6,7 @@ from torchvision import datasets, transforms, models
 from torch.utils.data import DataLoader
 import json
 
-def train_secondary_cnn(data_dir, num_epochs=10, batch_size=32, learning_rate=0.001):
+def train_secondary_cnn(data_dir, num_epochs=40, batch_size=32, learning_rate=0.001):
     """
     Trains a ResNet18 model on the cropped YOLO dataset for fine-grained classification.
     """
@@ -64,7 +64,8 @@ def train_secondary_cnn(data_dir, num_epochs=10, batch_size=32, learning_rate=0.
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
+    # Reduce LR by 50% every 10 epochs
+    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.5)
 
     # 5. Training Loop
     print("\nStarting Training...")
@@ -125,4 +126,4 @@ if __name__ == '__main__':
     multiprocessing.freeze_support()
     
     data_directory = r"d:\Projects\Nutrilens_front\Nutrilens_Application\Nutrilens_Model\ai_model\dataset_cnn_cropped"
-    train_secondary_cnn(data_directory, num_epochs=10)
+    train_secondary_cnn(data_directory, num_epochs=40)

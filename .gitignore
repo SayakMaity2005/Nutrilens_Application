@@ -44,3 +44,5 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 # Nutrilens_Model/ai_model/dataset
+/Nutrilens_Model/ai_model/dataset_cnn_cropped
+/Nutrilens_Model/ai_model/test_outputs
