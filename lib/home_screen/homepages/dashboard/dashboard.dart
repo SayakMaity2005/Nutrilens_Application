@@ -5,7 +5,9 @@ import 'package:nutrilens_test/cores/constants/colors.dart';
 import 'package:nutrilens_test/cores/constants/text_styles.dart';
 import 'package:nutrilens_test/custom_widget_library/wavy_animated_progress.dart';
 import 'package:nutrilens_test/home_screen/homepages/dashboard/ai_custom_recipe.dart';
+import 'package:nutrilens_test/home_screen/homepages/dashboard/edit_budget.dart';
 import 'package:nutrilens_test/home_screen/homepages/dashboard/intake_select.dart';
+import 'package:nutrilens_test/home_screen/homepages/dashboard/water_details.dart';
 
 import '../../../cores/custom_datatypes/custom_classes.dart';
 
@@ -48,16 +50,23 @@ class _DashboardState extends State<Dashboard> {
 
   final Map<String, IntakeRound> _intakeRounds = {
     'breakfast': IntakeRound(icon: '☕', type: 'Breakfast', requiredEnergy: 620),
-    'lunch': IntakeRound(icon: '🍛', type: 'Lunch', requiredEnergy: 870),
+    'lunch': IntakeRound(icon: '🍛', type: 'Lunch', requiredEnergy: 827),
     'dinner': IntakeRound(icon: '🍲', type: 'Dinner', requiredEnergy: 517),
     'snack': IntakeRound(icon: '🍎', type: 'Snack', requiredEnergy: 103),
+  };
+
+  final Map<String, int> _energyPerUnit = {'carbs': 4, 'protein': 4, 'fat': 9};
+  Map<String, double> _energyPercentage = {
+    'carbs': 50,
+    'protein': 30,
+    'fat': 20,
   };
 
   final Map<String, int> _requiredIntake = {
     'carbs': 259,
     'protein': 155,
     'fat': 46,
-    'energy': 620 + 870 + 517 + 103,
+    'energy': 620 + 827 + 517 + 103,
   };
   final Map<String, int> _consumedIntake = {
     'carbs': 0,
@@ -77,7 +86,8 @@ class _DashboardState extends State<Dashboard> {
   int _energyBurnedIntermediate = 0;
 
   int _requiredWater = 2250;
-  int _drinkedWater = 0;
+  int _drankWater = 0;
+  int _drankWaterCopy = 0;
   int _waterCupSize = 250;
 
   @override
@@ -86,6 +96,19 @@ class _DashboardState extends State<Dashboard> {
     super.initState();
     createWeekList();
     _datePageController = PageController(initialPage: _todayPageIndex);
+    _requiredIntake['energy'] = 620 + 827 + 517 + 103;
+    _requiredIntake['carbs'] =
+        ((_requiredIntake['energy']! * _energyPercentage['carbs']!) /
+            (100 * _energyPerUnit['carbs']!))
+            .round();
+    _requiredIntake['protein'] =
+        ((_requiredIntake['energy']! * _energyPercentage['protein']!) /
+            (100 * _energyPerUnit['protein']!))
+            .round();
+    _requiredIntake['fat'] =
+        ((_requiredIntake['energy']! * _energyPercentage['fat']!) /
+            (100 * _energyPerUnit['fat']!))
+            .round();
     _intakeRounds['breakfast']?.consumeIntake(
       Intake(
         name: 'Navy Beans, raw',
@@ -97,6 +120,7 @@ class _DashboardState extends State<Dashboard> {
         proteinPerUnit: 0.013,
         fatPerUnit: 0.027,
         ingredients: [],
+        recipe: '',
       ),
     );
     updateConsumptionRecords();
@@ -222,9 +246,9 @@ class _DashboardState extends State<Dashboard> {
                   // Container(
                   //   child:
                   for (
-                    DateTime tempDate = _startDate;
-                    _endDate.difference(tempDate).inDays > 0;
-                    tempDate = tempDate.add(Duration(days: 7))
+                  DateTime tempDate = _startDate;
+                  _endDate.difference(tempDate).inDays > 0;
+                  tempDate = tempDate.add(Duration(days: 7))
                   )
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -239,38 +263,38 @@ class _DashboardState extends State<Dashboard> {
                             },
                             child: Container(
                               height: 64,
-                              width: screenWidth / 7 - 6,
+                              width: 52,
                               decoration: BoxDecoration(
                                 color:
-                                    isSameDate(
-                                      tempDate.add(Duration(days: i)),
-                                      _selectedDate,
-                                    )
+                                isSameDate(
+                                  tempDate.add(Duration(days: i)),
+                                  _selectedDate,
+                                )
                                     ? Colors.blue.shade700
                                     : Colors.white,
                                 borderRadius: BorderRadius.circular(12),
                                 border:
-                                    isSameDate(
-                                      tempDate.add(Duration(days: i)),
-                                      _selectedDate,
-                                    )
+                                isSameDate(
+                                  tempDate.add(Duration(days: i)),
+                                  _selectedDate,
+                                )
                                     ? null
                                     : BoxBorder.all(
-                                        color:
-                                            isSameDate(
-                                              tempDate.add(Duration(days: i)),
-                                              DateTime.now(),
-                                            )
-                                            ? Colors.blue.shade700
-                                            : Color(0xFFBBBBBB),
-                                        width:
-                                            isSameDate(
-                                              tempDate.add(Duration(days: i)),
-                                              DateTime.now(),
-                                            )
-                                            ? 2
-                                            : 1,
-                                      ),
+                                  color:
+                                  isSameDate(
+                                    tempDate.add(Duration(days: i)),
+                                    DateTime.now(),
+                                  )
+                                      ? Colors.blue.shade700
+                                      : Color(0xFFBBBBBB),
+                                  width:
+                                  isSameDate(
+                                    tempDate.add(Duration(days: i)),
+                                    DateTime.now(),
+                                  )
+                                      ? 2
+                                      : 1,
+                                ),
                               ),
                               // padding: EdgeInsets.only(top: 4),
                               child: Center(
@@ -283,10 +307,10 @@ class _DashboardState extends State<Dashboard> {
                                       _dayList[i][0],
                                       style: AppTextStyle.primaryText.copyWith(
                                         color:
-                                            isSameDate(
-                                              tempDate.add(Duration(days: i)),
-                                              _selectedDate,
-                                            )
+                                        isSameDate(
+                                          tempDate.add(Duration(days: i)),
+                                          _selectedDate,
+                                        )
                                             ? Color(0xFFCCCCCC)
                                             : Color(0xFF999999),
                                       ),
@@ -295,10 +319,10 @@ class _DashboardState extends State<Dashboard> {
                                       '${tempDate.add(Duration(days: i)).day}',
                                       style: AppTextStyle.heading5.copyWith(
                                         color:
-                                            isSameDate(
-                                              tempDate.add(Duration(days: i)),
-                                              _selectedDate,
-                                            )
+                                        isSameDate(
+                                          tempDate.add(Duration(days: i)),
+                                          _selectedDate,
+                                        )
                                             ? Colors.white
                                             : Color(0xFF3C3C3C),
                                         fontWeight: FontWeight.w800,
@@ -325,7 +349,38 @@ class _DashboardState extends State<Dashboard> {
               children: [
                 Text('Daily budget', style: AppTextStyle.heading3),
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () async {
+                    Map<String, int> requiredIntakeCopy = {..._requiredIntake};
+                    final res = await showModalBottomSheet(
+                      context: context,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(20), // rounded top
+                        ),
+                      ),
+                      showDragHandle: true,
+                      isScrollControlled: true,
+                      builder: (context) {
+                        return StatefulBuilder(
+                          builder: (context, setState) {
+                            return EditBudget(
+                              requiredIntake: requiredIntakeCopy,
+                            );
+                          },
+                        );
+                      },
+                    );
+                    if (res != null) {
+                      setState(() {
+                        _requiredIntake['carbs'] = requiredIntakeCopy['carbs']!;
+                        _requiredIntake['protein'] =
+                        requiredIntakeCopy['protein']!;
+                        _requiredIntake['fat'] = requiredIntakeCopy['fat']!;
+                        _requiredIntake['energy'] =
+                        requiredIntakeCopy['energy']!;
+                      });
+                    }
+                  },
                   child: Row(
                     spacing: 4,
                     children: [
@@ -370,10 +425,10 @@ class _DashboardState extends State<Dashboard> {
                             TweenAnimationBuilder<double>(
                               tween: Tween<double>(
                                 begin:
-                                    _consumedIntake['energy']! /
+                                _consumedIntake['energy']! /
                                     _requiredIntake['energy']!,
                                 end:
-                                    _consumedIntermediateIntake['energy']! /
+                                _consumedIntermediateIntake['energy']! /
                                     _requiredIntake['energy']!,
                               ),
                               duration: Duration(milliseconds: 500),
@@ -381,7 +436,7 @@ class _DashboardState extends State<Dashboard> {
                               onEnd: () {
                                 setState(() {
                                   _consumedIntake['energy'] =
-                                      _consumedIntermediateIntake['energy']!;
+                                  _consumedIntermediateIntake['energy']!;
                                 });
                               },
                               builder: (context, value, child) {
@@ -420,8 +475,8 @@ class _DashboardState extends State<Dashboard> {
                                       begin: _consumedIntake['energy']!
                                           .toDouble(),
                                       end:
-                                          _consumedIntermediateIntake['energy']!
-                                              .toDouble(),
+                                      _consumedIntermediateIntake['energy']!
+                                          .toDouble(),
                                     ),
                                     duration: Duration(milliseconds: 500),
                                     curve: Curves.easeOutCubic,
@@ -467,7 +522,7 @@ class _DashboardState extends State<Dashboard> {
                   // Nutrients
                   Column(
                     spacing:
-                        1.5 *
+                    1.5 *
                         ((screenWidth - 40) * 0.2 - (screenWidth - 40) * 0.185),
                     children: [
                       for (int i = 0; i < 3; i++)
@@ -513,9 +568,9 @@ class _DashboardState extends State<Dashboard> {
                                               value.toStringAsFixed(0),
                                               style: AppTextStyle.heading5
                                                   .copyWith(
-                                                    color: Color(0xFF3C3C3C),
-                                                    fontWeight: FontWeight.w800,
-                                                  ),
+                                                color: Color(0xFF3C3C3C),
+                                                fontWeight: FontWeight.w800,
+                                              ),
                                             );
                                           },
                                         ),
@@ -530,9 +585,9 @@ class _DashboardState extends State<Dashboard> {
                                     ),
                                     Text(
                                       _requiredIntake.entries
-                                              .elementAt(i)
-                                              .key[0]
-                                              .toUpperCase() +
+                                          .elementAt(i)
+                                          .key[0]
+                                          .toUpperCase() +
                                           _requiredIntake.entries
                                               .elementAt(i)
                                               .key
@@ -549,16 +604,16 @@ class _DashboardState extends State<Dashboard> {
                                     TweenAnimationBuilder<double>(
                                       tween: Tween<double>(
                                         begin:
-                                            _consumedIntake.entries
-                                                .elementAt(i)
-                                                .value /
+                                        _consumedIntake.entries
+                                            .elementAt(i)
+                                            .value /
                                             _requiredIntake.entries
                                                 .elementAt(i)
                                                 .value,
                                         end:
-                                            _consumedIntermediateIntake.entries
-                                                .elementAt(i)
-                                                .value /
+                                        _consumedIntermediateIntake.entries
+                                            .elementAt(i)
+                                            .value /
                                             _requiredIntake.entries
                                                 .elementAt(i)
                                                 .value,
@@ -571,7 +626,7 @@ class _DashboardState extends State<Dashboard> {
                                             .elementAt(i)
                                             .key;
                                         _consumedIntake[key] =
-                                            _consumedIntermediateIntake[key]!;
+                                        _consumedIntermediateIntake[key]!;
                                         // });
                                       },
                                       builder: (context, value, child) {
@@ -582,15 +637,15 @@ class _DashboardState extends State<Dashboard> {
                                           ),
                                           backgroundColor: Color(0xFFDDDDDD),
                                           color:
-                                              (_requiredIntake.entries
-                                                      .elementAt(i)
-                                                      .key ==
-                                                  'carbs')
+                                          (_requiredIntake.entries
+                                              .elementAt(i)
+                                              .key ==
+                                              'carbs')
                                               ? Color(0xFF4AD851)
                                               : (_requiredIntake.entries
-                                                        .elementAt(i)
-                                                        .key ==
-                                                    'protein')
+                                              .elementAt(i)
+                                              .key ==
+                                              'protein')
                                               ? Colors.orangeAccent
                                               : Colors.amberAccent,
                                           value: value,
@@ -605,18 +660,18 @@ class _DashboardState extends State<Dashboard> {
                                       },
                                     ),
                                     if (_requiredIntake.entries
-                                            .elementAt(i)
-                                            .key ==
+                                        .elementAt(i)
+                                        .key ==
                                         'carbs')
                                       Text('🍞'),
                                     if (_requiredIntake.entries
-                                            .elementAt(i)
-                                            .key ==
+                                        .elementAt(i)
+                                        .key ==
                                         'protein')
                                       Text('🥚'),
                                     if (_requiredIntake.entries
-                                            .elementAt(i)
-                                            .key ==
+                                        .elementAt(i)
+                                        .key ==
                                         'fat')
                                       Text('🧀'),
                                   ],
@@ -837,14 +892,24 @@ class _DashboardState extends State<Dashboard> {
                     ),
                     SizedBox(width: screenWidth - 310),
                     GestureDetector(
-                      onTap: () {
-                        Navigator.push(
+                      onTap: () async {
+                        final Map<String, List<Intake>>? res =
+                        await Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
                                 IntakeSelect(intakeRoundIndex: i),
                           ),
                         );
+                        if (res != null) {
+                          setState(() {
+                            _intakeRounds[res.entries.elementAt(0).key]!
+                                .consumeAllIntakes(
+                              res.entries.elementAt(0).value,
+                            );
+                            updateConsumptionRecords();
+                          });
+                        }
                       },
                       child: Container(
                         height: 40,
@@ -959,7 +1024,35 @@ class _DashboardState extends State<Dashboard> {
                 SizedBox(
                   width: 120,
                   child: GestureDetector(
-                    onTap: () {},
+                    onTap: () async {
+                      final Map<String, String>? res =
+                      await showModalBottomSheet(
+                        context: context,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(20), // rounded top
+                          ),
+                        ),
+                        showDragHandle: true,
+                        isScrollControlled: true,
+                        builder: (context) {
+                          return StatefulBuilder(
+                            builder: (context, setState) {
+                              return WaterDetails(
+                                requiredWater: _requiredWater,
+                                waterCupSize: _waterCupSize,
+                              );
+                            },
+                          );
+                        },
+                      );
+                      if (res != null) {
+                        setState(() {
+                          _requiredWater = int.parse(res['goal']!);
+                          _waterCupSize = int.parse(res['cup']!);
+                        });
+                      }
+                    },
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       // spacing: 8,
@@ -979,105 +1072,132 @@ class _DashboardState extends State<Dashboard> {
             ),
 
             SizedBox(height: 14),
+
             // water section
-            Container(
-              // height: 70,
-              width: screenWidth,
+            // Container(
+            //   // height: 133,
+            //   width: screenWidth,
+            //   margin: EdgeInsetsGeometry.symmetric(horizontal: 16, vertical: 4),
+            //   // padding: EdgeInsetsGeometry.symmetric(
+            //   //   // horizontal: 16,
+            //   //   vertical: 16,
+            //   // ),
+            //   decoration: BoxDecoration(
+            //     color: Colors.white,
+            //     borderRadius: BorderRadius.circular(16),
+            //     border: BoxBorder.all(color: Color(0xFFE1E9FF), width: 1),
+            //   ),
+            //   child: Stack(
+            //     children: [
+            //       ClipRRect(
+            //         borderRadius: BorderRadius.circular(16),
+            //         // child: Positioned.fill(child: WaterWave()),
+            //         // child: WaterWave(),
+            //       ),
+            WaterWave(
+              key: Key(_drankWater.toString()),
+              fillFraction: _drankWater.toDouble() / _requiredWater.toDouble(),
+              fillFractionCopy:
+              _drankWaterCopy.toDouble() / _requiredWater.toDouble(),
+              updateCopy: () {
+                setState(() {
+                  _drankWaterCopy = _drankWater;
+                });
+              },
               margin: EdgeInsetsGeometry.symmetric(horizontal: 16, vertical: 4),
-              // padding: EdgeInsetsGeometry.symmetric(
-              //   // horizontal: 16,
-              //   vertical: 16,
-              // ),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
                 border: BoxBorder.all(color: Color(0xFFE1E9FF), width: 1),
               ),
-              child: Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    // child: Positioned.fill(child: WaterWave()),
-                    child: WaterWave(),
-                  ),
-                  // RotatingIcon(),
-                  Container(
-                    padding: EdgeInsetsGeometry.symmetric(
-                      // horizontal: 16,
-                      vertical: 16,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      spacing: screenWidth - 250,
+              // RotatingIcon(),
+              child: Container(
+                padding: EdgeInsetsGeometry.symmetric(
+                  // horizontal: 16,
+                  vertical: 16,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  spacing: screenWidth - 250,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        Row(
+                          spacing: 2,
                           children: [
-                            Row(
-                              spacing: 2,
-                              children: [
-                                Text(
-                                  _drinkedWater.toString(),
-                                  style: AppTextStyle.heading1.copyWith(
-                                    color: Color(0xFF050F2C),
-                                  ),
-                                ),
-                                Text(
-                                  'ml',
-                                  style: AppTextStyle.heading6.copyWith(
-                                    color: Color(0xFF050F2C),
-                                  ),
-                                ),
-                              ],
+                            Text(
+                              _drankWater.toString(),
+                              style: AppTextStyle.heading1.copyWith(
+                                color: Color(0xFF050F2C),
+                              ),
                             ),
                             Text(
-                              'Goal ${_requiredWater}ml',
-                              style: AppTextStyle.primaryBoldText.copyWith(
-                                color: Color(0xFF888888),
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Container(
-                              padding: EdgeInsetsGeometry.symmetric(
-                                horizontal: 6,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Color(0xFFEDEDED),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                '1 cup = ${_waterCupSize}ml',
-                                style: AppTextStyle.extraSmallText.copyWith(
-                                  color: Color(0xFF555555),
-                                ),
+                              'ml',
+                              style: AppTextStyle.heading6.copyWith(
+                                color: Color(0xFF050F2C),
                               ),
                             ),
                           ],
                         ),
-                        Container(
-                          height: 80,
-                          width: 50,
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: AssetImage(
-                                'assets/glass_of_water_image.png',
-                              ),
-                            ),
+                        Text(
+                          'Goal ${_requiredWater}ml',
+                          style: AppTextStyle.primaryBoldText.copyWith(
+                            color: Color(0xFF888888),
                           ),
-                          child: Icon(
-                            Icons.add_rounded,
-                            size: 28,
-                            color: Color(0xFF2A3145),
+                        ),
+                        SizedBox(height: 8),
+                        Container(
+                          padding: EdgeInsetsGeometry.symmetric(
+                            horizontal: 6,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Color(0xFFEDEDED),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            '1 cup = ${_waterCupSize}ml',
+                            style: AppTextStyle.extraSmallText.copyWith(
+                              color: Color(0xFF555555),
+                            ),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ],
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          if (_drankWater < _requiredWater) {
+                            _drankWater += _waterCupSize;
+                          }
+                        });
+                      },
+                      child: Container(
+                        height: 80,
+                        width: 50,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: AssetImage(
+                              'assets/glass_of_water_image.png',
+                            ),
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.add_rounded,
+                          size: 28,
+                          color: Color(0xFF2A3145),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
 
+            //   ],
+            // ),
+            // ),
             SizedBox(height: 120),
           ],
         ),

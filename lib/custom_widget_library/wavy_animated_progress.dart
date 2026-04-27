@@ -78,7 +78,27 @@ class _WavyAnimatedProgressState extends State<WavyAnimatedProgress>
 // import 'package:flutter/material.dart';
 
 class WaterWave extends StatefulWidget {
-  const WaterWave({super.key});
+  final double? height;
+  final double? width;
+  final double? fillFraction;
+  final double? fillFractionCopy;
+  final VoidCallback? updateCopy;
+  final EdgeInsetsGeometry? padding;
+  final EdgeInsetsGeometry? margin;
+  final BoxDecoration? decoration;
+  final Widget? child;
+  const WaterWave({
+    super.key,
+    this.child,
+    this.height,
+    this.width,
+    this.fillFraction,
+    this.fillFractionCopy,
+    this.padding,
+    this.margin,
+    this.decoration,
+    this.updateCopy,
+  });
 
   @override
   State<WaterWave> createState() => _WaterWaveState();
@@ -87,15 +107,30 @@ class WaterWave extends StatefulWidget {
 class _WaterWaveState extends State<WaterWave>
     with SingleTickerProviderStateMixin {
   late AnimationController controller;
+  late BorderRadiusGeometry _painterRadius;
+  late double _fillFraction;
+  late double _fillFractionCopy;
 
   @override
   void initState() {
     super.initState();
+    _painterRadius =
+    ((widget.decoration != null && widget.decoration?.borderRadius != null)
+        ? widget.decoration?.borderRadius
+        : BorderRadius.circular(0))!;
 
     controller = AnimationController(
       vsync: this,
       duration: Duration(seconds: 8),
     )..repeat();
+
+    _fillFraction = widget.fillFraction ?? 0.3;
+    if (_fillFraction > 1) _fillFraction = 1;
+    if (_fillFraction < 0) _fillFraction = 0;
+    _fillFractionCopy = widget.fillFractionCopy ?? 0.3;
+    if (_fillFractionCopy > 1) _fillFractionCopy = 1;
+    if (_fillFractionCopy < 0) _fillFractionCopy = 0;
+
   }
 
   @override
@@ -109,29 +144,100 @@ class _WaterWaveState extends State<WaterWave>
     final size = MediaQuery.of(context).size;
     final screenHeight = size.height;
     final screenWidth = size.width;
-    return AnimatedBuilder(
-      animation: controller,
-      builder: (context, child) {
-        return Stack(
-          children: [
-            CustomPaint(
-              painter: WavePainter(animationValue: controller.value,
-                color1: Color(0xFFDEECF4),
-                color2: Color(0xFFBCDCEF),
-                shift: 1.2,),
-              size: Size(screenWidth, 130),
-            ),
-            CustomPaint(
-              painter: WavePainter(
-                animationValue: controller.value,
-                color1: Color(0xFFBCDCEF),
-                color2: Color(0xFF4FB6E4),
-                shift: 0,
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxHeight = constraints.maxHeight;
+        final maxWidth = constraints.maxWidth;
+        // print('////////// max-height: $maxHeight //////////');
+        return AnimatedBuilder(
+          animation: controller,
+          builder: (context, child) {
+            return Container(
+              // width: widget.width,
+              // height: widget.height,
+              margin: widget.margin,
+              padding: widget.padding,
+              // padding: EdgeInsetsGeometry.symmetric(
+              //   // horizontal: 16,
+              //   vertical: 16,
+              // ),
+              decoration: widget.decoration,
+              // decoration: BoxDecoration(
+              //   color: Colors.white,
+              //   borderRadius: BorderRadius.circular(16),
+              //   border: BoxBorder.all(color: Color(0xFFE1E9FF), width: 1),
+              // ),
+              child: ClipRRect(
+                borderRadius: _painterRadius,
+                child: TweenAnimationBuilder(
+                    tween: Tween<double>(
+                      begin: _fillFractionCopy,
+                      end: _fillFraction,
+                    ),
+                    onEnd: () {
+                      setState(() {
+                        _fillFractionCopy = _fillFraction;
+                        widget.updateCopy?.call();
+                      });
+                    },
+                    duration: Duration(seconds: 2),
+                    curve: Curves.easeInOut,
+
+                    builder: (context, value, child) {
+                      return Stack(
+                        children: [
+                          CustomPaint(
+                            painter: WavePainter(
+                              animationValue: controller.value,
+                              color1: Color(0xFFDEECF4),
+                              color2: Color(0xFFBCDCEF),
+                              shift: 1.2,
+                              fillFraction: value,
+                            ),
+                            size: Size(maxWidth, widget.height ?? 130),
+                          ),
+                          CustomPaint(
+                            painter: WavePainter(
+                              animationValue: controller.value,
+                              color1: Color(0xFFBCDCEF),
+                              color2: Color(0xFF3FB4E8),
+                              shift: 0,
+                              fillFraction: value,
+                            ),
+                            size: Size(maxWidth, widget.height ?? 130),
+                          ),
+                          ?widget.child,
+                        ],
+                      );
+                    }
+                ),
+
+
               ),
-              size: Size(screenWidth, 130),
-            ),
-          ],
+            );
+          },
         );
+        // Stack(
+        //   children: [
+        //     CustomPaint(
+        //       painter: WavePainter(animationValue: controller.value,
+        //         color1: Color(0xFFDEECF4),
+        //         color2: Color(0xFFBCDCEF),
+        //         shift: 1.2,),
+        //       // size: Size(screenWidth, 130),
+        //     ),
+        //     CustomPaint(
+        //       painter: WavePainter(
+        //         animationValue: controller.value,
+        //         color1: Color(0xFFBCDCEF),
+        //         color2: Color(0xFF3FB4E8),
+        //         shift: 0,
+        //       ),
+        //       size: Size(200, 100),
+        //     ),
+        //   ],
+        // );
       },
     );
   }
@@ -142,19 +248,22 @@ class WavePainter extends CustomPainter {
   final Color color1;
   final Color color2;
   final double shift;
+  final double fillFraction;
 
   WavePainter({
     required this.animationValue,
     required this.color1,
     required this.color2,
     required this.shift,
+    this.fillFraction = 0.3,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..shader = LinearGradient(
-        stops: [0.7, 0.9],
+        stops: [fillFraction < 1 ? 1 - fillFraction : 0.7, 1],
+        // stops: [0.7, 0.9],
         // colors: [Colors.lightBlueAccent, Colors.blue],
         colors: [color1, color2],
         begin: Alignment.topCenter,
@@ -172,7 +281,7 @@ class WavePainter extends CustomPainter {
       double y =
           sin(((x / waveLength * 2 * pi) + (animationValue * 2 * pi)) + shift) *
               waveHeight +
-          size.height * 0.7;
+              size.height * (fillFraction < 1 ? 1 - fillFraction : 0.7);
 
       path.lineTo(x, y);
     }
@@ -185,5 +294,5 @@ class WavePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

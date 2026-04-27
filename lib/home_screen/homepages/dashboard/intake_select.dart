@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:nutrilens_test/cores/constants/colors.dart';
 import 'package:nutrilens_test/cores/constants/text_styles.dart';
 import 'package:nutrilens_test/custom_widget_library/animated_button.dart';
+import 'package:nutrilens_test/home_screen/homepages/dashboard/select_intake_popup.dart';
 
 import '../../../cores/custom_datatypes/custom_classes.dart';
+import 'intake_details.dart';
 
 class IntakeSelect extends StatefulWidget {
   final int intakeRoundIndex;
@@ -26,7 +28,7 @@ class _IntakeSelectState extends State<IntakeSelect>
 
   late final TabController _tabController;
 
-  final List<Intake> _availableBreakfastIntakes = [
+  final List<Intake> _availableLunchIntakes = [
     Intake(
       name: 'Nesfit Diet Cereal',
       type: 'food',
@@ -37,6 +39,7 @@ class _IntakeSelectState extends State<IntakeSelect>
       proteinPerUnit: 0.069,
       fatPerUnit: 0.00,
       ingredients: [],
+      recipe: '',
     ),
     Intake(
       name: 'Navy Beans, raw',
@@ -48,6 +51,7 @@ class _IntakeSelectState extends State<IntakeSelect>
       proteinPerUnit: 0.013,
       fatPerUnit: 0.027,
       ingredients: [],
+      recipe: '',
     ),
     Intake(
       name: 'Navy Beans, raw',
@@ -59,6 +63,7 @@ class _IntakeSelectState extends State<IntakeSelect>
       proteinPerUnit: 0.013,
       fatPerUnit: 0.027,
       ingredients: [],
+      recipe: '',
     ),
     Intake(
       name: 'Navy Beans, raw',
@@ -70,6 +75,7 @@ class _IntakeSelectState extends State<IntakeSelect>
       proteinPerUnit: 0.013,
       fatPerUnit: 0.027,
       ingredients: [],
+      recipe: '',
     ),
     Intake(
       name: 'Navy Beans, raw',
@@ -81,6 +87,25 @@ class _IntakeSelectState extends State<IntakeSelect>
       proteinPerUnit: 0.013,
       fatPerUnit: 0.027,
       ingredients: [],
+      recipe: '',
+    ),
+    Intake(
+      name: 'Rice Dal Vegetables',
+      type: 'food',
+      unit: 'g',
+      quantity: 450,
+      energyPerUnit: 0.95,
+      carbsPerUnit: 0.15,
+      proteinPerUnit: 0.035,
+      fatPerUnit: 0.02,
+      ingredients: [
+        'Rice',
+        'Dal',
+        'Raw vegetables like Potato, tomato,...',
+        'Oil, Ginger, Turmeric powder, salt',
+        'Cumin',
+      ],
+      recipe: 'Bla bla bla ......',
     ),
   ];
 
@@ -91,13 +116,18 @@ class _IntakeSelectState extends State<IntakeSelect>
     'snack': [],
   };
 
+  final List<Intake> _selectedIntakes = [];
+
+  bool _showSelectedIntakes = false;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _currIntakeRoundIndex = widget.intakeRoundIndex;
     _tabController = TabController(length: 4, vsync: this);
-    _allIntakes['lunch'] = _availableBreakfastIntakes;
+    _allIntakes['lunch'] = _availableLunchIntakes;
+    _showSelectedIntakes = false;
   }
 
   @override
@@ -105,6 +135,14 @@ class _IntakeSelectState extends State<IntakeSelect>
     // TODO: implement dispose
     _tabController.dispose();
     super.dispose();
+  }
+
+  int _totalEnergy() {
+    int sum = 0;
+    for (int i = 0; i < _selectedIntakes.length; i++) {
+      sum += _selectedIntakes[i].energy();
+    }
+    return sum;
   }
 
   Widget _intakeRoundSelectionBottomDrawer(double screenWidth) {
@@ -232,8 +270,8 @@ class _IntakeSelectState extends State<IntakeSelect>
             children: [
               Text(
                 _intakeRounds[_currIntakeRoundIndex].name
-                        .substring(0, 1)
-                        .toUpperCase() +
+                    .substring(0, 1)
+                    .toUpperCase() +
                     _intakeRounds[_currIntakeRoundIndex].name.substring(1),
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
@@ -325,10 +363,10 @@ class _IntakeSelectState extends State<IntakeSelect>
                 splashFactory: NoSplash.splashFactory,
 
                 tabs: const <Widget>[
-                  Tab(text: 'All',),
-                  Tab(text: 'Recent',),
-                  Tab(text: 'Customize',),
-                  Tab(text: 'Starred',),
+                  Tab(text: 'All'),
+                  Tab(text: 'Recent'),
+                  Tab(text: 'Customize'),
+                  Tab(text: 'Starred'),
                   // Tab(icon: Icon(Icons.cloud_outlined),text: 'All',),
                   // Tab(icon: Icon(Icons.beach_access_sharp)),
                   // Tab(icon: Icon(Icons.brightness_5_sharp)),
@@ -341,18 +379,186 @@ class _IntakeSelectState extends State<IntakeSelect>
                   children: <Widget>[
                     AllTab(
                       intakes:
-                          _allIntakes[_intakeRounds[_currIntakeRoundIndex]
-                              .name]!,
+                      _allIntakes[_intakeRounds[_currIntakeRoundIndex]
+                          .name]!,
+                      selectedIntakes: _selectedIntakes,
                     ),
                     // Center(child: Text("It's cloudy here")),
-                    Center(child: Text("No data yet")),
-                    Center(child: Text("No data yet")),
-                    Center(child: Text("No data yet")),
+                    Center(child: Text("No item yet!")),
+                    Center(child: Text("No item yet!")),
+                    Center(child: Text("No item yet!")),
                   ],
                 ),
               ),
             ],
           ),
+        ),
+      ),
+      bottomNavigationBar: AnimatedContainer(
+        duration: Duration(milliseconds: 250),
+        height: _showSelectedIntakes ? screenHeight / 2 - 80 : 140,
+        width: screenWidth,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+          boxShadow: [
+            BoxShadow(
+              color: _showSelectedIntakes
+                  ? Color(0xFFAAAAAA)
+                  : Color(0xFFDDDDDD),
+              spreadRadius: _showSelectedIntakes ? 20.0 : 1.0,
+              blurRadius: _showSelectedIntakes ? 30 : 10,
+            ),
+          ],
+        ),
+        padding: EdgeInsetsGeometry.symmetric(horizontal: 24, vertical: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 8,
+          children: [
+            Text(
+              '${_intakeRounds[_currIntakeRoundIndex].icon} ${_intakeRounds[_currIntakeRoundIndex].name.substring(0, 1).toUpperCase() + _intakeRounds[_currIntakeRoundIndex].name.substring(1)}',
+              style: AppTextStyle.heading4,
+            ),
+            AnimatedContainer(
+              duration: Duration(milliseconds: 250),
+              height: _showSelectedIntakes ? screenHeight / 2 - 224 : 0,
+              child: SingleChildScrollView(
+                child: Column(
+                  spacing: 10,
+                  children: [
+                    for (int i = 0; i < _selectedIntakes.length; i++)
+                      Container(
+                        padding: EdgeInsetsGeometry.all(10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          border: BoxBorder.all(color: Color(0xFFBBBBBB)),
+                        ),
+                        child: Row(
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _selectedIntakes[i].name(),
+                                  style: AppTextStyle.heading5.copyWith(
+                                    color: Color(0xFF333333),
+                                  ),
+                                ),
+                                Text(
+                                  '${_selectedIntakes[i].energy()} kcal, ${_selectedIntakes[i].quantity()} g',
+                                  style: AppTextStyle.primaryBoldText.copyWith(
+                                    color: Color(0xFF999999),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Expanded(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        _selectedIntakes.removeAt(i);
+                                      });
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsetsGeometry.all(8),
+                                      decoration: BoxDecoration(
+                                        color: Color(0xFFEEEEEE),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        Icons.cancel_outlined,
+                                        color: Color(0xFFFF9898),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            Row(
+              children: [
+                Text.rich(
+                  TextSpan(
+                    text: _selectedIntakes.length.toString(),
+                    style: AppTextStyle.heading4,
+                    children: [
+                      TextSpan(
+                        text: ' Added | ',
+                        style: AppTextStyle.primaryText.copyWith(
+                          color: Color(0xFF777777),
+                        ),
+                      ),
+                      TextSpan(
+                        text: _totalEnergy().toString(),
+                        style: AppTextStyle.heading4,
+                      ),
+                      TextSpan(
+                        text: ' kcal',
+                        style: AppTextStyle.primaryText.copyWith(
+                          color: Color(0xFF777777),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (_selectedIntakes.isNotEmpty)
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _showSelectedIntakes = _showSelectedIntakes
+                            ? false
+                            : true;
+                      });
+                    },
+                    child: Icon(
+                      _showSelectedIntakes
+                          ? Icons.arrow_drop_up_rounded
+                          : Icons.arrow_drop_down_rounded,
+                      size: 42,
+                      color: Color(0xFF777777),
+                    ),
+                  ),
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      AnimatedButton(
+                        width: screenWidth / 4,
+                        decoration: BoxDecoration(
+                          color: Color(0xFF375EC5),
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        onTap: () {
+                          Navigator.pop(context, {
+                            _intakeRounds[_currIntakeRoundIndex].name:
+                            _selectedIntakes,
+                          });
+                        },
+                        child: Center(
+                          child: Text(
+                            'Done',
+                            style: AppTextStyle.heading5.copyWith(
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -367,7 +573,12 @@ class _IntakeRound {
 
 class AllTab extends StatefulWidget {
   final List<Intake> intakes;
-  const AllTab({super.key, required this.intakes});
+  final List<Intake> selectedIntakes;
+  const AllTab({
+    super.key,
+    required this.intakes,
+    required this.selectedIntakes,
+  });
 
   @override
   State<AllTab> createState() => _AllTabState();
@@ -376,6 +587,15 @@ class AllTab extends StatefulWidget {
 class _AllTabState extends State<AllTab> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
+
+  late List<Intake> _selectedIntakes;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _selectedIntakes = widget.selectedIntakes;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -386,58 +606,109 @@ class _AllTabState extends State<AllTab> with AutomaticKeepAliveClientMixin {
         spacing: 10,
         children: [
           for (int i = 0; i < widget.intakes.length; i++)
-            Container(
-              // height: 50,
-              width: screenWidth,
-              margin: EdgeInsetsGeometry.symmetric(horizontal: 16),
-              padding: EdgeInsetsGeometry.symmetric(
-                horizontal: 16,
-                vertical: 12,
-              ),
-              decoration: BoxDecoration(
-                color: Color(0xFFE7EBEF),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 2,
-                    children: [
-                      Text(
-                        widget.intakes[i].name(),
-                        style: TextStyle(fontSize: 18, color: Color(0xFF333333), fontWeight: FontWeight.w500),
-                      ),
-                      Text(
-                        '${widget.intakes[i].energy()} kcal, ${widget.intakes[i].quantity()} ${widget.intakes[i].unit()}',
-                        style: AppTextStyle.smallBoldText.copyWith(
-                          color: Color(0xFF777777),
-                        ),
-                      ),
-                    ],
+            GestureDetector(
+              onTap: () async {
+                Intake selectedIntake = widget.intakes[i];
+                final res = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return IntakeDetails(selectedIntake: selectedIntake);
+                    },
                   ),
-                  Expanded(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                );
+                if (res != null) {
+                  setState(() {
+                    _selectedIntakes.add(res);
+                  });
+                }
+              },
+              child: Container(
+                // height: 50,
+                width: screenWidth,
+                margin: EdgeInsetsGeometry.symmetric(horizontal: 16),
+                padding: EdgeInsetsGeometry.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: Color(0xFFE7EBEF),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 2,
                       children: [
-                        Container(
-                          padding: EdgeInsetsGeometry.all(3),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Color(0xFF102047),
-                          ),
-                          child: Icon(
-                            Icons.add_rounded,
-                            color: Colors.white,
-                            size: 28,
+                        Text(
+                          widget.intakes[i].name(),
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Color(0xFF333333),
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                        Text('  '),
+                        Text(
+                          '${widget.intakes[i].energy()} kcal, ${widget.intakes[i].quantity()} ${widget.intakes[i].unit()}',
+                          style: AppTextStyle.smallBoldText.copyWith(
+                            color: Color(0xFF777777),
+                          ),
+                        ),
                       ],
                     ),
-                  ),
-                ],
+                    Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          GestureDetector(
+                            onTap: () async {
+                              Intake selectedIntake = widget.intakes[i].copyWith();
+                              final res = await showModalBottomSheet(
+                                context: context,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(20), // rounded top
+                                  ),
+                                ),
+                                showDragHandle: true,
+                                isScrollControlled: true,
+                                builder: (context) {
+                                  return StatefulBuilder(
+                                    builder: (context, setState) {
+                                      return SelectIntakePopup(
+                                        selectedIntake: selectedIntake,
+                                      );
+                                    },
+                                  );
+                                },
+                              );
+                              if (res != null) {
+                                setState(() {
+                                  _selectedIntakes.add(res);
+                                });
+                              }
+                            },
+                            child: Container(
+                              padding: EdgeInsetsGeometry.all(3),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Color(0xFF102047),
+                              ),
+                              child: Icon(
+                                Icons.add_rounded,
+                                color: Colors.white,
+                                size: 28,
+                              ),
+                            ),
+                          ),
+                          Text('  '),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
         ],

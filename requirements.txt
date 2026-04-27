@@ -1,0 +1,6 @@
+fastapi[standard]
+pydantic
+motor
+passlib[bcrypt]
+python-jose
+python-dotenv

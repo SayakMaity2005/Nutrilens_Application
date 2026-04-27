@@ -1,4 +1,3 @@
-
 class IntakeRound {
   late final String _icon;
   late final String _type;
@@ -41,8 +40,15 @@ class IntakeRound {
     _intakeCount++;
   }
 
+  void consumeAllIntakes(List<Intake> intakes) {
+    for (final intake in intakes) {
+      consumeIntake(intake);
+    }
+  }
+
   String getIcon() => _icon;
   String getType() => _type;
+  List<Intake> consumedIntakes() => _consumedIntakes;
   int getRequiredEnergy() => _requiredEnergy;
   int getConsumedEnergy() => _consumedEnergy;
   double getConsumedCarbs() => _consumedCarbs;
@@ -61,6 +67,7 @@ class Intake {
   late final double _proteinPerUnit;
   late final double _fatPerUnit;
   late final List<String> _ingredients;
+  late final String _recipe;
   Intake({
     required String name,
     required String type,
@@ -71,6 +78,7 @@ class Intake {
     required double proteinPerUnit,
     required double fatPerUnit,
     required List<String> ingredients,
+    required String recipe,
   }) {
     _name = name;
     _type = type;
@@ -81,16 +89,48 @@ class Intake {
     _proteinPerUnit = proteinPerUnit;
     _fatPerUnit = fatPerUnit;
     _ingredients = ingredients;
+    _recipe = recipe;
   }
+  Intake copyWith({
+    String? name,
+    String? type,
+    String? unit,
+    double? quantity,
+    double? energyPerUnit,
+    double? carbsPerUnit,
+    double? proteinPerUnit,
+    double? fatPerUnit,
+    List<String>? ingredients,
+    String? recipe,
+  }) {
+    return Intake(
+      name: name ?? _name,
+      type: type ?? _type,
+      unit: unit ?? _unit,
+      quantity: quantity ?? _quantity,
+      energyPerUnit: energyPerUnit ?? _energyPerUnit,
+      carbsPerUnit: carbsPerUnit ?? _carbsPerUnit,
+      proteinPerUnit: proteinPerUnit ?? _proteinPerUnit,
+      fatPerUnit: fatPerUnit ?? _fatPerUnit,
+      ingredients: ingredients ?? _ingredients,
+      recipe: recipe ?? _recipe,
+    );
+  }
+
   String name() => _name;
   String type() => _type;
   String unit() => _unit;
   double quantity() => _quantity;
+  void setQuantity(double quantity) {
+    _quantity = quantity;
+  }
+
   int energy() => (_energyPerUnit * _quantity).toInt();
   double carbs() => _carbsPerUnit * _quantity;
   double protein() => _proteinPerUnit * _quantity;
   double fat() => _fatPerUnit * _quantity;
   List<String> ingredients() => _ingredients;
+  String recipe() => _recipe;
 }
 
 class WorkoutRound {
@@ -108,6 +148,7 @@ class WorkoutRound {
     _totalEnergyBurned += workout.energyBurned();
     _workoutCount++;
   }
+
   void removeWorkout(int index) {
     _totalEnergyBurned -= _completedWorkouts[index].energyBurned();
     _completedWorkouts.removeAt(index);
@@ -125,11 +166,11 @@ class Workout {
   late final double _energyBurnPerMinute;
   late final int _timeInMinute;
   Workout({
-    required String name,
-    required String type,
-    required String explanation,
-    required double energyBurnPerMinute,
-    required int timeInMinute,
+    required name,
+    required type,
+    required explanation,
+    required energyBurnPerMinute,
+    required timeInMinute,
   }) {
     _name = name;
     _type = type;
