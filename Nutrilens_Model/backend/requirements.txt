@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+ultralytics
+python-multipart
+opencv-python-headless
+numpy
+pillow
+pydantic
+pydantic-settings
+python-dotenv
+huggingface-hub
+pyyaml
+openai

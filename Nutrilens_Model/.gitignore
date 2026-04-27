@@ -1,0 +1,31 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# AI Model & Dataset
+ai_model/dataset/
+runs/
+*.pt
+
+# Results & Temporary files
+test_result.json
+final_test_result.json
+final_check.txt
+final_verification.txt
+
+# Editor settings
+.vscode/
+.idea/
