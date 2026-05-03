@@ -21,6 +21,7 @@ def auto_annotate():
     print("Loading YOLO-World model (this may take a minute to download the first time)...")
     # yolov8s-world.pt is the small, fast zero-shot model
     model = YOLOWorld('yolov8s-world.pt')
+    model.to('cpu')
     
     for folder_name, info in CLASS_MAPPING.items():
         folder_path = os.path.join(DATASET_DIR, folder_name)

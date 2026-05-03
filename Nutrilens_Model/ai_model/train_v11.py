@@ -34,11 +34,11 @@ def train_v11_model(trial=False):
     model = YOLO(model_path)
 
     # 2. Path to our Indian Food dataset configuration
-    DATASET_CONFIG = "d:/Projects/Nutrilens_front/Nutrilens_Application/Nutrilens_Model/ai_model/dataset/dataset_final.yaml"
+    DATASET_CONFIG = "d:/Projects/Nutrilens_front/Nutrilens_Application/Nutrilens_Model/ai_model/dataset/dataset_expanded.yaml"
     
     if not os.path.exists(DATASET_CONFIG):
         # Fallback to a relative path if absolute fails
-        DATASET_CONFIG = os.path.join(os.path.dirname(__file__), "dataset", "dataset_final.yaml")
+        DATASET_CONFIG = os.path.join(os.path.dirname(__file__), "dataset", "dataset_expanded.yaml")
         if not os.path.exists(DATASET_CONFIG):
             print(f"Error: Dataset configuration not found!")
             return
