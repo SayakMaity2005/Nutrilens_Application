@@ -12,7 +12,7 @@ def sanitize_labels(labels_dir, max_class_id=24):
                 lines = f.readlines()
                 
             valid_lines = []
-            modified = false
+            modified = False
             for line in lines:
                 parts = line.strip().split()
                 if not parts: continue

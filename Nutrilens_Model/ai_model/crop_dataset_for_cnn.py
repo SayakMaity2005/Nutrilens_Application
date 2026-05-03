@@ -83,6 +83,6 @@ def crop_yolo_to_cnn_dataset(yolo_yaml_path, output_dir):
     print(f"\nDataset generation complete! Created {total_crops} cropped images at: {output_dir}")
 
 if __name__ == "__main__":
-    yolo_yaml = r"d:\Projects\Nutrilens_front\Nutrilens_Application\Nutrilens_Model\ai_model\dataset\dataset_final.yaml"
+    yolo_yaml = r"d:\Projects\Nutrilens_front\Nutrilens_Application\Nutrilens_Model\ai_model\dataset\dataset_expanded.yaml"
     out_dir = r"d:\Projects\Nutrilens_front\Nutrilens_Application\Nutrilens_Model\ai_model\dataset_cnn_cropped"
     crop_yolo_to_cnn_dataset(yolo_yaml, out_dir)
