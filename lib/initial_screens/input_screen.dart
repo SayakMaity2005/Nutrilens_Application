@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:nutrients_tracker/initial_screens/input_data_pages/dob_input.dart';
-import 'package:nutrients_tracker/initial_screens/input_data_pages/gender_selection.dart';
-import 'package:nutrients_tracker/initial_screens/input_data_pages/height_input.dart';
+import 'package:nutrilens_test/initial_screens/input_data_pages/dob_input.dart';
+import 'package:nutrilens_test/initial_screens/input_data_pages/gender_selection.dart';
+import 'package:nutrilens_test/initial_screens/input_data_pages/height_input.dart';
 
 class InputScreen extends StatefulWidget {
   const InputScreen({super.key});

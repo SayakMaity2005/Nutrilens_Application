@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:nutrients_tracker/cores/constants/colors.dart';
-import 'package:nutrients_tracker/initial_screens/input_screen.dart';
-import 'package:nutrients_tracker/initial_screens/overview_screens/first_screen.dart';
+import 'package:nutrilens_test/cores/constants/colors.dart';
+import 'package:nutrilens_test/initial_screens/input_screen.dart';
+import 'package:nutrilens_test/initial_screens/overview_screens/first_screen.dart';
 
 import '../cores/constants/text_styles.dart';
 

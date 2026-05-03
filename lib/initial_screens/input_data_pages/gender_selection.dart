@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:nutrients_tracker/cores/constants/colors.dart';
-import 'package:nutrients_tracker/cores/constants/text_styles.dart';
+import 'package:nutrilens_test/cores/constants/colors.dart';
+import 'package:nutrilens_test/cores/constants/text_styles.dart';
 
 class GenderSelection extends StatefulWidget {
   final Map<String, dynamic> inputData;

@@ -263,7 +263,7 @@ class _DashboardState extends State<Dashboard> {
                             },
                             child: Container(
                               height: 64,
-                              width: 52,
+                              width: screenWidth / 7 - 6,
                               decoration: BoxDecoration(
                                 color:
                                 isSameDate(
