@@ -21,7 +21,7 @@ class NutrilensAdvancedPipeline:
         print("[INFO] Loading Stage 2: Secondary CNN Classifier/Regressor...")
         
         # Load classes dynamically from the JSON created during training
-        json_path = Path(r"d:\Projects\Nutrilens_front\Nutrilens_Application\Nutrilens_Model\cnn_class_names.json")
+        json_path = Path(__file__).parent.parent / "cnn_class_names.json"
         if json_path.exists():
             with open(json_path, 'r') as f:
                 self.cnn_class_names = json.load(f)
