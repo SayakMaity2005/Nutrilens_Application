@@ -11,10 +11,12 @@ class GrokService:
         base_url = "https://api.groq.com/openai/v1" if self.is_groq else "https://api.x.ai/v1"
         self.model = "llama-3.2-11b-vision-preview" if self.is_groq else "grok-vision-beta"
         
-        self.client = OpenAI(
-            api_key=api_key,
-            base_url=base_url,
-        )
+        self.client = None
+        if api_key:
+            self.client = OpenAI(
+                api_key=api_key,
+                base_url=base_url,
+            )
 
     async def refine_dish(self, image_bytes: bytes, yolo_category: str) -> dict:
         """

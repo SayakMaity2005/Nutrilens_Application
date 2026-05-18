@@ -23,11 +23,20 @@ class YOLOService:
             cls._instance = super(YOLOService, cls).__new__(cls)
             # Initialize the advanced pipeline model only once
             try:
-                # Use fine-tuned yolo weights and cnn weights
-                yolo_weights = r"d:\Projects\Nutrilens_front\runs\detect\IndianFood_92Class\weights\best.pt"
-                cnn_weights = r"d:\Projects\Nutrilens_front\Nutrilens_Application\Nutrilens_Model\best_cnn_stage2.pth"
-                cls._model = NutrilensAdvancedPipeline(yolo_weights_path=yolo_weights, cnn_weights_path=cnn_weights)
-                print(f"Nutrilens Advanced Pipeline loaded successfully")
+                # Use relative paths for weights to ensure portability (e.g. on Hugging Face)
+                base_dir = Path(__file__).resolve().parent.parent
+                yolo_weights = base_dir / "weights" / "best_indian_food.pt"
+                cnn_weights = base_dir.parent / "best_cnn_stage2.pth"
+                
+                # Check if files exist, if not try alternative locations
+                if not yolo_weights.exists():
+                     yolo_weights = base_dir / "weights" / "best.pt"
+                
+                cls._model = NutrilensAdvancedPipeline(
+                    yolo_weights_path=str(yolo_weights), 
+                    cnn_weights_path=str(cnn_weights)
+                )
+                print(f"Nutrilens Advanced Pipeline loaded successfully from {yolo_weights}")
             except Exception as e:
                 print(f"FAILED to load advanced pipeline: {e}")
                 # Fallback
