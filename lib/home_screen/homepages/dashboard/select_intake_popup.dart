@@ -49,7 +49,7 @@ class _SelectIntakePopupState extends State<SelectIntakePopup> {
                       spacing: 10,
                       children: [
                         Container(
-                          width: sheetWidth/4-20,
+                          width: sheetWidth/4-14,
                           padding: EdgeInsetsGeometry.all(10),
                           decoration: BoxDecoration(
                             color: Color(0xFFD2E8F6),
@@ -69,7 +69,7 @@ class _SelectIntakePopupState extends State<SelectIntakePopup> {
                           ),
                         ),
                         Container(
-                          width: sheetWidth/4-20,
+                          width: sheetWidth/4-18,
                           padding: EdgeInsetsGeometry.all(10),
                           decoration: BoxDecoration(
                             color: Color(0xFFD7FDD8),
@@ -89,7 +89,7 @@ class _SelectIntakePopupState extends State<SelectIntakePopup> {
                           ),
                         ),
                         Container(
-                          width: sheetWidth/4-20,
+                          width: sheetWidth/4-18,
                           padding: EdgeInsetsGeometry.all(10),
                           decoration: BoxDecoration(
                             color: Color(0xFFFDE2CF),
@@ -109,7 +109,7 @@ class _SelectIntakePopupState extends State<SelectIntakePopup> {
                           ),
                         ),
                         Container(
-                          width: sheetWidth/4-20,
+                          width: sheetWidth/4-18,
                           padding: EdgeInsetsGeometry.all(10),
                           decoration: BoxDecoration(
                             color: Color(0xFFFBEFCF),

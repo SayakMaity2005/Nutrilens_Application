@@ -30,6 +30,8 @@ environment:
 dependencies:
   google_fonts: ^8.0.2
   pie_chart: ^5.4.0
+  http: ^1.6.0
+  flutter_secure_storage: ^10.2.0
   flutter:
     sdk: flutter
 

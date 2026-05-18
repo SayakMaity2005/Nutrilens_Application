@@ -1,7 +1,7 @@
 class IntakeRound {
   late final String _icon;
   late final String _type;
-  late final int _requiredEnergy;
+  late int _requiredEnergy;
   late int _consumedEnergy;
   late double _consumedCarbs;
   late double _consumedProtein;
@@ -44,6 +44,18 @@ class IntakeRound {
     for (final intake in intakes) {
       consumeIntake(intake);
     }
+  }
+
+  void clearAllIntakes() {
+    _consumedIntakes.clear();
+    _consumedCarbs = 0;
+    _consumedProtein = 0;
+    _consumedFat = 0;
+    _consumedEnergy = 0;
+  }
+
+  void setRequiredEnergy(int energy) {
+    _requiredEnergy = energy;
   }
 
   String getIcon() => _icon;
