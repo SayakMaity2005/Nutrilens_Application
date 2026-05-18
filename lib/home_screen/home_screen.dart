@@ -7,6 +7,8 @@ import 'package:nutrilens_test/custom_widget_library/animated_button.dart';
 import 'package:nutrilens_test/custom_widget_library/rounded_notched_nav_bar.dart';
 import 'package:nutrilens_test/home_screen/homepages/dashboard/dashboard.dart';
 
+import '../profile_screen/profile_page.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -17,14 +19,14 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late int _currentPageIndex;
 
+  Map<String, dynamic>? _userData = null;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _currentPageIndex = 0;
-    SystemChrome.setEnabledSystemUIMode(
-      SystemUiMode.immersiveSticky,
-    );
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
 
   @override
@@ -62,8 +64,33 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             child: Center(
               child: IconButton(
-                onPressed: () {},
-                icon: Icon(Icons.person, size: 28),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) {
+                        return ProfilePage(
+                          updateUserdata: (userData) {
+                            setState(() {
+                              _userData = userData;
+                            });
+                          },
+                          userData: _userData,
+                        );
+                      },
+                    ),
+                  );
+                },
+                icon: (_userData == null || _userData?['full_name'] == null)
+                    ? Icon(Icons.person, size: 28)
+                    : Text(
+                        _userData!['full_name'][0].toString().toUpperCase(),
+                        // 'S',
+                        style: TextStyle(
+                          color: Color(0xFF555555),
+                          fontSize: 22,
+                        ),
+                      ),
               ),
             ),
           ),
@@ -91,7 +118,13 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 SizedBox(height: 110, width: screenWidth),
-                Dashboard(),
+                Dashboard(
+                  updateUserdata: (userData) {
+                    setState(() {
+                      _userData = userData;
+                    });
+                  },
+                ),
               ],
             ),
             RoundedNotchedNavBar(borderColor: palette.selectColor3),
@@ -167,13 +200,18 @@ class _HomeScreenState extends State<HomeScreen> {
               Container(
                 height: 2,
                 width: 20,
-                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(2)),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
               Container(
                 height: 10,
                 width: 28,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.vertical(bottom: Radius.circular(6)),
+                  borderRadius: BorderRadius.vertical(
+                    bottom: Radius.circular(6),
+                  ),
                   border: BorderDirectional(
                     start: BorderSide(color: Colors.white, width: 2),
                     bottom: BorderSide(color: Colors.white, width: 2),

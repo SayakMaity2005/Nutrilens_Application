@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:nutrilens_test/cores/constants/colors.dart';
 import 'package:nutrilens_test/cores/constants/text_styles.dart';
+import 'package:nutrilens_test/cores/daily_data/daily_data_services.dart';
 import 'package:nutrilens_test/custom_widget_library/wavy_animated_progress.dart';
 import 'package:nutrilens_test/home_screen/homepages/dashboard/ai_custom_recipe.dart';
 import 'package:nutrilens_test/home_screen/homepages/dashboard/edit_budget.dart';
@@ -10,9 +11,11 @@ import 'package:nutrilens_test/home_screen/homepages/dashboard/intake_select.dar
 import 'package:nutrilens_test/home_screen/homepages/dashboard/water_details.dart';
 
 import '../../../cores/custom_datatypes/custom_classes.dart';
+import '../../../cores/user_operations/user_services.dart';
 
 class Dashboard extends StatefulWidget {
-  const Dashboard({super.key});
+  final Function(Map<String, dynamic>) updateUserdata;
+  const Dashboard({super.key, required this.updateUserdata});
 
   @override
   State<Dashboard> createState() => _DashboardState();
@@ -48,6 +51,13 @@ class _DashboardState extends State<Dashboard> {
   DateTime _startDate = DateTime.now();
   DateTime _endDate = DateTime.now();
 
+  final Map<String, int> _requiredIntake = {
+    'carbs': 259,
+    'protein': 155,
+    'fat': 46,
+    'energy': 620 + 827 + 517 + 103,
+  };
+
   final Map<String, IntakeRound> _intakeRounds = {
     'breakfast': IntakeRound(icon: '☕', type: 'Breakfast', requiredEnergy: 620),
     'lunch': IntakeRound(icon: '🍛', type: 'Lunch', requiredEnergy: 827),
@@ -62,12 +72,6 @@ class _DashboardState extends State<Dashboard> {
     'fat': 20,
   };
 
-  final Map<String, int> _requiredIntake = {
-    'carbs': 259,
-    'protein': 155,
-    'fat': 46,
-    'energy': 620 + 827 + 517 + 103,
-  };
   final Map<String, int> _consumedIntake = {
     'carbs': 0,
     'protein': 0,
@@ -90,6 +94,10 @@ class _DashboardState extends State<Dashboard> {
   int _drankWaterCopy = 0;
   int _waterCupSize = 250;
 
+  bool _authorized = false;
+  Map<String, dynamic> _userData = {};
+  bool _got_dailyData = false;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -99,15 +107,15 @@ class _DashboardState extends State<Dashboard> {
     _requiredIntake['energy'] = 620 + 827 + 517 + 103;
     _requiredIntake['carbs'] =
         ((_requiredIntake['energy']! * _energyPercentage['carbs']!) /
-            (100 * _energyPerUnit['carbs']!))
+                (100 * _energyPerUnit['carbs']!))
             .round();
     _requiredIntake['protein'] =
         ((_requiredIntake['energy']! * _energyPercentage['protein']!) /
-            (100 * _energyPerUnit['protein']!))
+                (100 * _energyPerUnit['protein']!))
             .round();
     _requiredIntake['fat'] =
         ((_requiredIntake['energy']! * _energyPercentage['fat']!) /
-            (100 * _energyPerUnit['fat']!))
+                (100 * _energyPerUnit['fat']!))
             .round();
     _intakeRounds['breakfast']?.consumeIntake(
       Intake(
@@ -123,6 +131,9 @@ class _DashboardState extends State<Dashboard> {
         recipe: '',
       ),
     );
+
+    getCurrentUser();
+
     updateConsumptionRecords();
   }
 
@@ -133,6 +144,198 @@ class _DashboardState extends State<Dashboard> {
     _dayList.clear();
     _monthList.clear();
     super.dispose();
+  }
+
+  // void refresh
+
+  Future<void> getCurrentUser() async {
+    final response = await UserServices().getUser();
+    if (response['status_ok']) {
+      setState(() {
+        _authorized = true;
+        // _headingText = response['data']['full_name'];
+        _userData = response['data'];
+
+        widget.updateUserdata(_userData);
+
+        _requiredIntake['carbs'] =
+            (_userData['profile']['daily_target']['carbs']).toInt();
+        _requiredIntake['protein'] =
+            (_userData['profile']['daily_target']['protein']).toInt();
+        _requiredIntake['fat'] = (_userData['profile']['daily_target']['fat'])
+            .toInt();
+        _requiredIntake['energy'] =
+            (_userData['profile']['daily_target']['energy']).toInt();
+        _requiredWater = (_userData['profile']['daily_target']['water'])
+            .toInt();
+
+        _intakeRounds['breakfast']?.setRequiredEnergy(
+          (_requiredIntake['energy']! * 0.3).round(),
+        );
+        _intakeRounds['lunch']?.setRequiredEnergy(
+          (_requiredIntake['energy']! * 0.4).round(),
+        );
+        _intakeRounds['dinner']?.setRequiredEnergy(
+          (_requiredIntake['energy']! * 0.25).round(),
+        );
+        _intakeRounds['snack']?.setRequiredEnergy(
+          (_requiredIntake['energy']! * 0.05).round(),
+        );
+
+        getDailyData();
+      });
+    } else {
+      setState(() {
+        _authorized = false;
+        _userData = {};
+      });
+    }
+  }
+
+  Future<void> getDailyData() async {
+    final response = await DailyDataServices().getDailyData(_selectedDate);
+    if (response['status_ok']) {
+      setState(() {
+        _got_dailyData = true;
+
+        // print('////////////////////\n');
+        // print(response['data']);
+        // print('/////////////////');
+        //
+        // print('----------- ${response['message']} -------------');
+
+        if (response['data'] == null) {
+          // print('nulllllllllllllllllll');
+          _intakeRounds['breakfast']?.clearAllIntakes();
+          _intakeRounds['lunch']?.clearAllIntakes();
+          _intakeRounds['dinner']?.clearAllIntakes();
+          _intakeRounds['snack']?.clearAllIntakes();
+
+          _drankWater = 0;
+
+          updateConsumptionRecords();
+          return;
+        }
+
+        _requiredIntake['carbs'] = (response['data']['daily_target']['carbs'])
+            .toInt();
+        _requiredIntake['protein'] =
+            (response['data']['daily_target']['protein']).toInt();
+        _requiredIntake['fat'] = (response['data']['daily_target']['fat'])
+            .toInt();
+        _requiredIntake['energy'] = (response['data']['daily_target']['energy'])
+            .toInt();
+        _requiredWater = (response['data']['daily_target']['water']).toInt();
+
+        _intakeRounds['breakfast']?.setRequiredEnergy(
+          (_requiredIntake['energy']! * 0.3).round(),
+        );
+        _intakeRounds['lunch']?.setRequiredEnergy(
+          (_requiredIntake['energy']! * 0.4).round(),
+        );
+        _intakeRounds['dinner']?.setRequiredEnergy(
+          (_requiredIntake['energy']! * 0.25).round(),
+        );
+        _intakeRounds['snack']?.setRequiredEnergy(
+          (_requiredIntake['energy']! * 0.05).round(),
+        );
+
+        final List<dynamic> breakfastList =
+            response['data']['meals']['breakfast']['consumed_intakes'];
+        final List<dynamic> lunchList =
+            response['data']['meals']['lunch']['consumed_intakes'];
+        final List<dynamic> dinnerList =
+            response['data']['meals']['dinner']['consumed_intakes'];
+        final List<dynamic> snacksList =
+            response['data']['meals']['snacks']['consumed_intakes'];
+        _intakeRounds['breakfast']?.clearAllIntakes();
+        for (int i = 0; i < breakfastList.length; i++) {
+          _intakeRounds['breakfast']?.consumeIntake(
+            Intake(
+              name: breakfastList[i]['name'],
+              type: breakfastList[i]['type'],
+              unit: 'g',
+              quantity: breakfastList[i]['quantity'],
+              energyPerUnit: breakfastList[i]['energy_per_unit'],
+              carbsPerUnit: breakfastList[i]['carbs_per_unit'],
+              proteinPerUnit: breakfastList[i]['protein_per_unit'],
+              fatPerUnit: breakfastList[i]['fat_per_unit'],
+              ingredients: [],
+              recipe: '',
+            ),
+          );
+        }
+        _intakeRounds['lunch']?.clearAllIntakes();
+        for (int i = 0; i < lunchList.length; i++) {
+          _intakeRounds['lunch']?.consumeIntake(
+            Intake(
+              name: lunchList[i]['name'],
+              type: lunchList[i]['type'],
+              unit: 'g',
+              quantity: lunchList[i]['quantity'],
+              energyPerUnit: lunchList[i]['energy_per_unit'],
+              carbsPerUnit: lunchList[i]['carbs_per_unit'],
+              proteinPerUnit: lunchList[i]['protein_per_unit'],
+              fatPerUnit: lunchList[i]['fat_per_unit'],
+              ingredients: [],
+              recipe: '',
+            ),
+          );
+        }
+        _intakeRounds['dinner']?.clearAllIntakes();
+        for (int i = 0; i < dinnerList.length; i++) {
+          _intakeRounds['dinner']?.consumeIntake(
+            Intake(
+              name: dinnerList[i]['name'],
+              type: dinnerList[i]['type'],
+              unit: 'g',
+              quantity: dinnerList[i]['quantity'],
+              energyPerUnit: dinnerList[i]['energy_per_unit'],
+              carbsPerUnit: dinnerList[i]['carbs_per_unit'],
+              proteinPerUnit: dinnerList[i]['protein_per_unit'],
+              fatPerUnit: dinnerList[i]['fat_per_unit'],
+              ingredients: [],
+              recipe: '',
+            ),
+          );
+        }
+        _intakeRounds['snack']?.clearAllIntakes();
+        for (int i = 0; i < snacksList.length; i++) {
+          _intakeRounds['snack']?.consumeIntake(
+            Intake(
+              name: snacksList[i]['name'],
+              type: snacksList[i]['type'],
+              unit: 'g',
+              quantity: snacksList[i]['quantity'],
+              energyPerUnit: snacksList[i]['energy_per_unit'],
+              carbsPerUnit: snacksList[i]['carbs_per_unit'],
+              proteinPerUnit: snacksList[i]['protein_per_unit'],
+              fatPerUnit: snacksList[i]['fat_per_unit'],
+              ingredients: [],
+              recipe: '',
+            ),
+          );
+        }
+
+        // print('==========================================');
+        // print(_intakeRounds);
+
+        _drankWater = (response['data']['water']).toInt();
+
+        updateConsumptionRecords();
+      });
+    } else {
+      setState(() {
+        _got_dailyData = false;
+
+        _intakeRounds['breakfast']?.clearAllIntakes();
+        _intakeRounds['lunch']?.clearAllIntakes();
+        _intakeRounds['dinner']?.clearAllIntakes();
+        _intakeRounds['snack']?.clearAllIntakes();
+
+        _drankWater = 0;
+      });
+    }
   }
 
   bool isSameDate(DateTime a, DateTime b) {
@@ -246,9 +449,9 @@ class _DashboardState extends State<Dashboard> {
                   // Container(
                   //   child:
                   for (
-                  DateTime tempDate = _startDate;
-                  _endDate.difference(tempDate).inDays > 0;
-                  tempDate = tempDate.add(Duration(days: 7))
+                    DateTime tempDate = _startDate;
+                    _endDate.difference(tempDate).inDays > 0;
+                    tempDate = tempDate.add(Duration(days: 7))
                   )
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -259,6 +462,7 @@ class _DashboardState extends State<Dashboard> {
                             onTap: () {
                               setState(() {
                                 _selectedDate = tempDate.add(Duration(days: i));
+                                getDailyData();
                               });
                             },
                             child: Container(
@@ -266,35 +470,35 @@ class _DashboardState extends State<Dashboard> {
                               width: screenWidth / 7 - 6,
                               decoration: BoxDecoration(
                                 color:
-                                isSameDate(
-                                  tempDate.add(Duration(days: i)),
-                                  _selectedDate,
-                                )
+                                    isSameDate(
+                                      tempDate.add(Duration(days: i)),
+                                      _selectedDate,
+                                    )
                                     ? Colors.blue.shade700
                                     : Colors.white,
                                 borderRadius: BorderRadius.circular(12),
                                 border:
-                                isSameDate(
-                                  tempDate.add(Duration(days: i)),
-                                  _selectedDate,
-                                )
+                                    isSameDate(
+                                      tempDate.add(Duration(days: i)),
+                                      _selectedDate,
+                                    )
                                     ? null
                                     : BoxBorder.all(
-                                  color:
-                                  isSameDate(
-                                    tempDate.add(Duration(days: i)),
-                                    DateTime.now(),
-                                  )
-                                      ? Colors.blue.shade700
-                                      : Color(0xFFBBBBBB),
-                                  width:
-                                  isSameDate(
-                                    tempDate.add(Duration(days: i)),
-                                    DateTime.now(),
-                                  )
-                                      ? 2
-                                      : 1,
-                                ),
+                                        color:
+                                            isSameDate(
+                                              tempDate.add(Duration(days: i)),
+                                              DateTime.now(),
+                                            )
+                                            ? Colors.blue.shade700
+                                            : Color(0xFFBBBBBB),
+                                        width:
+                                            isSameDate(
+                                              tempDate.add(Duration(days: i)),
+                                              DateTime.now(),
+                                            )
+                                            ? 2
+                                            : 1,
+                                      ),
                               ),
                               // padding: EdgeInsets.only(top: 4),
                               child: Center(
@@ -307,10 +511,10 @@ class _DashboardState extends State<Dashboard> {
                                       _dayList[i][0],
                                       style: AppTextStyle.primaryText.copyWith(
                                         color:
-                                        isSameDate(
-                                          tempDate.add(Duration(days: i)),
-                                          _selectedDate,
-                                        )
+                                            isSameDate(
+                                              tempDate.add(Duration(days: i)),
+                                              _selectedDate,
+                                            )
                                             ? Color(0xFFCCCCCC)
                                             : Color(0xFF999999),
                                       ),
@@ -319,10 +523,10 @@ class _DashboardState extends State<Dashboard> {
                                       '${tempDate.add(Duration(days: i)).day}',
                                       style: AppTextStyle.heading5.copyWith(
                                         color:
-                                        isSameDate(
-                                          tempDate.add(Duration(days: i)),
-                                          _selectedDate,
-                                        )
+                                            isSameDate(
+                                              tempDate.add(Duration(days: i)),
+                                              _selectedDate,
+                                            )
                                             ? Colors.white
                                             : Color(0xFF3C3C3C),
                                         fontWeight: FontWeight.w800,
@@ -345,9 +549,9 @@ class _DashboardState extends State<Dashboard> {
             // Daily budget Section
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              spacing: screenWidth - 230,
+              spacing: screenWidth - 200,
               children: [
-                Text('Daily budget', style: AppTextStyle.heading3),
+                Text('Daily budget', style: AppTextStyle.heading4),
                 GestureDetector(
                   onTap: () async {
                     Map<String, int> requiredIntakeCopy = {..._requiredIntake};
@@ -374,10 +578,10 @@ class _DashboardState extends State<Dashboard> {
                       setState(() {
                         _requiredIntake['carbs'] = requiredIntakeCopy['carbs']!;
                         _requiredIntake['protein'] =
-                        requiredIntakeCopy['protein']!;
+                            requiredIntakeCopy['protein']!;
                         _requiredIntake['fat'] = requiredIntakeCopy['fat']!;
                         _requiredIntake['energy'] =
-                        requiredIntakeCopy['energy']!;
+                            requiredIntakeCopy['energy']!;
                       });
                     }
                   },
@@ -425,10 +629,10 @@ class _DashboardState extends State<Dashboard> {
                             TweenAnimationBuilder<double>(
                               tween: Tween<double>(
                                 begin:
-                                _consumedIntake['energy']! /
+                                    _consumedIntake['energy']! /
                                     _requiredIntake['energy']!,
                                 end:
-                                _consumedIntermediateIntake['energy']! /
+                                    _consumedIntermediateIntake['energy']! /
                                     _requiredIntake['energy']!,
                               ),
                               duration: Duration(milliseconds: 500),
@@ -436,7 +640,7 @@ class _DashboardState extends State<Dashboard> {
                               onEnd: () {
                                 setState(() {
                                   _consumedIntake['energy'] =
-                                  _consumedIntermediateIntake['energy']!;
+                                      _consumedIntermediateIntake['energy']!;
                                 });
                               },
                               builder: (context, value, child) {
@@ -475,8 +679,8 @@ class _DashboardState extends State<Dashboard> {
                                       begin: _consumedIntake['energy']!
                                           .toDouble(),
                                       end:
-                                      _consumedIntermediateIntake['energy']!
-                                          .toDouble(),
+                                          _consumedIntermediateIntake['energy']!
+                                              .toDouble(),
                                     ),
                                     duration: Duration(milliseconds: 500),
                                     curve: Curves.easeOutCubic,
@@ -522,7 +726,7 @@ class _DashboardState extends State<Dashboard> {
                   // Nutrients
                   Column(
                     spacing:
-                    1.5 *
+                        1.5 *
                         ((screenWidth - 40) * 0.2 - (screenWidth - 40) * 0.185),
                     children: [
                       for (int i = 0; i < 3; i++)
@@ -568,9 +772,9 @@ class _DashboardState extends State<Dashboard> {
                                               value.toStringAsFixed(0),
                                               style: AppTextStyle.heading5
                                                   .copyWith(
-                                                color: Color(0xFF3C3C3C),
-                                                fontWeight: FontWeight.w800,
-                                              ),
+                                                    color: Color(0xFF3C3C3C),
+                                                    fontWeight: FontWeight.w800,
+                                                  ),
                                             );
                                           },
                                         ),
@@ -585,9 +789,9 @@ class _DashboardState extends State<Dashboard> {
                                     ),
                                     Text(
                                       _requiredIntake.entries
-                                          .elementAt(i)
-                                          .key[0]
-                                          .toUpperCase() +
+                                              .elementAt(i)
+                                              .key[0]
+                                              .toUpperCase() +
                                           _requiredIntake.entries
                                               .elementAt(i)
                                               .key
@@ -604,16 +808,16 @@ class _DashboardState extends State<Dashboard> {
                                     TweenAnimationBuilder<double>(
                                       tween: Tween<double>(
                                         begin:
-                                        _consumedIntake.entries
-                                            .elementAt(i)
-                                            .value /
+                                            _consumedIntake.entries
+                                                .elementAt(i)
+                                                .value /
                                             _requiredIntake.entries
                                                 .elementAt(i)
                                                 .value,
                                         end:
-                                        _consumedIntermediateIntake.entries
-                                            .elementAt(i)
-                                            .value /
+                                            _consumedIntermediateIntake.entries
+                                                .elementAt(i)
+                                                .value /
                                             _requiredIntake.entries
                                                 .elementAt(i)
                                                 .value,
@@ -626,7 +830,7 @@ class _DashboardState extends State<Dashboard> {
                                             .elementAt(i)
                                             .key;
                                         _consumedIntake[key] =
-                                        _consumedIntermediateIntake[key]!;
+                                            _consumedIntermediateIntake[key]!;
                                         // });
                                       },
                                       builder: (context, value, child) {
@@ -637,15 +841,15 @@ class _DashboardState extends State<Dashboard> {
                                           ),
                                           backgroundColor: Color(0xFFDDDDDD),
                                           color:
-                                          (_requiredIntake.entries
-                                              .elementAt(i)
-                                              .key ==
-                                              'carbs')
+                                              (_requiredIntake.entries
+                                                      .elementAt(i)
+                                                      .key ==
+                                                  'carbs')
                                               ? Color(0xFF4AD851)
                                               : (_requiredIntake.entries
-                                              .elementAt(i)
-                                              .key ==
-                                              'protein')
+                                                        .elementAt(i)
+                                                        .key ==
+                                                    'protein')
                                               ? Colors.orangeAccent
                                               : Colors.amberAccent,
                                           value: value,
@@ -660,18 +864,18 @@ class _DashboardState extends State<Dashboard> {
                                       },
                                     ),
                                     if (_requiredIntake.entries
-                                        .elementAt(i)
-                                        .key ==
+                                            .elementAt(i)
+                                            .key ==
                                         'carbs')
                                       Text('🍞'),
                                     if (_requiredIntake.entries
-                                        .elementAt(i)
-                                        .key ==
+                                            .elementAt(i)
+                                            .key ==
                                         'protein')
                                       Text('🥚'),
                                     if (_requiredIntake.entries
-                                        .elementAt(i)
-                                        .key ==
+                                            .elementAt(i)
+                                            .key ==
                                         'fat')
                                       Text('🧀'),
                                   ],
@@ -800,9 +1004,9 @@ class _DashboardState extends State<Dashboard> {
             SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              spacing: screenWidth - 232,
+              spacing: screenWidth - 220,
               children: [
-                Text('Intake', style: AppTextStyle.heading3),
+                Text('Intake', style: AppTextStyle.heading4),
                 SizedBox(
                   width: 120,
                   child: Row(
@@ -866,7 +1070,9 @@ class _DashboardState extends State<Dashboard> {
                         children: [
                           Text(
                             _intakeRounds.entries.elementAt(i).value.getType(),
-                            style: AppTextStyle.heading4,
+                            style: AppTextStyle.heading5.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                           Row(
                             children: [
@@ -894,19 +1100,19 @@ class _DashboardState extends State<Dashboard> {
                     GestureDetector(
                       onTap: () async {
                         final Map<String, List<Intake>>? res =
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                IntakeSelect(intakeRoundIndex: i),
-                          ),
-                        );
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    IntakeSelect(intakeRoundIndex: i),
+                              ),
+                            );
                         if (res != null) {
                           setState(() {
                             _intakeRounds[res.entries.elementAt(0).key]!
                                 .consumeAllIntakes(
-                              res.entries.elementAt(0).value,
-                            );
+                                  res.entries.elementAt(0).value,
+                                );
                             updateConsumptionRecords();
                           });
                         }
@@ -929,9 +1135,9 @@ class _DashboardState extends State<Dashboard> {
             SizedBox(height: 28),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              spacing: screenWidth - 244,
+              spacing: screenWidth - 228,
               children: [
-                Text('Burned', style: AppTextStyle.heading3),
+                Text('Burned', style: AppTextStyle.heading4),
                 SizedBox(
                   width: 120,
                   child: Row(
@@ -1018,34 +1224,41 @@ class _DashboardState extends State<Dashboard> {
             // Water section
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              spacing: screenWidth - 244,
+              spacing: screenWidth - 222,
               children: [
-                Text('Water', style: AppTextStyle.heading3),
+                Text('Water', style: AppTextStyle.heading4),
                 SizedBox(
                   width: 120,
                   child: GestureDetector(
                     onTap: () async {
                       final Map<String, String>? res =
-                      await showModalBottomSheet(
-                        context: context,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.vertical(
-                            top: Radius.circular(20), // rounded top
-                          ),
-                        ),
-                        showDragHandle: true,
-                        isScrollControlled: true,
-                        builder: (context) {
-                          return StatefulBuilder(
-                            builder: (context, setState) {
-                              return WaterDetails(
-                                requiredWater: _requiredWater,
-                                waterCupSize: _waterCupSize,
+                          await showModalBottomSheet(
+                            context: context,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(20), // rounded top
+                              ),
+                            ),
+                            showDragHandle: true,
+                            isScrollControlled: true,
+                            builder: (context) {
+                              return StatefulBuilder(
+                                builder: (context, setState) {
+                                  return Padding(
+                                    padding: EdgeInsets.only(
+                                      bottom: MediaQuery.of(
+                                        context,
+                                      ).viewInsets.bottom,
+                                    ),
+                                    child: WaterDetails(
+                                      requiredWater: _requiredWater,
+                                      waterCupSize: _waterCupSize,
+                                    ),
+                                  );
+                                },
                               );
                             },
                           );
-                        },
-                      );
                       if (res != null) {
                         setState(() {
                           _requiredWater = int.parse(res['goal']!);
@@ -1098,7 +1311,7 @@ class _DashboardState extends State<Dashboard> {
               key: Key(_drankWater.toString()),
               fillFraction: _drankWater.toDouble() / _requiredWater.toDouble(),
               fillFractionCopy:
-              _drankWaterCopy.toDouble() / _requiredWater.toDouble(),
+                  _drankWaterCopy.toDouble() / _requiredWater.toDouble(),
               updateCopy: () {
                 setState(() {
                   _drankWaterCopy = _drankWater;
