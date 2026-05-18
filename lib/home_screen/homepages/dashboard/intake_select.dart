@@ -5,10 +5,10 @@ import 'package:nutrilens_test/cores/constants/colors.dart';
 import 'package:nutrilens_test/cores/constants/text_styles.dart';
 import 'package:nutrilens_test/custom_widget_library/animated_button.dart';
 import 'package:nutrilens_test/home_screen/homepages/dashboard/scan_food_screen.dart';
+import 'package:nutrilens_test/home_screen/homepages/dashboard/intake_details.dart';
 import 'package:nutrilens_test/home_screen/homepages/dashboard/select_intake_popup.dart';
 
 import '../../../cores/custom_datatypes/custom_classes.dart';
-import 'intake_details.dart';
 
 class IntakeSelect extends StatefulWidget {
   final int intakeRoundIndex;
@@ -224,7 +224,7 @@ class _IntakeSelectState extends State<IntakeSelect>
       appBar: AppBar(
         leading: GestureDetector(
           onTap: () {
-            Navigator.pop(context, true);
+            Navigator.pop(context);
           },
           child: Container(
             height: 16,
@@ -271,8 +271,8 @@ class _IntakeSelectState extends State<IntakeSelect>
             children: [
               Text(
                 _intakeRounds[_currIntakeRoundIndex].name
-                    .substring(0, 1)
-                    .toUpperCase() +
+                        .substring(0, 1)
+                        .toUpperCase() +
                     _intakeRounds[_currIntakeRoundIndex].name.substring(1),
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
@@ -388,9 +388,12 @@ class _IntakeSelectState extends State<IntakeSelect>
                   children: <Widget>[
                     AllTab(
                       intakes:
-                      _allIntakes[_intakeRounds[_currIntakeRoundIndex]
-                          .name]!,
+                          _allIntakes[_intakeRounds[_currIntakeRoundIndex]
+                              .name]!,
                       selectedIntakes: _selectedIntakes,
+                      onUpdate: () {
+                        setState(() {});
+                      },
                     ),
                     // Center(child: Text("It's cloudy here")),
                     Center(child: Text("No item yet!")),
@@ -470,6 +473,9 @@ class _IntakeSelectState extends State<IntakeSelect>
                                     onTap: () {
                                       setState(() {
                                         _selectedIntakes.removeAt(i);
+                                        if (_selectedIntakes.isEmpty) {
+                                          _showSelectedIntakes = false;
+                                        }
                                       });
                                     },
                                     child: Container(
@@ -550,7 +556,7 @@ class _IntakeSelectState extends State<IntakeSelect>
                         onTap: () {
                           Navigator.pop(context, {
                             _intakeRounds[_currIntakeRoundIndex].name:
-                            _selectedIntakes,
+                                _selectedIntakes,
                           });
                         },
                         child: Center(
@@ -583,10 +589,12 @@ class _IntakeRound {
 class AllTab extends StatefulWidget {
   final List<Intake> intakes;
   final List<Intake> selectedIntakes;
+  final VoidCallback onUpdate;
   const AllTab({
     super.key,
     required this.intakes,
     required this.selectedIntakes,
+    required this.onUpdate,
   });
 
   @override
@@ -629,6 +637,7 @@ class _AllTabState extends State<AllTab> with AutomaticKeepAliveClientMixin {
                 if (res != null) {
                   setState(() {
                     _selectedIntakes.add(res);
+                    widget.onUpdate();
                   });
                 }
               },
@@ -673,7 +682,8 @@ class _AllTabState extends State<AllTab> with AutomaticKeepAliveClientMixin {
                         children: [
                           GestureDetector(
                             onTap: () async {
-                              Intake selectedIntake = widget.intakes[i].copyWith();
+                              Intake selectedIntake = widget.intakes[i]
+                                  .copyWith();
                               final res = await showModalBottomSheet(
                                 context: context,
                                 shape: RoundedRectangleBorder(
@@ -686,8 +696,15 @@ class _AllTabState extends State<AllTab> with AutomaticKeepAliveClientMixin {
                                 builder: (context) {
                                   return StatefulBuilder(
                                     builder: (context, setState) {
-                                      return SelectIntakePopup(
-                                        selectedIntake: selectedIntake,
+                                      return Padding(
+                                        padding: EdgeInsets.only(
+                                          bottom: MediaQuery.of(
+                                            context,
+                                          ).viewInsets.bottom,
+                                        ),
+                                        child: SelectIntakePopup(
+                                          selectedIntake: selectedIntake,
+                                        ),
                                       );
                                     },
                                   );
@@ -696,6 +713,7 @@ class _AllTabState extends State<AllTab> with AutomaticKeepAliveClientMixin {
                               if (res != null) {
                                 setState(() {
                                   _selectedIntakes.add(res);
+                                  widget.onUpdate();
                                 });
                               }
                             },

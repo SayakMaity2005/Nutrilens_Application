@@ -9,6 +9,8 @@ import 'package:nutrilens_test/home_screen/homepages/dashboard/dashboard.dart';
 import 'package:nutrilens_test/home_screen/homepages/dashboard/scan_food_screen.dart';
 import 'package:nutrilens_test/home_screen/homepages/dietitian/dietitian_page.dart';
 
+import '../profile_screen/profile_page.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -20,19 +22,25 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentPageIndex = 0;
   late final List<Widget> _pages;
 
+  Map<String, dynamic>? _userData = null;
+
   @override
   void initState() {
     super.initState();
     _currentPageIndex = 0;
     _pages = [
-      const Dashboard(),
+      Dashboard(
+        updateUserdata: (userData) {
+          setState(() {
+            _userData = userData;
+          });
+        },
+      ),
       const Center(child: Text("Progress Page (Coming Soon)")),
       const DietitianPage(),
       const Center(child: Text("Settings Page (Coming Soon)")),
     ];
-    SystemChrome.setEnabledSystemUIMode(
-      SystemUiMode.immersiveSticky,
-    );
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
 
   @override
@@ -71,8 +79,33 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             child: Center(
               child: IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.person, size: 28),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) {
+                        return ProfilePage(
+                          updateUserdata: (userData) {
+                            setState(() {
+                              _userData = userData;
+                            });
+                          },
+                          userData: _userData,
+                        );
+                      },
+                    ),
+                  );
+                },
+                icon: (_userData == null || _userData?['full_name'] == null)
+                    ? const Icon(Icons.person, size: 28)
+                    : Text(
+                        _userData!['full_name'][0].toString().toUpperCase(),
+                        // 'S',
+                        style: const TextStyle(
+                          color: Color(0xFF555555),
+                          fontSize: 22,
+                        ),
+                      ),
               ),
             ),
           ),
@@ -188,7 +221,10 @@ class _HomeScreenState extends State<HomeScreen> {
               Container(
                 height: 2,
                 width: 20,
-                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(2)),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
               const SizedBox(height: 4),
               Container(

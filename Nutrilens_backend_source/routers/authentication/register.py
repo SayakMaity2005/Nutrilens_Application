@@ -39,6 +39,7 @@ async def register(form_data: RegisterUserForm) -> Token:
         email=form_data.email,
         full_name=form_data.full_name,
         hashed_password=hashed_password,
+        profile=form_data.profile,
         disabled=False
     )
  

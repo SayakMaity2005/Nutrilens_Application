@@ -17,4 +17,9 @@ client = AsyncIOMotorClient(
 
 db = client["nutrilens_db"]
 
+# collections
 users_collection = db["users"]
+users_daily_data_collection = db["users_daily_data"]
+
+# default intakes collection
+default_intakes_collection = db["default_intakes"]

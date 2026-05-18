@@ -129,161 +129,167 @@ class _EditBudgetState extends State<EditBudget> {
                                                 builder: (context, constrains) {
                                                   final subSheetWidth =
                                                       constrains.maxWidth;
-                                                  return SizedBox(
-                                                    width: subSheetWidth,
-                                                    child: Wrap(
-                                                      alignment:
-                                                          WrapAlignment.center,
-                                                      spacing: 20,
-                                                      runSpacing: 20,
-                                                      children: [
-                                                        Text(
-                                                          'Customize',
-                                                          style: AppTextStyle
-                                                              .heading4,
-                                                        ),
-                                                        Container(
-                                                          padding:
-                                                              EdgeInsetsGeometry.symmetric(
-                                                                horizontal: 80,
-                                                              ),
-                                                          child: TextField(
-                                                            controller:
-                                                                _textEditingController,
+                                                  return Padding(
+                                                    padding: EdgeInsets.only(
+                                                      bottom: MediaQuery.of(
+                                                        context,
+                                                      ).viewInsets.bottom,
+                                                    ),
+                                                    child: SizedBox(
+                                                      width: subSheetWidth,
+                                                      child: Wrap(
+                                                        alignment: WrapAlignment
+                                                            .center,
+                                                        spacing: 20,
+                                                        runSpacing: 20,
+                                                        children: [
+                                                          Text(
+                                                            'Customize',
                                                             style: AppTextStyle
-                                                                .heading2
-                                                                .copyWith(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w900,
+                                                                .heading4,
+                                                          ),
+                                                          Container(
+                                                            padding:
+                                                                EdgeInsetsGeometry.symmetric(
+                                                                  horizontal:
+                                                                      80,
                                                                 ),
-                                                            autofocus: true,
-                                                            maxLength: 5,
-                                                            decoration: InputDecoration(
-                                                              suffix: Text(
-                                                                'kcal',
-                                                                style: AppTextStyle
-                                                                    .heading4
-                                                                    .copyWith(
-                                                                      color: Color(
-                                                                        0xFF555555,
+                                                            child: TextField(
+                                                              controller:
+                                                                  _textEditingController,
+                                                              style: AppTextStyle
+                                                                  .heading2
+                                                                  .copyWith(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w900,
+                                                                  ),
+                                                              autofocus: true,
+                                                              maxLength: 5,
+                                                              decoration: InputDecoration(
+                                                                suffix: Text(
+                                                                  'kcal',
+                                                                  style: AppTextStyle
+                                                                      .heading4
+                                                                      .copyWith(
+                                                                        color: Color(
+                                                                          0xFF555555,
+                                                                        ),
                                                                       ),
-                                                                    ),
-                                                              ),
-                                                              focusedBorder: OutlineInputBorder(
-                                                                borderRadius:
-                                                                    BorderRadius.circular(
-                                                                      16,
-                                                                    ),
-                                                                borderSide:
-                                                                    BorderSide(
-                                                                      color: Color(
-                                                                        0xFF0D35B5,
+                                                                ),
+                                                                focusedBorder: OutlineInputBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius.circular(
+                                                                        16,
                                                                       ),
+                                                                  borderSide: BorderSide(
+                                                                    color: Color(
+                                                                      0xFF0D35B5,
                                                                     ),
-                                                              ),
-                                                              enabledBorder: OutlineInputBorder(
-                                                                borderRadius:
-                                                                    BorderRadius.circular(
-                                                                      16,
-                                                                    ),
-                                                                borderSide:
-                                                                    BorderSide(
-                                                                      color: Color(
-                                                                        0xFFBBBBBB,
+                                                                  ),
+                                                                ),
+                                                                enabledBorder: OutlineInputBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius.circular(
+                                                                        16,
                                                                       ),
+                                                                  borderSide: BorderSide(
+                                                                    color: Color(
+                                                                      0xFFBBBBBB,
                                                                     ),
-                                                              ),
-                                                              errorBorder: OutlineInputBorder(
-                                                                borderRadius:
-                                                                    BorderRadius.circular(
-                                                                      16,
-                                                                    ),
-                                                                borderSide:
-                                                                    BorderSide(
-                                                                      color: Color(
-                                                                        0x98ED0F0F,
+                                                                  ),
+                                                                ),
+                                                                errorBorder: OutlineInputBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius.circular(
+                                                                        16,
                                                                       ),
+                                                                  borderSide: BorderSide(
+                                                                    color: Color(
+                                                                      0x98ED0F0F,
                                                                     ),
-                                                              ),
-                                                              focusedErrorBorder: OutlineInputBorder(
-                                                                borderRadius:
-                                                                    BorderRadius.circular(
-                                                                      16,
-                                                                    ),
-                                                                borderSide:
-                                                                    BorderSide(
-                                                                      color: Color(
-                                                                        0x98ED0F0F,
+                                                                  ),
+                                                                ),
+                                                                focusedErrorBorder: OutlineInputBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius.circular(
+                                                                        16,
                                                                       ),
+                                                                  borderSide: BorderSide(
+                                                                    color: Color(
+                                                                      0x98ED0F0F,
                                                                     ),
+                                                                  ),
+                                                                ),
                                                               ),
                                                             ),
                                                           ),
-                                                        ),
-                                                        Text.rich(
-                                                          TextSpan(
-                                                            text:
-                                                                'The recommended range is from ',
-                                                            style: AppTextStyle
-                                                                .primaryText
-                                                                .copyWith(
-                                                                  color: Color(
-                                                                    0xFF555555,
+                                                          Text.rich(
+                                                            TextSpan(
+                                                              text:
+                                                                  'The recommended range is from ',
+                                                              style: AppTextStyle
+                                                                  .primaryText
+                                                                  .copyWith(
+                                                                    color: Color(
+                                                                      0xFF555555,
+                                                                    ),
                                                                   ),
+                                                              children: [
+                                                                TextSpan(
+                                                                  text:
+                                                                      '1000 to 4000 kcal.',
+                                                                  style: AppTextStyle
+                                                                      .primaryText
+                                                                      .copyWith(
+                                                                        color: Colors
+                                                                            .blueAccent
+                                                                            .shade700,
+                                                                      ),
                                                                 ),
-                                                            children: [
-                                                              TextSpan(
-                                                                text:
-                                                                    '1000 to 4000 kcal.',
+                                                              ],
+                                                            ),
+                                                          ),
+                                                          AnimatedButton(
+                                                            width:
+                                                                sheetWidth - 32,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                                  color: Color(
+                                                                    0xFF375EC5,
+                                                                  ),
+                                                                  borderRadius:
+                                                                      BorderRadius.circular(
+                                                                        30,
+                                                                      ),
+                                                                ),
+                                                            onTapScaleFactor:
+                                                                0.96,
+                                                            onTap: () {
+                                                              Navigator.pop(
+                                                                context,
+                                                                true,
+                                                              );
+                                                            },
+                                                            child: Center(
+                                                              child: Text(
+                                                                'Save',
                                                                 style: AppTextStyle
-                                                                    .primaryText
+                                                                    .heading5
                                                                     .copyWith(
                                                                       color: Colors
-                                                                          .blueAccent
-                                                                          .shade700,
+                                                                          .white,
                                                                     ),
                                                               ),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                        AnimatedButton(
-                                                          width:
-                                                              sheetWidth - 32,
-                                                          decoration: BoxDecoration(
-                                                            color: Color(
-                                                              0xFF375EC5,
-                                                            ),
-                                                            borderRadius:
-                                                                BorderRadius.circular(
-                                                                  30,
-                                                                ),
-                                                          ),
-                                                          onTapScaleFactor:
-                                                              0.96,
-                                                          onTap: () {
-                                                            Navigator.pop(
-                                                              context,
-                                                              true,
-                                                            );
-                                                          },
-                                                          child: Center(
-                                                            child: Text(
-                                                              'Save',
-                                                              style: AppTextStyle
-                                                                  .heading5
-                                                                  .copyWith(
-                                                                    color: Colors
-                                                                        .white,
-                                                                  ),
                                                             ),
                                                           ),
-                                                        ),
-                                                        SizedBox(
-                                                          height: 10,
-                                                          width: subSheetWidth,
-                                                        ),
-                                                      ],
+                                                          SizedBox(
+                                                            height: 10,
+                                                            width:
+                                                                subSheetWidth,
+                                                          ),
+                                                        ],
+                                                      ),
                                                     ),
                                                   );
                                                 },
