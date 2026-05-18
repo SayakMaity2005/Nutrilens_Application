@@ -6,6 +6,8 @@ import 'package:nutrilens_test/cores/constants/text_styles.dart';
 import 'package:nutrilens_test/custom_widget_library/animated_button.dart';
 import 'package:nutrilens_test/custom_widget_library/rounded_notched_nav_bar.dart';
 import 'package:nutrilens_test/home_screen/homepages/dashboard/dashboard.dart';
+import 'package:nutrilens_test/home_screen/homepages/dashboard/scan_food_screen.dart';
+import 'package:nutrilens_test/home_screen/homepages/dietitian/dietitian_page.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,13 +17,19 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late int _currentPageIndex;
+  int _currentPageIndex = 0;
+  late final List<Widget> _pages;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _currentPageIndex = 0;
+    _pages = [
+      const Dashboard(),
+      const Center(child: Text("Progress Page (Coming Soon)")),
+      const DietitianPage(),
+      const Center(child: Text("Settings Page (Coming Soon)")),
+    ];
     SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.immersiveSticky,
     );
@@ -33,9 +41,10 @@ class _HomeScreenState extends State<HomeScreen> {
     final screenHeight = screenSize.height;
     final screenWidth = screenSize.width;
     final bottomPadding = MediaQuery.of(context).padding.bottom;
-    final palette = Theme.of(context).extension<AppPalette>()!;
+    
+    // Safety check for palette
+    final palette = Theme.of(context).extension<AppPalette>() ?? ThemePalette.lightPalette;
 
-    // TODO: implement build
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -55,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             height: 44,
             width: 44,
-            margin: EdgeInsetsGeometry.symmetric(horizontal: 18),
+            margin: const EdgeInsets.symmetric(horizontal: 18),
             decoration: BoxDecoration(
               color: palette.unselectColor1,
               borderRadius: BorderRadius.circular(22),
@@ -63,12 +72,11 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Center(
               child: IconButton(
                 onPressed: () {},
-                icon: Icon(Icons.person, size: 28),
+                icon: const Icon(Icons.person, size: 28),
               ),
             ),
           ),
         ],
-        // flexibleSpace: IconButton(onPressed: () {}, icon: Icon(Icons.person))
       ),
       body: Container(
         height: screenHeight,
@@ -90,55 +98,68 @@ class _HomeScreenState extends State<HomeScreen> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SizedBox(height: 110, width: screenWidth),
-                Dashboard(),
+                const SizedBox(height: 110),
+                Expanded(
+                  child: _currentPageIndex >= 0 && _currentPageIndex < _pages.length
+                      ? _pages[_currentPageIndex]
+                      : const Center(child: Text("Page not found")),
+                ),
               ],
             ),
             RoundedNotchedNavBar(borderColor: palette.selectColor3),
           ],
         ),
       ),
-
       bottomNavigationBar: Container(
-        margin: EdgeInsetsGeometry.symmetric(horizontal: 22),
+        margin: const EdgeInsets.symmetric(horizontal: 22),
         child: NavigationBar(
-          height: 80 - bottomPadding, // for pixel 9 pro it was 54
+          height: 80 - bottomPadding,
           destinations: [
-            NavigationDestination(
+            const NavigationDestination(
               icon: Icon(Icons.home_outlined, size: 28),
               selectedIcon: Icon(Icons.home_filled, size: 24),
               label: 'Home',
             ),
-            NavigationDestination(
+            const NavigationDestination(
               icon: Icon(Icons.bar_chart, size: 24),
               selectedIcon: Icon(Icons.bar_chart_rounded, size: 24),
               label: 'Progress',
             ),
-            SizedBox(width: 10),
-            NavigationDestination(
+            const NavigationDestination(
+              icon: Opacity(opacity: 0, child: Icon(Icons.add)),
+              label: '',
+              enabled: false,
+            ),
+            const NavigationDestination(
               icon: Icon(Icons.eco_outlined, size: 28),
               selectedIcon: Icon(Icons.eco, size: 24),
               label: 'Dietitian',
             ),
-            NavigationDestination(
+            const NavigationDestination(
               icon: Icon(Icons.settings_outlined, size: 24),
               selectedIcon: Icon(Icons.settings, size: 24),
               label: 'Settings',
             ),
           ],
           indicatorColor: palette.selectColor4,
-          selectedIndex: _currentPageIndex,
+          selectedIndex: _currentPageIndex >= 2 ? _currentPageIndex + 1 : _currentPageIndex,
           onDestinationSelected: (index) {
+            if (index == 2) return;
             setState(() {
-              _currentPageIndex = index;
+              _currentPageIndex = index > 2 ? index - 1 : index;
             });
           },
           backgroundColor: Colors.transparent,
         ),
       ),
       extendBody: true,
-
       floatingActionButton: AnimatedButton(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ScanFoodScreen()),
+          );
+        },
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -150,12 +171,11 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            spacing: 4,
             children: [
               Container(
                 height: 10,
                 width: 28,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   borderRadius: BorderRadius.vertical(top: Radius.circular(6)),
                   border: BorderDirectional(
                     start: BorderSide(color: Colors.white, width: 2),
@@ -164,15 +184,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
+              const SizedBox(height: 4),
               Container(
                 height: 2,
                 width: 20,
                 decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(2)),
               ),
+              const SizedBox(height: 4),
               Container(
                 height: 10,
                 width: 28,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   borderRadius: BorderRadius.vertical(bottom: Radius.circular(6)),
                   border: BorderDirectional(
                     start: BorderSide(color: Colors.white, width: 2),
@@ -185,7 +207,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }

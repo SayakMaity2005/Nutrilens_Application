@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:nutrilens_test/cores/constants/colors.dart';
 import 'package:nutrilens_test/cores/constants/text_styles.dart';
 import 'package:nutrilens_test/custom_widget_library/animated_button.dart';
+import 'package:nutrilens_test/home_screen/homepages/dashboard/scan_food_screen.dart';
 import 'package:nutrilens_test/home_screen/homepages/dashboard/select_intake_popup.dart';
 
 import '../../../cores/custom_datatypes/custom_classes.dart';
@@ -334,13 +335,21 @@ class _IntakeSelectState extends State<IntakeSelect>
                       ),
                     ),
                   ),
-                  Container(
-                    padding: EdgeInsetsGeometry.all(12),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Color(0xFF1576D6),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const ScanFoodScreen()),
+                      );
+                    },
+                    child: Container(
+                      padding: EdgeInsetsGeometry.all(12),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color(0xFF1576D6),
+                      ),
+                      child: Icon(Icons.camera_alt_rounded, color: Colors.white),
                     ),
-                    child: Icon(Icons.camera_alt_rounded, color: Colors.white),
                   ),
                 ],
               ),
