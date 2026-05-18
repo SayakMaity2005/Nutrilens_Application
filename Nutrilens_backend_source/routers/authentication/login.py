@@ -41,24 +41,3 @@ async def login_for_access_token(
     return Token(access_token=access_token, token_type="bearer")
 
 
-
-
-# async def login(response: Response, request: LoginForm, db: Session = Depends(get_db)):
-#     user = get_user(request.username, db)
-#     if not user or not Hash.verify_password(request.password, user.password):
-#         raise HTTPException(
-#             status_code=status.HTTP_404_NOT_FOUND,
-#             detail="Incorrect username or password"
-#         )
-    
-#     access_token_expires = VALIDATION_TIME
-#     access_token = create_access_token(
-#         data={"sub": user.username}, expires_delta=access_token_expires
-#     )
-    
-#     verifiedUser = VerifiedUser(
-#         name=user.name,
-#         username=user.username,
-#         role=user.role
-#     )
-#     return {"status":"ok","message": "Login successful!", "user": verifiedUser}
