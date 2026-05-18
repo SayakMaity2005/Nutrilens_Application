@@ -11,3 +11,6 @@ python-dotenv
 huggingface-hub
 pyyaml
 openai
+torch
+torchvision
+httpx
