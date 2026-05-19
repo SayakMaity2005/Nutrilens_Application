@@ -19,7 +19,7 @@ class DailyDataServices {
     try {
       final response = await http.get(
         Uri.parse(
-          "http://10.0.2.2:8000/daily_data/get_daily_data",
+          "https://nutrilens-application.onrender.com/daily_data/get_daily_data",
         ).replace(queryParameters: {"date": selectedDate}),
 
         headers: {"Authorization": "Bearer $token"},

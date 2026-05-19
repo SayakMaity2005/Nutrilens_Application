@@ -22,7 +22,7 @@ class UserServices {
       final response = await http.get(
 
         Uri.parse(
-          "http://10.0.2.2:8000/users/me",
+          "https://nutrilens-application.onrender.com/users/me",
         ),
 
         headers: {

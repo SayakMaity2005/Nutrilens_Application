@@ -61,8 +61,8 @@ class _AnalyzingLoadingScreenState extends State<AnalyzingLoadingScreen>
         _statusMessage = "Connecting to Neural Engine...";
       });
 
-      // Use 127.0.0.1 on web, 10.0.2.2 on Android emulator
-      final baseUrl = kIsWeb ? "http://127.0.0.1:8000" : "http://10.0.2.2:8000";
+      // Use deployed backend URL
+      final baseUrl = "https://nutrilens-application.onrender.com";
 
       var request = http.MultipartRequest(
         'POST',

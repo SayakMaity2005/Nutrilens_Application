@@ -14,7 +14,7 @@ class AuthServices {
   }) async {
     try {
       final response = await http.post(
-        Uri.parse("http://10.0.2.2:8000/token"),
+        Uri.parse("https://nutrilens-application.onrender.com/token"),
 
         headers: {"Content-Type": "application/x-www-form-urlencoded"},
 

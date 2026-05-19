@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import httpx
 import json
 import random
+from PIL import Image
 from Nutrilens_backend_source.schemas import IntakeInMeal, MealType
 from Nutrilens_backend_source.auth import get_current_active_user
 
@@ -33,8 +34,17 @@ async def analyze_food(
         # Read file contents
         file_content = await file.read()
         
+        # Convert image to RGB using Pillow to prevent RGBA errors on Hugging Face
+        image = Image.open(io.BytesIO(file_content))
+        if image.mode in ("RGBA", "P"):
+            image = image.convert("RGB")
+            
+        img_byte_arr = io.BytesIO()
+        image.save(img_byte_arr, format='JPEG')
+        img_byte_arr.seek(0)
+        
         async with httpx.AsyncClient() as client:
-            files = {'file': (file.filename or 'image.jpg', io.BytesIO(file_content), 'image/jpeg')}
+            files = {'file': (file.filename or 'image.jpg', img_byte_arr, 'image/jpeg')}
             hf_response = await client.post(HF_API_URL, files=files, timeout=30.0)
             
         if hf_response.status_code != 200:
