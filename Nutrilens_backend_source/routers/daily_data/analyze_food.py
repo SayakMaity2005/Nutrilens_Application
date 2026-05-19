@@ -17,7 +17,7 @@ load_dotenv(override=True) # also load from current dir just in case
 # We use the REST endpoint for Gemini. 
 GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
 
-@router.post("/analyze_food", response_model=IntakeInMeal)
+@router.post("/daily_data/analyze_food", response_model=IntakeInMeal)
 async def analyze_food(
     file: UploadFile = File(...),
     meal_type: MealType = Form(MealType.lunch),
@@ -38,7 +38,9 @@ async def analyze_food(
     try:
         # Read and encode the uploaded image
         file_content = await file.read()
-        mime_type = file.content_type or "image/jpeg"
+        mime_type = file.content_type
+        if not mime_type or not mime_type.startswith("image/"):
+            mime_type = "image/jpeg"
         base64_image = base64.b64encode(file_content).decode("utf-8")
         
         system_prompt = (
