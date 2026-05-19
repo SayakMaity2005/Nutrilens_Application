@@ -8,6 +8,7 @@ import 'package:nutrilens_test/custom_widget_library/rounded_notched_nav_bar.dar
 import 'package:nutrilens_test/home_screen/homepages/dashboard/dashboard.dart';
 import 'package:nutrilens_test/home_screen/homepages/dashboard/scan_food_screen.dart';
 import 'package:nutrilens_test/home_screen/homepages/dietitian/dietitian_page.dart';
+import 'package:nutrilens_test/home_screen/homepages/progress/progress_page.dart';
 
 import '../profile_screen/profile_page.dart';
 
@@ -20,26 +21,12 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentPageIndex = 0;
-  late final List<Widget> _pages;
-
-  Map<String, dynamic>? _userData = null;
+  Map<String, dynamic>? _userData;
 
   @override
   void initState() {
     super.initState();
     _currentPageIndex = 0;
-    _pages = [
-      Dashboard(
-        updateUserdata: (userData) {
-          setState(() {
-            _userData = userData;
-          });
-        },
-      ),
-      const Center(child: Text("Progress Page (Coming Soon)")),
-      const DietitianPage(),
-      const Center(child: Text("Settings Page (Coming Soon)")),
-    ];
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
 
@@ -50,8 +37,20 @@ class _HomeScreenState extends State<HomeScreen> {
     final screenWidth = screenSize.width;
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     
-    // Safety check for palette
     final palette = Theme.of(context).extension<AppPalette>() ?? ThemePalette.lightPalette;
+
+    final List<Widget> pages = [
+      Dashboard(
+        updateUserdata: (userData) {
+          setState(() {
+            _userData = userData;
+          });
+        },
+      ),
+      const ProgressPage(),
+      const DietitianPage(),
+      const Center(child: Text("Settings Page (Coming Soon)")),
+    ];
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -100,7 +99,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ? const Icon(Icons.person, size: 28)
                     : Text(
                         _userData!['full_name'][0].toString().toUpperCase(),
-                        // 'S',
                         style: const TextStyle(
                           color: Color(0xFF555555),
                           fontSize: 22,
@@ -133,8 +131,8 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 const SizedBox(height: 110),
                 Expanded(
-                  child: _currentPageIndex >= 0 && _currentPageIndex < _pages.length
-                      ? _pages[_currentPageIndex]
+                  child: _currentPageIndex >= 0 && _currentPageIndex < pages.length
+                      ? pages[_currentPageIndex]
                       : const Center(child: Text("Page not found")),
                 ),
               ],
@@ -204,6 +202,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            spacing: 4,
             children: [
               Container(
                 height: 10,
@@ -217,7 +216,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 4),
               Container(
                 height: 2,
                 width: 20,

@@ -1,5 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:nutrilens_test/home_screen/homepages/dashboard/amount_input_screen.dart';
 import 'package:nutrilens_test/main.dart';
 
 class ScanFoodScreen extends StatefulWidget {
@@ -161,22 +163,48 @@ class _ScanFoodScreenState extends State<ScanFoodScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         // Gallery button
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.black26,
-                            borderRadius: BorderRadius.circular(12),
+                        GestureDetector(
+                          onTap: () async {
+                            try {
+                              final ImagePicker picker = ImagePicker();
+                              final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+                              
+                              if (image != null && mounted) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => AmountInputScreen(imageFile: image),
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              print("Error picking image: $e");
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.black26,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(Icons.image_outlined, color: Colors.white, size: 28),
                           ),
-                          child: const Icon(Icons.image_outlined, color: Colors.white, size: 28),
                         ),
                         // Capture button
                         GestureDetector(
                           onTap: () async {
                             try {
                               final image = await controller!.takePicture();
-                              // Handle the captured image
+                              if (!mounted) return;
+                              
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => AmountInputScreen(imageFile: image),
+                                ),
+                              );
                             } catch (e) {
-                              print(e);
+                              print("Error taking picture: $e");
                             }
                           },
                           child: Container(

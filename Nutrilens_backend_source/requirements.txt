@@ -7,3 +7,5 @@ python-jose
 pyjwt
 pwdlib[argon2]
 python-dotenv
+httpx
+python-multipart
