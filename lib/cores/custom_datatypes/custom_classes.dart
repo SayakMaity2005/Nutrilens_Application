@@ -70,6 +70,7 @@ class IntakeRound {
 }
 
 class Intake {
+  late final String _id;
   late final String _name;
   late final String _type; // food / drinks
   late final String _unit; // g, L, mL, ...
@@ -81,6 +82,7 @@ class Intake {
   late final List<String> _ingredients;
   late final String _recipe;
   Intake({
+    String id = '',
     required String name,
     required String type,
     required String unit,
@@ -92,6 +94,7 @@ class Intake {
     required List<String> ingredients,
     required String recipe,
   }) {
+    _id = id;
     _name = name;
     _type = type;
     _unit = unit;
@@ -129,6 +132,7 @@ class Intake {
     );
   }
 
+  String id() => _id;
   String name() => _name;
   String type() => _type;
   String unit() => _unit;
@@ -136,6 +140,11 @@ class Intake {
   void setQuantity(double quantity) {
     _quantity = quantity;
   }
+
+  double energyPerUnit() => _energyPerUnit;
+  double carbsPerUnit() => _carbsPerUnit;
+  double proteinPerUnit() => _proteinPerUnit;
+  double fatPerUnit() => _fatPerUnit;
 
   int energy() => (_energyPerUnit * _quantity).toInt();
   double carbs() => _carbsPerUnit * _quantity;

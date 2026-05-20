@@ -4,10 +4,15 @@ import 'package:pie_chart/pie_chart.dart';
 
 import '../../../cores/constants/colors.dart';
 import '../../../cores/custom_datatypes/custom_classes.dart';
+import '../../../cores/daily_data/daily_data_services.dart';
 
 class IntakeDetails extends StatefulWidget {
   final Intake selectedIntake;
-  const IntakeDetails({super.key, required this.selectedIntake});
+  
+  const IntakeDetails({
+    super.key, 
+    required this.selectedIntake,
+  });
   @override
   State<IntakeDetails> createState() => _IntakeDetailsState();
 }
@@ -66,7 +71,8 @@ class _IntakeDetailsState extends State<IntakeDetails> {
         ),
 
         title: Text(
-          _selectIntake.name(),
+          // _selectIntake.name(),
+          'Details',
           style: TextStyle(fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
@@ -76,6 +82,10 @@ class _IntakeDetailsState extends State<IntakeDetails> {
         child: Column(
           // mainAxisAlignment: MainAxisAlignment.start,
           children: [
+            Container(
+              margin: EdgeInsetsGeometry.symmetric(horizontal: 20, vertical: 10),
+              child: Text(_selectIntake.name(), style: AppTextStyle.heading4,),
+            ),
             Container(
               margin: EdgeInsetsGeometry.all(16),
               padding: EdgeInsetsGeometry.all(20),
@@ -371,10 +381,66 @@ class _IntakeDetailsState extends State<IntakeDetails> {
                 ],
               ),
             ),
-          ],
+              SizedBox(height: 100), // space for FAB
+            ],
+          ),
         ),
-      ),
-    );
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () async {
+            // Show loading
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) => Center(child: CircularProgressIndicator()),
+            );
+
+            // Determine meal type by time
+            final hour = DateTime.now().hour;
+            String computedMealType = "lunch";
+            if (hour < 11) computedMealType = "breakfast";
+            else if (hour < 16) computedMealType = "lunch";
+            else if (hour < 19) computedMealType = "snacks";
+            else computedMealType = "dinner";
+
+            // Prepare payload
+            final mealData = {
+              "meal_type": computedMealType,
+              "consumed_intakes": [
+                {
+                  "name": _selectIntake.name(),
+                  "type": _selectIntake.type(),
+                  "energy_per_unit": _selectIntake.energyPerUnit(),
+                  "quantity": _selectIntake.quantity(),
+                  "carbs_per_unit": _selectIntake.carbsPerUnit(),
+                  "protein_per_unit": _selectIntake.proteinPerUnit(),
+                  "fat_per_unit": _selectIntake.fatPerUnit(),
+                }
+              ]
+            };
+
+            // Send to backend
+            // Requires importing 'package:nutrilens_test/cores/daily_data/daily_data_services.dart';
+            final response = await DailyDataServices().addMeal(mealData);
+
+            // Close loading
+            Navigator.pop(context);
+
+            if (response['status_ok']) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Added to your diary!')),
+              );
+              Navigator.pop(context); // Go back after adding
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Error: ${response['message']}')),
+              );
+            }
+          },
+          label: Text('Add to Diary', style: TextStyle(fontWeight: FontWeight.bold)),
+          icon: Icon(Icons.add),
+          backgroundColor: Color(0xFF4A90E2),
+        ),
+      );
     // extendBodyBehindAppBar: true,
   }
 }

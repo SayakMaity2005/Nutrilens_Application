@@ -18,7 +18,7 @@ from Nutrilens_backend_source.database.db import users_collection
 import os
 
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
 
 
 SECRET_KEY = os.getenv("JWT_SECRET_KEY")

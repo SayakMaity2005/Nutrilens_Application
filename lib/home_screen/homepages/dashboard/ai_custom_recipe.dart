@@ -1,9 +1,15 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:nutrilens_test/cores/ai_usage/custom_recipe.dart';
+import 'package:nutrilens_test/cores/ai_usage/groq_services.dart';
 import 'package:nutrilens_test/cores/constants/colors.dart';
 import 'package:nutrilens_test/cores/constants/text_styles.dart';
 import 'package:nutrilens_test/custom_widget_library/animated_button.dart';
+import 'package:nutrilens_test/home_screen/homepages/dashboard/custom_recipe_show.dart';
+import 'package:nutrilens_test/home_screen/homepages/dashboard/intake_details.dart';
+
+import '../../../cores/custom_datatypes/custom_classes.dart';
 
 class AiCustomRecipe extends StatefulWidget {
   const AiCustomRecipe({super.key});
@@ -26,6 +32,8 @@ class _AiCustomRecipeState extends State<AiCustomRecipe>
   ];
   int _currIntakeRoundIndex = 1;
 
+  late TextEditingController _textEditingController;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -43,6 +51,8 @@ class _AiCustomRecipeState extends State<AiCustomRecipe>
     _animationPurple = Tween<double>(begin: -350, end: -100).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOutCirc),
     );
+
+    _textEditingController = TextEditingController();
   }
 
   @override
@@ -120,6 +130,22 @@ class _AiCustomRecipeState extends State<AiCustomRecipe>
     );
   }
 
+  void _showSnackBar(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        margin: EdgeInsetsGeometry.symmetric(horizontal: 40, vertical: 40),
+        padding: EdgeInsetsGeometry.symmetric(horizontal: 20, vertical: 14),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        content: Text(
+          msg,
+          style: AppTextStyle.primaryText.copyWith(color: Color(0xFF000000)),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -155,8 +181,38 @@ class _AiCustomRecipeState extends State<AiCustomRecipe>
         centerTitle: true,
         actions: [
           GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
+            onTap: () async {
+              // Navigator.pop(context);
+              final response = await CustomRecipe().getAllRecipe();
+              if (response['status_ok']) {
+                print('////////////// ${response['data']} ////////////');
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) {
+                      List<Intake> customRecipeList = [];
+                      for (int i = 0; i < response['data'].length; i++) {
+                        Intake intake = Intake(
+                          id: response['data'][i]['_id'],
+                          name: response['data'][i]['intake_details']['name'],
+                          type: response['data'][i]['intake_details']['type'],
+                          unit: 'g',
+                          quantity: response['data'][i]['intake_details']['quantity'],
+                          energyPerUnit: response['data'][i]['intake_details']['energy_per_unit'],
+                          carbsPerUnit: response['data'][i]['intake_details']['carbs_per_unit'],
+                          proteinPerUnit: response['data'][i]['intake_details']['protein_per_unit'],
+                          fatPerUnit: response['data'][i]['intake_details']['fat_per_unit'],
+                          ingredients: List<String>.from(response['data'][i]['intake_details']['ingredients']),
+                          recipe: response['data'][i]['intake_details']['recipe'],
+                        );
+                        customRecipeList.add(intake);
+                      }
+                      return CustomRecipeShow(
+                        customRecipeList: customRecipeList,
+                      );
+                    },
+                  ),
+                );
+              }
             },
             child: Container(
               // height: 16,
@@ -321,6 +377,7 @@ class _AiCustomRecipeState extends State<AiCustomRecipe>
                             onTapOutside: (_) {
                               FocusScope.of(context).unfocus();
                             },
+                            controller: _textEditingController,
                             maxLines: null,
                             decoration: InputDecoration(
                               // filled: true,
@@ -410,6 +467,59 @@ class _AiCustomRecipeState extends State<AiCustomRecipe>
                         ],
                       ),
                       AnimatedButton(
+                        onTap: () async {
+                          if (_textEditingController.text.isEmpty) {
+                            return;
+                          }
+                          final response = await GroqServices().makeRecipe(
+                            _textEditingController.text,
+                          );
+                          _showSnackBar(response['message']);
+                          if (response['data'] != null) {
+                            Intake selectedIntake = Intake(
+                              name: response['data']['data']['name'],
+                              type: response['data']['data']['type'],
+                              unit: 'g',
+                              quantity: response['data']['data']['quantity'],
+                              energyPerUnit:
+                                  response['data']['data']['energy_per_unit'],
+                              carbsPerUnit:
+                                  response['data']['data']['carbs_per_unit'],
+                              proteinPerUnit:
+                                  response['data']['data']['protein_per_unit'],
+                              fatPerUnit:
+                                  response['data']['data']['fat_per_unit'],
+                              ingredients: List<String>.from(
+                                response['data']['data']['ingredients'],
+                              ),
+                              recipe: response['data']['data']['recipe'],
+                            );
+
+                            final saveRes = await CustomRecipe().addRecipe(
+                              _intakeRounds[_currIntakeRoundIndex].name,
+                              selectedIntake,
+                            );
+
+                            _showSnackBar(saveRes['message']);
+
+                            if (saveRes['status_ok']) {
+                              print(
+                                '////////////// ${saveRes['message']} ///////////',
+                              );
+                            } else {}
+
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return IntakeDetails(
+                                    selectedIntake: selectedIntake,
+                                  );
+                                },
+                              ),
+                            );
+                          }
+                          // print(response['data']['data']['name']);
+                        },
                         width: screenWidth,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(

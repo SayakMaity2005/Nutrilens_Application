@@ -9,3 +9,6 @@ pwdlib[argon2]
 python-dotenv
 
 groq
+httpx
+python-multipart
+Pillow

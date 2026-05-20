@@ -9,6 +9,10 @@ class Gender(str, Enum):
     female = "female"
     other = "other"
 
+# Enum for User Role
+class UserRole(str, Enum):
+    user = "user"
+    dietician = "dietician"
 
 
 # User structure with profile
@@ -34,6 +38,7 @@ class User(BaseModel):
     email: EmailStr | None = None
     full_name: str | None = None
     disabled: bool = False
+    role: UserRole = UserRole.user  # "user" or "dietician"
     profile: Profile
 
 
@@ -182,6 +187,60 @@ class DailyDataUser(BaseModel):
     daily_target: DailyTarget
     meals: Meals # 4 types of meal
     water: float = 0       # in ml
+
+
+
+# =============================================
+# Dietician-specific Schemas
+# =============================================
+
+# Dietician profile stored in dietician_profiles collection
+class DieticianProfile(BaseModel):
+    user_id: str                                # links to users_collection _id
+    specialization: str | None = None           # e.g. "Clinical Nutrition"
+    qualification: str | None = None            # e.g. "M.Sc Dietetics"
+    experience_years: int | None = None
+    verification_status: str = "pending"        # "pending" | "verified" | "rejected"
+    document_data: str | None = None            # base64 encoded credential document
+    document_filename: str | None = None        # original filename of the uploaded doc
+    client_ids: list[str] = []                  # list of user ObjectId strings
+
+# Registration form for dietician (expected from frontend)
+class RegisterDieticianForm(BaseModel):
+    username: str
+    email: EmailStr | None = None
+    full_name: str | None = None
+    password: str = Field(min_length=8)
+    specialization: str | None = None
+    qualification: str | None = None
+    experience_years: int | None = None
+    document_data: str | None = None            # base64 encoded credential doc
+    document_filename: str | None = None
+
+
+# =============================================
+# Meeting / Appointment Schemas
+# =============================================
+
+class MeetingStatus(str, Enum):
+    scheduled = "scheduled"
+    completed = "completed"
+    cancelled = "cancelled"
+
+class Meeting(BaseModel):
+    dietician_id: str
+    user_id: str
+    user_name: str | None = None
+    dietician_name: str | None = None
+    scheduled_at: datetime
+    notes: str | None = None
+    status: MeetingStatus = MeetingStatus.scheduled
+
+class BookMeetingForm(BaseModel):
+    dietician_id: str
+    scheduled_at: datetime
+    notes: str | None = None
+
 
 
 
