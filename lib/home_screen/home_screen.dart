@@ -9,6 +9,7 @@ import 'package:nutrilens_test/home_screen/homepages/dashboard/dashboard.dart';
 import 'package:nutrilens_test/home_screen/homepages/dashboard/scan_food_screen.dart';
 import 'package:nutrilens_test/home_screen/homepages/dietitian/dietitian_page.dart';
 import 'package:nutrilens_test/home_screen/homepages/progress/progress_page.dart';
+import 'package:nutrilens_test/home_screen/homepages/settings/settings_page.dart';
 
 import '../profile_screen/profile_page.dart';
 import '../dietician_screen/dietician_home_screen.dart' as nutrilens_test_dietician;
@@ -60,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       const ProgressPage(),
       const DietitianPage(),
-      const Center(child: Text("Settings Page (Coming Soon)")),
+      const SettingsPage(),
     ];
 
     return Scaffold(

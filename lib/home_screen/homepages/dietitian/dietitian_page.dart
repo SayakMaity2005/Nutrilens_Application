@@ -27,8 +27,14 @@ class _DietitianPageState extends State<DietitianPage> {
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     
-    final dieticians = await DieticianServices().getAvailableDieticians();
-    final meetings = await MeetingServices().getMyMeetings();
+    // Fetch data in parallel to reduce loading time by half
+    final results = await Future.wait([
+      DieticianServices().getAvailableDieticians(),
+      MeetingServices().getMyMeetings(),
+    ]);
+    
+    final dieticians = results[0] as List<Map<String, dynamic>>;
+    final meetings = results[1] as List<Map<String, dynamic>>;
     
     setState(() {
       _availableDieticians = dieticians;
