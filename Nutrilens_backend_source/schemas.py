@@ -184,3 +184,9 @@ class DailyDataUser(BaseModel):
     water: float = 0       # in ml
 
 
+
+# Custom recipe data
+class CustomRecipeData(BaseModel):
+    user_id: str
+    timestamp: datetime
+    intake_details: Intake
