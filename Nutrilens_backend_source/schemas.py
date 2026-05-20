@@ -243,3 +243,9 @@ class BookMeetingForm(BaseModel):
 
 
 
+
+# Custom recipe data
+class CustomRecipeData(BaseModel):
+    user_id: str
+    timestamp: datetime
+    intake_details: Intake
