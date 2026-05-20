@@ -3,9 +3,9 @@
     "short_name": "Nutrilens",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0FFFFFF",
+    "background_color": "#FFFFFF",
     "theme_color": "#80CBC4",
-    "description": "A new Flutter project.",
+    "description": "Your personal nutrition and diet tracking companion.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
