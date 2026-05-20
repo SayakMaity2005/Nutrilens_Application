@@ -9,6 +9,7 @@ import 'package:nutrilens_test/profile_screen/authentication.dart';
 
 import '../cores/constants/colors.dart';
 import '../cores/user_operations/user_services.dart';
+import '../home_screen/home_screen.dart';
 import '../dietician_screen/dietician_home_screen.dart' as nutrilens_test_dietician;
 
 class ProfilePage extends StatefulWidget {
@@ -47,14 +48,6 @@ class _ProfilePageState extends State<ProfilePage> {
         _userData = response['data'];
         widget.updateUserdata(_userData);
       });
-      
-      if (_userData['role'] == 'dietician') {
-        if (!mounted) return;
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const nutrilens_test_dietician.DieticianHomeScreen()),
-          (Route<dynamic> route) => false,
-        );
-      }
     } else {
       setState(() {
         _authorized = false;
@@ -88,11 +81,13 @@ class _ProfilePageState extends State<ProfilePage> {
         actions: [
           if (_authorized)
             GestureDetector(
-              onTap: () {
-                setState(() {
-                  AuthServices().logout();
-                  getCurrentUser();
-                });
+              onTap: () async {
+                await AuthServices().logout();
+                if (!context.mounted) return;
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => const HomeScreen()),
+                  (Route<dynamic> route) => false,
+                );
               },
               child: Container(
                 // height: 16,
@@ -191,9 +186,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       );
 
                       if (res != null) {
-                        setState(() async {
-                          getCurrentUser();
-                        });
+                        await getCurrentUser();
                       }
                     },
                     height: 54,
@@ -373,7 +366,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('Age', style: AppTextStyle.heading6),
-                            Text('${_userData['profile']['age'] ?? '--'}'),
+                            Text('${_userData['profile']?['age'] ?? '--'}'),
                           ],
                         ),
                       ],
@@ -403,7 +396,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('Gender', style: AppTextStyle.heading6),
-                            Text('${_userData['profile']['gender'] ?? '--'}'),
+                            Text('${_userData['profile']?['gender'] ?? '--'}'),
                           ],
                         ),
                       ],
@@ -434,8 +427,8 @@ class _ProfilePageState extends State<ProfilePage> {
                           children: [
                             Text('Height', style: AppTextStyle.heading6),
                             Text(
-                              '${_userData['profile']['height'] ?? '--'}'
-                              '${_userData['profile']['height'] != null ? ' cm' : ''}',
+                              '${_userData['profile']?['height'] ?? '--'}'
+                              '${_userData['profile']?['height'] != null ? ' cm' : ''}',
                             ),
                           ],
                         ),
@@ -467,8 +460,8 @@ class _ProfilePageState extends State<ProfilePage> {
                           children: [
                             Text('Weight', style: AppTextStyle.heading6),
                             Text(
-                              '${_userData['profile']['weight'] ?? '--'}'
-                              '${_userData['profile']['weight'] != null ? ' kg' : ''}',
+                              '${_userData['profile']?['weight'] ?? '--'}'
+                              '${_userData['profile']?['weight'] != null ? ' kg' : ''}',
                             ),
                           ],
                         ),

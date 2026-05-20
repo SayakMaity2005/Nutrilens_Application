@@ -99,6 +99,16 @@ class _HomeScreenState extends State<HomeScreen> {
                             setState(() {
                               _userData = userData;
                             });
+                            
+                            if (userData != null && userData['role'] == 'dietician') {
+                              Future.microtask(() {
+                                if (!mounted) return;
+                                Navigator.of(context).pushAndRemoveUntil(
+                                  MaterialPageRoute(builder: (context) => const nutrilens_test_dietician.DieticianHomeScreen()),
+                                  (Route<dynamic> route) => false,
+                                );
+                              });
+                            }
                           },
                           userData: _userData,
                         );

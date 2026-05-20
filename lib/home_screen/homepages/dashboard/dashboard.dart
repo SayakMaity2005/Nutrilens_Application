@@ -147,6 +147,7 @@ class _DashboardState extends State<Dashboard> {
 
   Future<void> _loadNudges() async {
     final response = await UserServices().getNudges();
+    if (!mounted) return;
     if (response['status_ok'] == true) {
       setState(() {
         _nudges = response['nudges'] ?? [];
@@ -167,6 +168,7 @@ class _DashboardState extends State<Dashboard> {
 
   Future<void> getCurrentUser() async {
     final response = await UserServices().getUser();
+    if (!mounted) return;
     if (response['status_ok']) {
       setState(() {
         _authorized = true;
@@ -211,6 +213,7 @@ class _DashboardState extends State<Dashboard> {
 
   Future<void> getDailyData() async {
     final response = await DailyDataServices().getDailyData(_selectedDate);
+    if (!mounted) return;
     if (response['status_ok']) {
       setState(() {
         _gotDailyData = true;
