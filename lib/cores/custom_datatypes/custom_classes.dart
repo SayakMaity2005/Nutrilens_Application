@@ -150,12 +150,6 @@ class Intake {
   double carbs() => _carbsPerUnit * _quantity;
   double protein() => _proteinPerUnit * _quantity;
   double fat() => _fatPerUnit * _quantity;
-  
-  double energyPerUnit() => _energyPerUnit;
-  double carbsPerUnit() => _carbsPerUnit;
-  double proteinPerUnit() => _proteinPerUnit;
-  double fatPerUnit() => _fatPerUnit;
-  
   List<String> ingredients() => _ingredients;
   String recipe() => _recipe;
 }
