@@ -11,6 +11,7 @@ import 'package:nutrilens_test/home_screen/homepages/dietitian/dietitian_page.da
 import 'package:nutrilens_test/home_screen/homepages/progress/progress_page.dart';
 
 import '../profile_screen/profile_page.dart';
+import '../dietician_screen/dietician_home_screen.dart' as nutrilens_test_dietician;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -45,6 +46,16 @@ class _HomeScreenState extends State<HomeScreen> {
           setState(() {
             _userData = userData;
           });
+          
+          if (userData != null && userData['role'] == 'dietician') {
+            Future.microtask(() {
+              if (!mounted) return;
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => const nutrilens_test_dietician.DieticianHomeScreen()),
+                (Route<dynamic> route) => false,
+              );
+            });
+          }
         },
       ),
       const ProgressPage(),

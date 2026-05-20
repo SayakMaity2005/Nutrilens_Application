@@ -22,7 +22,7 @@ class DefaultIntakeService {
       final response = await http.get(
 
           Uri.parse(
-            "https://nutrilens-application.onrender.com/default_intakes",
+            "http://192.168.1.4:8000/default_intakes",
           ).replace(queryParameters: {"meal_type": mealType}),
       );
 

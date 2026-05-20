@@ -62,7 +62,7 @@ class _AnalyzingLoadingScreenState extends State<AnalyzingLoadingScreen>
       });
 
       // Use deployed backend URL
-      final baseUrl = "https://nutrilens-application.onrender.com";
+      final baseUrl = "http://192.168.1.4:8000";
 
       var request = http.MultipartRequest(
         'POST',

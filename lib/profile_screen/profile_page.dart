@@ -9,6 +9,7 @@ import 'package:nutrilens_test/profile_screen/authentication.dart';
 
 import '../cores/constants/colors.dart';
 import '../cores/user_operations/user_services.dart';
+import '../dietician_screen/dietician_home_screen.dart' as nutrilens_test_dietician;
 
 class ProfilePage extends StatefulWidget {
   final Function(Map<String, dynamic>?) updateUserdata;
@@ -46,6 +47,14 @@ class _ProfilePageState extends State<ProfilePage> {
         _userData = response['data'];
         widget.updateUserdata(_userData);
       });
+      
+      if (_userData['role'] == 'dietician') {
+        if (!mounted) return;
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const nutrilens_test_dietician.DieticianHomeScreen()),
+          (Route<dynamic> route) => false,
+        );
+      }
     } else {
       setState(() {
         _authorized = false;

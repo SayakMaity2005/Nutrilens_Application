@@ -97,6 +97,8 @@ class _DashboardState extends State<Dashboard> {
   bool _authorized = false;
   Map<String, dynamic> _userData = {};
   bool _got_dailyData = false;
+  
+  List<dynamic> _nudges = [];
 
   @override
   void initState() {
@@ -135,6 +137,17 @@ class _DashboardState extends State<Dashboard> {
     getCurrentUser();
 
     updateConsumptionRecords();
+    
+    _loadNudges();
+  }
+
+  Future<void> _loadNudges() async {
+    final response = await UserServices().getNudges();
+    if (response['status_ok'] == true) {
+      setState(() {
+        _nudges = response['nudges'] ?? [];
+      });
+    }
   }
 
   @override
@@ -436,6 +449,42 @@ class _DashboardState extends State<Dashboard> {
                 ),
               ),
             ),
+
+            if (_nudges.isNotEmpty)
+              ..._nudges.map((nudge) => Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.blue.shade200),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.tips_and_updates, color: Colors.blue),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text("Message from Dietitian", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue, fontSize: 12)),
+                          const SizedBox(height: 4),
+                          Text(nudge['message'], style: const TextStyle(color: Colors.black87, fontSize: 13)),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close, size: 16, color: Colors.grey),
+                      onPressed: () {
+                        setState(() {
+                          _nudges.remove(nudge);
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              )).toList(),
 
             SizedBox(height: 8),
 
@@ -1379,12 +1428,21 @@ class _DashboardState extends State<Dashboard> {
                       ],
                     ),
                     GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          if (_drankWater < _requiredWater) {
-                            _drankWater += _waterCupSize;
+                      onTap: () async {
+                        if (_drankWater < _requiredWater) {
+                          final res = await DailyDataServices().addWater(_waterCupSize.toDouble());
+                          if (res['status_ok']) {
+                            setState(() {
+                              _drankWater += _waterCupSize;
+                            });
+                          } else {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(res['message'] ?? 'Failed to add water')),
+                              );
+                            }
                           }
-                        });
+                        }
                       },
                       child: Container(
                         height: 80,

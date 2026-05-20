@@ -13,7 +13,8 @@ router = APIRouter()
 @router.post("/daily_data/add_meal")
 async def add_meal_in_daily_data(
     meal: Meal,
-    current_user: Annotated[UserInDB, Depends(get_current_active_user)]
+    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
+    date: str | None = None
 ):
     # give timestamp to each intakes in meal
     for intake in meal.consumed_intakes:
@@ -21,10 +22,13 @@ async def add_meal_in_daily_data(
 
     # pymongo does not support date so I had to make the date (of daily_data) as datetime type with min time
     # this make date with min time 00.00.00 like 2026-05-16 00:00:00
-    today: datetime = datetime.combine(
-        datetime.now().date(),
-        datetime.min.time()
-    )
+    if date:
+        try:
+            today: datetime = datetime.combine(datetime.strptime(date, "%Y-%m-%d").date(), datetime.min.time())
+        except Exception:
+            today: datetime = datetime.combine(datetime.now().date(), datetime.min.time())
+    else:
+        today: datetime = datetime.combine(datetime.now().date(), datetime.min.time())
 
     
     try:

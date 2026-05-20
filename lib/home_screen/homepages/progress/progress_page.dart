@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nutrilens_test/cores/constants/colors.dart';
 import 'package:nutrilens_test/cores/constants/text_styles.dart';
+import 'package:nutrilens_test/cores/daily_data/daily_data_services.dart';
 
 class ProgressPage extends StatefulWidget {
   const ProgressPage({super.key});
@@ -24,10 +25,55 @@ class _ProgressPageState extends State<ProgressPage> {
   final List<GlobalKey> _sectionKeys = List.generate(6, (index) => GlobalKey());
   bool _isScrollingFromTap = false;
 
+  bool _isLoading = true;
+  double _totalCalories = 0;
+  double _totalCarbs = 0;
+  double _totalProtein = 0;
+  double _totalFat = 0;
+  double _waterIntake = 0;
+
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    _fetchDailyData();
+  }
+
+  Future<void> _fetchDailyData() async {
+    final response = await DailyDataServices().getDailyData(DateTime.now());
+    if (response['status_ok'] && response['data'] != null) {
+      final data = response['data'];
+      final meals = data['meals'] as Map<String, dynamic>? ?? {};
+      
+      double cals = 0, carbs = 0, protein = 0, fat = 0;
+      
+      for (final mealKey in ['breakfast', 'lunch', 'dinner', 'snacks']) {
+        final meal = meals[mealKey] as Map<String, dynamic>?;
+        if (meal != null && meal['consumed_intakes'] != null) {
+          final intakes = meal['consumed_intakes'] as List;
+          for (final intake in intakes) {
+            double qty = (intake['quantity'] ?? 1).toDouble();
+            cals += (intake['energy_per_unit'] ?? 0) * qty;
+            carbs += (intake['carbs_per_unit'] ?? 0) * qty;
+            protein += (intake['protein_per_unit'] ?? 0) * qty;
+            fat += (intake['fat_per_unit'] ?? 0) * qty;
+          }
+        }
+      }
+      
+      setState(() {
+        _totalCalories = cals;
+        _totalCarbs = carbs;
+        _totalProtein = protein;
+        _totalFat = fat;
+        _waterIntake = (data['water'] ?? 0).toDouble();
+        _isLoading = false;
+      });
+    } else {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -160,7 +206,7 @@ class _ProgressPageState extends State<ProgressPage> {
                 const SizedBox(height: 20),
                 _buildNutrientsCard(screenWidth, palette, key: _sectionKeys[4]),
                 const SizedBox(height: 20),
-                _buildWaterCard(screenWidth, palette, key: _sectionKeys[5]),
+                _isLoading ? const Center(child: CircularProgressIndicator()) : _buildWaterCard(screenWidth, palette, key: _sectionKeys[5]),
                 const SizedBox(height: 200), // Extra space to allow last item to reach top
               ],
             ),
@@ -325,7 +371,7 @@ class _ProgressPageState extends State<ProgressPage> {
     return _buildTrendSection(
       key: key,
       title: "Calories Intake",
-      currentValue: "0",
+      currentValue: _totalCalories.toStringAsFixed(0),
       unit: "kcal",
       timeFrame: "Last 7 days",
       chart: _buildChartPlaceholder(width, "No data"),
@@ -368,11 +414,11 @@ class _ProgressPageState extends State<ProgressPage> {
           const SizedBox(height: 10),
           Text("Average", style: AppTextStyle.smallText.copyWith(color: Colors.grey.shade400)),
           const SizedBox(height: 16),
-          _buildNutrientRow("Carbs", 0, 215, const Color(0xFF81C784), subItems: ["Sugar", "Dietary Fiber"]),
+          _buildNutrientRow("Carbs", _totalCarbs, 215, const Color(0xFF81C784), subItems: ["Sugar", "Dietary Fiber"]),
           const SizedBox(height: 16),
-          _buildNutrientRow("Protein", 0, 107, const Color(0xFFFFB74D)),
+          _buildNutrientRow("Protein", _totalProtein, 107, const Color(0xFFFFB74D)),
           const SizedBox(height: 16),
-          _buildNutrientRow("Fat", 0, 48, const Color(0xFFFFD54F), subItems: ["Saturated Fat", "Trans Fat"]),
+          _buildNutrientRow("Fat", _totalFat, 48, const Color(0xFFFFD54F), subItems: ["Saturated Fat", "Trans Fat"]),
           const SizedBox(height: 10),
           Center(
             child: TextButton.icon(
@@ -425,7 +471,7 @@ class _ProgressPageState extends State<ProgressPage> {
     return _buildTrendSection(
       key: key,
       title: "Water",
-      currentValue: "0",
+      currentValue: _waterIntake.toStringAsFixed(0),
       unit: "ml",
       timeFrame: "Last 7 days",
       chart: _buildChartPlaceholder(width, "No data"),

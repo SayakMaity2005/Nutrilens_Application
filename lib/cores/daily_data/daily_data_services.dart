@@ -19,7 +19,7 @@ class DailyDataServices {
     try {
       final response = await http.get(
         Uri.parse(
-          "https://nutrilens-application.onrender.com/daily_data/get_daily_data",
+          "http://192.168.1.4:8000/daily_data/get_daily_data",
         ).replace(queryParameters: {"date": selectedDate}),
 
         headers: {"Authorization": "Bearer $token"},
@@ -43,6 +43,44 @@ class DailyDataServices {
     } catch (e) {
       // debugPrint(e);
       return {'status_ok': false, 'message': 'Daily data fetch error: $e'};
+    }
+  }
+
+  Future<Map<String, dynamic>> addWater(double amount) async {
+    String? token = await storage.read(key: "access_token");
+    try {
+      final response = await http.post(
+        Uri.parse("http://192.168.1.4:8000/daily_data/add_water?water_quantity=$amount"),
+        headers: {"Authorization": "Bearer $token"},
+      );
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return {'status_ok': true, 'message': data['message'] ?? 'Water added'};
+      }
+      return {'status_ok': false, 'message': data['detail'] ?? 'Failed to add water'};
+    } catch (e) {
+      return {'status_ok': false, 'message': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> addMeal(Map<String, dynamic> mealData) async {
+    String? token = await storage.read(key: "access_token");
+    try {
+      final response = await http.post(
+        Uri.parse("http://192.168.1.4:8000/daily_data/add_meal"),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token"
+        },
+        body: jsonEncode(mealData),
+      );
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return {'status_ok': true, 'message': data['message'] ?? 'Meal added successfully'};
+      }
+      return {'status_ok': false, 'message': data['detail'] ?? 'Failed to add meal'};
+    } catch (e) {
+      return {'status_ok': false, 'message': e.toString()};
     }
   }
 }
