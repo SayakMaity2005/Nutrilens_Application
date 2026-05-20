@@ -30,7 +30,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    if(widget.userData == null) {
+    if (widget.userData == null) {
       getCurrentUser();
     } else {
       _authorized = true;
@@ -86,7 +86,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
         actions: [
-          if(_authorized)
+          if (_authorized)
             GestureDetector(
               onTap: () {
                 setState(() {
@@ -94,22 +94,22 @@ class _ProfilePageState extends State<ProfilePage> {
                   getCurrentUser();
                 });
               },
-          child: Container(
-            // height: 16,
-            // width: 16,
-            margin: EdgeInsetsGeometry.symmetric(horizontal: 6),
-            padding: EdgeInsetsGeometry.all(10),
-            decoration: BoxDecoration(
-              color: Color(0xFFD9EEFF),
-              shape: BoxShape.circle,
+              child: Container(
+                // height: 16,
+                // width: 16,
+                margin: EdgeInsetsGeometry.symmetric(horizontal: 6),
+                padding: EdgeInsetsGeometry.all(10),
+                decoration: BoxDecoration(
+                  color: Color(0xFFD9EEFF),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.logout_rounded,
+                  size: 24,
+                  color: Color(0xFF882828),
+                ),
+              ),
             ),
-            child: Icon(
-              Icons.logout_rounded,
-              size: 24,
-              color: Color(0xFF882828),
-            ),
-          )
-            )
         ],
         backgroundColor: Colors.transparent,
         toolbarHeight: 50,
@@ -216,7 +216,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           Color(0xFF6DBDF6),
                           Colors.white,
                           Colors.white,
-                          Color(0xFFDB7AF3),
+                          Color(0xFF947AF3),
                         ],
                       ),
                     ),
@@ -338,7 +338,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
 
-
                   SizedBox(height: 10),
 
                   Container(
@@ -434,7 +433,10 @@ class _ProfilePageState extends State<ProfilePage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('Height', style: AppTextStyle.heading6),
-                            Text('${_userData['profile']['height'] ?? '--'}'),
+                            Text(
+                              '${_userData['profile']['height'] ?? '--'}'
+                              '${_userData['profile']['height'] != null ? ' cm' : ''}',
+                            ),
                           ],
                         ),
                       ],
@@ -464,12 +466,15 @@ class _ProfilePageState extends State<ProfilePage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('Weight', style: AppTextStyle.heading6),
-                            Text('${_userData['profile']['weight'] ?? '--'}'),
+                            Text(
+                              '${_userData['profile']['weight'] ?? '--'}'
+                              '${_userData['profile']['weight'] != null ? ' kg' : ''}',
+                            ),
                           ],
                         ),
                       ],
                     ),
-                  )
+                  ),
                 ],
               ),
           ],

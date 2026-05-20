@@ -71,7 +71,8 @@ class _IntakeDetailsState extends State<IntakeDetails> {
         ),
 
         title: Text(
-          _selectIntake.name(),
+          // _selectIntake.name(),
+          'Details',
           style: TextStyle(fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
@@ -81,6 +82,10 @@ class _IntakeDetailsState extends State<IntakeDetails> {
         child: Column(
           // mainAxisAlignment: MainAxisAlignment.start,
           children: [
+            Container(
+              margin: EdgeInsetsGeometry.symmetric(horizontal: 20, vertical: 10),
+              child: Text(_selectIntake.name(), style: AppTextStyle.heading4,),
+            ),
             Container(
               margin: EdgeInsetsGeometry.all(16),
               padding: EdgeInsetsGeometry.all(20),
