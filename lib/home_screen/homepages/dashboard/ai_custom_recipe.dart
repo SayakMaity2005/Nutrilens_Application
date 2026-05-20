@@ -474,6 +474,7 @@ class _AiCustomRecipeState extends State<AiCustomRecipe>
                           final response = await GroqServices().makeRecipe(
                             _textEditingController.text,
                           );
+                          print('///////////// ${response['message']} ///////////');
                           _showSnackBar(response['message']);
                           if (response['data'] != null) {
                             Intake selectedIntake = Intake(

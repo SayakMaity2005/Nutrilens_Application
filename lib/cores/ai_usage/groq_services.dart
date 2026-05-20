@@ -17,7 +17,7 @@ class GroqServices {
       final response = await http.post(
         Uri.parse(
           // "https://nutrilens-application.onrender.com/make_recipe",
-          "http://nutrilens-application.onrender.com/make_recipe",
+          "https://nutrilens-application.onrender.com/make_recipe",
         ).replace(queryParameters: {"user_prompt": userPrompt}),
 
         headers: {"Authorization": "Bearer $token"},

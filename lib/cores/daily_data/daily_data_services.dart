@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import '../custom_datatypes/custom_classes.dart';
 
 class DailyDataServices {
+  static const String _baseUrl = "https://nutrilens-application.onrender.com";
   final storage = FlutterSecureStorage();
 
   Future<Map<String, dynamic>> getDailyData(DateTime date) async {
@@ -21,7 +22,7 @@ class DailyDataServices {
     try {
       final response = await http.get(
         Uri.parse(
-          "https://nutrilens-application.onrender.com/daily_data/get_daily_data",
+          "$_baseUrl/daily_data/get_daily_data",
         ).replace(queryParameters: {"date": selectedDate}),
 
         headers: {"Authorization": "Bearer $token"},
@@ -65,7 +66,7 @@ class DailyDataServices {
     String? token = await storage.read(key: "access_token");
     try {
       final response = await http.post(
-        Uri.parse("https://nutrilens-application.onrender.com/daily_data/add_meal"),
+        Uri.parse("$_baseUrl/daily_data/add_meal"),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token"
@@ -102,7 +103,7 @@ class DailyDataServices {
 
     try {
       final response = await http.post(
-        Uri.parse("https://nutrilens-application.onrender.com/daily_data/add_meal"),
+        Uri.parse("$_baseUrl/daily_data/add_meal"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -127,7 +128,7 @@ class DailyDataServices {
     String? token = await storage.read(key: "access_token");
     try {
       final response = await http.post(
-        Uri.parse("https://nutrilens-application.onrender.com/daily_data/add_water").replace(
+        Uri.parse("$_baseUrl/daily_data/add_water").replace(
           queryParameters: {"water_quantity": quantity.toString()}
         ),
         headers: {"Authorization": "Bearer $token"},
