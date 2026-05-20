@@ -4,6 +4,7 @@ import 'package:nutrilens_test/cores/constants/text_styles.dart';
 import 'package:nutrilens_test/custom_widget_library/animated_button.dart';
 import 'package:nutrilens_test/cores/dietician/dietician_services.dart';
 import 'package:nutrilens_test/cores/meetings/meeting_services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DietitianPage extends StatefulWidget {
   const DietitianPage({super.key});
@@ -121,9 +122,7 @@ class _DietitianPageState extends State<DietitianPage> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       ),
                       onPressed: () async {
-                        Navigator.pop(context); // Close modal
-                        
-                        // Show loading
+                        // Show loading on top of the modal
                         showDialog(
                           context: context,
                           barrierDismissible: false,
@@ -144,7 +143,10 @@ class _DietitianPageState extends State<DietitianPage> {
                           notes: notesController.text,
                         );
                         
-                        if (mounted) Navigator.pop(context); // Close loading
+                        if (!context.mounted) return;
+                        
+                        Navigator.pop(context); // Close loading dialog
+                        Navigator.pop(context); // Close modal bottom sheet
                         
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text(res['message'])),
@@ -361,39 +363,97 @@ class _DietitianPageState extends State<DietitianPage> {
     );
   }
 
+  Future<void> _joinCall(String meetingId) async {
+    final url = Uri.parse('https://meet.jit.si/Nutrilens_Meeting_$meetingId');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not launch video call')),
+        );
+      }
+    }
+  }
+
   Widget _buildMyAppointmentsSection(double width, AppPalette palette) {
-    if (_myMeetings.isEmpty) return const SizedBox.shrink();
-    
+    if (_myMeetings.isEmpty) {
+      return Container(
+        width: width,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: const Center(child: Text("No upcoming meetings.", style: TextStyle(color: Colors.grey))),
+      );
+    }
+
     return Column(
       children: _myMeetings.map((meeting) {
-        final dateStr = meeting['scheduled_at'] ?? '';
-        final date = DateTime.tryParse(dateStr);
         final dieticianName = meeting['dietician_name'] ?? 'Dietician';
+        final date = DateTime.tryParse(meeting['scheduled_at'] ?? '');
+        final status = meeting['status'] ?? 'scheduled';
         
         return Container(
           width: width,
           margin: const EdgeInsets.only(bottom: 10),
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(15),
           decoration: BoxDecoration(
-            color: const Color(0xFFF0F7FF),
+            color: Colors.white,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: Colors.blue.shade100),
           ),
-          child: Row(
+          child: Column(
             children: [
-              const Icon(Icons.calendar_today, color: Colors.blue),
-              const SizedBox(width: 15),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Meeting with $dieticianName", style: const TextStyle(fontWeight: FontWeight.bold)),
-                    if (date != null)
-                      Text("${date.day}/${date.month}/${date.year} at ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}", 
-                           style: const TextStyle(color: Colors.grey, fontSize: 13)),
-                  ],
-                ),
+              Row(
+                children: [
+                  const Icon(Icons.calendar_today, color: Colors.blue),
+                  const SizedBox(width: 15),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Meeting with $dieticianName", style: const TextStyle(fontWeight: FontWeight.bold)),
+                        if (date != null)
+                          Text("${date.day}/${date.month}/${date.year} at ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}", 
+                               style: const TextStyle(color: Colors.grey, fontSize: 13)),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      status.toUpperCase(),
+                      style: const TextStyle(color: Colors.blue, fontSize: 10, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
               ),
+              if (status == 'scheduled') ...[
+                const SizedBox(height: 12),
+                const Divider(height: 1),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    onPressed: () => _joinCall(meeting['_id'] ?? ''),
+                    icon: const Icon(Icons.video_call_rounded, size: 20),
+                    label: const Text("Join Call"),
+                    style: TextButton.styleFrom(
+                      foregroundColor: palette.selectColor1,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         );

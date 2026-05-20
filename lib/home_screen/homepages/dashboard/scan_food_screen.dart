@@ -16,29 +16,38 @@ class _ScanFoodScreenState extends State<ScanFoodScreen> {
   int _selectedModeIndex = 1; // 0: Barcode, 1: Food photo, 2: Ingredients
   final List<String> _modes = ["Barcode", "Food photo", "Ingredients"];
 
+  int _selectedCameraIndex = 0;
+
+  Future<void> _initCamera(int cameraIndex) async {
+    if (cameras.isEmpty) return;
+    
+    // Default to back camera initially if possible
+    if (controller == null) {
+      final backCameraIndex = cameras.indexWhere((c) => c.lensDirection == CameraLensDirection.back);
+      if (backCameraIndex != -1) {
+        cameraIndex = backCameraIndex;
+        _selectedCameraIndex = backCameraIndex;
+      }
+    }
+
+    if (controller != null) {
+      await controller!.dispose();
+    }
+
+    controller = CameraController(cameras[cameraIndex], ResolutionPreset.max);
+    try {
+      await controller!.initialize();
+      if (!mounted) return;
+      setState(() {});
+    } on CameraException catch (e) {
+      print("Camera Error: $e");
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    if (cameras.isNotEmpty) {
-      controller = CameraController(cameras[0], ResolutionPreset.max);
-      controller!.initialize().then((_) {
-        if (!mounted) {
-          return;
-        }
-        setState(() {});
-      }).catchError((Object e) {
-        if (e is CameraException) {
-          switch (e.code) {
-            case 'CameraAccessDenied':
-              // Handle access errors here.
-              break;
-            default:
-              // Handle other errors here.
-              break;
-          }
-        }
-      });
-    }
+    _initCamera(_selectedCameraIndex);
   }
 
   @override
@@ -226,16 +235,23 @@ class _ScanFoodScreenState extends State<ScanFoodScreen> {
                             ),
                           ),
                         ),
-                        // Zoom button
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.black26,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: const Text(
-                            "1.0x",
-                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        // Flip camera button
+                        GestureDetector(
+                          onTap: () {
+                            if (cameras.length > 1) {
+                              setState(() {
+                                _selectedCameraIndex = (_selectedCameraIndex + 1) % cameras.length;
+                              });
+                              _initCamera(_selectedCameraIndex);
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.black26,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(Icons.flip_camera_ios_outlined, color: Colors.white, size: 28),
                           ),
                         ),
                       ],

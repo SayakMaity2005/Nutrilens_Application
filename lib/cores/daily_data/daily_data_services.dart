@@ -64,9 +64,13 @@ class DailyDataServices {
 
   Future<Map<String, dynamic>> _addMealMap(Map<String, dynamic> mealData) async {
     String? token = await storage.read(key: "access_token");
+    final date = DateTime.now();
+    String dateStr = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
     try {
       final response = await http.post(
-        Uri.parse("$_baseUrl/daily_data/add_meal"),
+        Uri.parse("$_baseUrl/daily_data/add_meal").replace(
+          queryParameters: {"date": dateStr}
+        ),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token"
@@ -85,6 +89,8 @@ class DailyDataServices {
 
   Future<Map<String, dynamic>> _addMealList(String mealType, List<dynamic> meals) async {
     String? token = await storage.read(key: "access_token");
+    final date = DateTime.now();
+    String dateStr = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
 
     List<Map<String, dynamic>> consumedIntakes = [];
     for (int i = 0; i < meals.length; i++) {
@@ -103,7 +109,9 @@ class DailyDataServices {
 
     try {
       final response = await http.post(
-        Uri.parse("$_baseUrl/daily_data/add_meal"),
+        Uri.parse("$_baseUrl/daily_data/add_meal").replace(
+          queryParameters: {"date": dateStr}
+        ),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -126,10 +134,15 @@ class DailyDataServices {
 
   Future<Map<String, dynamic>> addWater(double quantity) async {
     String? token = await storage.read(key: "access_token");
+    final date = DateTime.now();
+    String dateStr = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
     try {
       final response = await http.post(
         Uri.parse("$_baseUrl/daily_data/add_water").replace(
-          queryParameters: {"water_quantity": quantity.toString()}
+          queryParameters: {
+            "water_quantity": quantity.toString(),
+            "date": dateStr
+          }
         ),
         headers: {"Authorization": "Bearer $token"},
       );
