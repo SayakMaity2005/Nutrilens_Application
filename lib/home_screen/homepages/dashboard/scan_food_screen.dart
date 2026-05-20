@@ -2,6 +2,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nutrilens_test/home_screen/homepages/dashboard/amount_input_screen.dart';
+import 'package:nutrilens_test/premium_screen/premium_subscription_page.dart';
 import 'package:nutrilens_test/main.dart';
 
 class ScanFoodScreen extends StatefulWidget {
