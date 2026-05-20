@@ -14,8 +14,8 @@ class AuthServices {
   }) async {
     try {
       final response = await http.post(
+        // Uri.parse("http://10.0.2.2:8000/token"),
         Uri.parse("https://nutrilens-application.onrender.com/token"),
-
         headers: {"Content-Type": "application/x-www-form-urlencoded"},
 
         body: {"username": username, "password": password},
@@ -41,6 +41,106 @@ class AuthServices {
     } catch (e) {
       // debugPrint(e);
       return {'status_ok': false, 'message': 'Login error: $e'};
+    }
+  }
+
+  Future<Map<String, dynamic>> register({
+    required String username,
+    required String email,
+    required String fullName,
+
+    required double? height,
+    required double? weight,
+    required int? age,
+    required String? gender,
+
+    required String password,
+  }) async {
+
+    bool canCalculate = height != null && weight != null && gender != null && age != null;
+
+
+    double? energy, carbs, protein, fat;
+
+    if(canCalculate) {
+      double BMR = 0.0;
+
+      if (gender == 'male') {
+        BMR = (10 * weight) + (6.25 * height) - (5 * age) + 5;
+      } else if (gender == 'female') {
+        BMR = 10 * weight + 6.25 * height - 5 * age - 161;
+      }
+
+      // sedentary -> 1.2
+      // light -> 1.375
+      // moderate -> 1.55
+      // active -> 1.725
+
+      double activityFactor = 1.55; // moderate
+      double TDEE = BMR * activityFactor; //ActivityFactor;
+
+      double protein = 2.0 * weight; // 1.6 to 2.2×Weight(kg)
+      double fat = 0.8 * weight; // 0.8 * Weight(kg)
+      double carbs = (TDEE - protein * 4 - fat * 9)/4;
+
+    }
+
+    // Then:
+
+    // Daily Calories
+    //
+    // double TDEE = BMR * ActivityFactor;
+
+    try {
+      final response = await http.post(
+        Uri.parse("https://nutrilens-application.onrender.com/register"),
+
+        headers: {"Content-Type": "application/json"},
+
+        body: jsonEncode({
+          "username": username,
+
+          "email": email,
+
+          "full_name": fullName,
+
+          "disabled": false,
+
+          "profile": {
+            "height": height,
+
+            "weight": weight,
+
+            "age": age,
+
+            "gender": gender,
+            "daily_target": {
+              "energy": energy ?? 2000,
+              "carbs": carbs ?? 250,
+              "protein": protein ?? 150,
+              "fat": fat ?? 44,
+              "water": weight != null ? weight * 42: 2250
+            }
+          },
+
+          "password": password,
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+
+      // SUCCESS
+      if (response.statusCode == 200) {
+        final token = data["access_token"];
+
+        await storage.write(key: "access_token", value: token);
+
+        return {"status_ok": true, "message": "Welcome to Nutrilens"};
+      }
+
+      return {"status_ok": false, "message": data["detail"]};
+    } catch (e) {
+      return {"status_ok": false, "message": "Registration error: $e"};
     }
   }
 

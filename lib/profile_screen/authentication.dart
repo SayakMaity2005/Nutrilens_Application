@@ -23,6 +23,41 @@ class _AuthenticationState extends State<Authentication> {
   late TextEditingController _confirmPasswordTextController;
   late TextEditingController _fullNameTextController;
   late TextEditingController _emailTextController;
+  late TextEditingController _heightTextController;
+  late TextEditingController _weightTextController;
+
+  DateTime? _selectedDate;
+
+  Future<void> pickDOB(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate ?? DateTime(2005),
+      firstDate: DateTime(1950),
+      lastDate: DateTime.now(),
+    );
+
+    if (picked != null) {
+      _selectedDate = picked;
+    }
+  }
+
+  String? _selectedGender = 'Male';
+
+  void _showSnackBar(BuildContext context, String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        margin: EdgeInsetsGeometry.symmetric(horizontal: 40, vertical: 40),
+        padding: EdgeInsetsGeometry.symmetric(horizontal: 20, vertical: 14),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        content: Text(
+          msg,
+          style: AppTextStyle.primaryText.copyWith(color: Color(0xFF000000)),
+        ),
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -33,6 +68,8 @@ class _AuthenticationState extends State<Authentication> {
     _confirmPasswordTextController = TextEditingController();
     _fullNameTextController = TextEditingController();
     _emailTextController = TextEditingController();
+    _heightTextController = TextEditingController();
+    _weightTextController = TextEditingController();
   }
 
   @override
@@ -102,407 +139,805 @@ class _AuthenticationState extends State<Authentication> {
         child: Stack(
           children: [
             Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 SizedBox(height: 110, width: screenWidth),
-                // Dashboard(),
-                SizedBox(height: 40),
-
-                AnimatedContainer(
-                  duration: Duration(milliseconds: 300),
-                  margin: EdgeInsetsGeometry.symmetric(
-                    horizontal: 20,
-                    vertical: 10,
-                  ),
-                  // padding: EdgeInsetsGeometry.symmetric(
-                  //   horizontal: 20,
-                  //   vertical: 20,
-                  // ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Color(0xFFAAAAAA),
-                        offset: Offset(1, 1),
-                        spreadRadius: 0,
-                        blurRadius: 1,
-                      ),
-                    ],
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      stops: [0.0, 0.3, 0.7, 1.0],
-                      colors: [
-                        Color(0xFF6DBDF6),
-                        Colors.white,
-                        Colors.white,
-                        Color(0xFFE59FF6),
-                      ],
-                    ),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadiusGeometry.circular(30),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-                      child: Container(
-                        padding: EdgeInsetsGeometry.symmetric(
-                          horizontal: 20,
-                          vertical: 20,
-                        ),
-                        child: Column(
-                          spacing: 16,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              spacing: 5,
-                              children: [
-                                Text(
-                                  '  '
-                                  'Username',
-                                ),
-                                TextField(
-                                  controller: _usernameTextController,
-                                  // style: AppTextStyle.primaryText.copyWith(
-                                  //   fontWeight: FontWeight.w900,
-                                  // ),
-                                  // autofocus: true,
-                                  onTapOutside: (_) {
-                                    FocusScope.of(context).unfocus();
-                                  },
-                                  decoration: InputDecoration(
-                                    contentPadding:
-                                        EdgeInsetsGeometry.symmetric(
-                                          vertical: 16,
-                                          horizontal: 30,
-                                        ),
-                                    prefixIcon: Icon(Icons.person),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: BorderSide(
-                                        color: Color(0xFF0D35B5),
-                                      ),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: BorderSide(
-                                        color: Color(0xFF777777),
-                                      ),
-                                    ),
-                                    errorBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: BorderSide(
-                                        color: Color(0x98ED0F0F),
-                                      ),
-                                    ),
-                                    focusedErrorBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: BorderSide(
-                                        color: Color(0x98ED0F0F),
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                Container(
+                  height: screenHeight - 120,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // SizedBox(height: 110, width: screenWidth),
+                        // // Dashboard(),
+                        // SizedBox(height: 40),
+                        AnimatedContainer(
+                          duration: Duration(milliseconds: 300),
+                          margin: EdgeInsetsGeometry.symmetric(
+                            horizontal: 20,
+                            vertical: 10,
+                          ),
+                          // padding: EdgeInsetsGeometry.symmetric(
+                          //   horizontal: 20,
+                          //   vertical: 20,
+                          // ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(30),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color(0xFFAAAAAA),
+                                offset: Offset(1, 1),
+                                spreadRadius: 0,
+                                blurRadius: 1,
+                              ),
+                            ],
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              stops: [0.0, 0.3, 0.7, 1.0],
+                              colors: [
+                                Color(0xFF6DBDF6),
+                                Colors.white,
+                                Colors.white,
+                                Color(0xFFE59FF6),
                               ],
                             ),
-                            if (!_isSignIn)
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                spacing: 5,
-                                children: [
-                                  Text(
-                                    '  '
-                                    'Full name',
-                                  ),
-                                  TextField(
-                                    controller: _usernameTextController,
-                                    // style: AppTextStyle.primaryText.copyWith(
-                                    //   fontWeight: FontWeight.w900,
-                                    // ),
-                                    // autofocus: true,
-                                    onTapOutside: (_) {
-                                      FocusScope.of(context).unfocus();
-                                    },
-                                    decoration: InputDecoration(
-                                      contentPadding:
-                                          EdgeInsetsGeometry.symmetric(
-                                            vertical: 16,
-                                            horizontal: 30,
-                                          ),
-                                      prefixIcon: Icon(Icons.person),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                        borderSide: BorderSide(
-                                          color: Color(0xFF0D35B5),
-                                        ),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                        borderSide: BorderSide(
-                                          color: Color(0xFF777777),
-                                        ),
-                                      ),
-                                      errorBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                        borderSide: BorderSide(
-                                          color: Color(0x98ED0F0F),
-                                        ),
-                                      ),
-                                      focusedErrorBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                        borderSide: BorderSide(
-                                          color: Color(0x98ED0F0F),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            if (!_isSignIn)
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                spacing: 5,
-                                children: [
-                                  Text(
-                                    '  '
-                                    'Email',
-                                  ),
-                                  TextField(
-                                    controller: _usernameTextController,
-                                    // style: AppTextStyle.primaryText.copyWith(
-                                    //   fontWeight: FontWeight.w900,
-                                    // ),
-                                    // autofocus: true,
-                                    onTapOutside: (_) {
-                                      FocusScope.of(context).unfocus();
-                                    },
-                                    decoration: InputDecoration(
-                                      contentPadding:
-                                          EdgeInsetsGeometry.symmetric(
-                                            vertical: 16,
-                                            horizontal: 30,
-                                          ),
-                                      prefixIcon: Icon(Icons.person),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                        borderSide: BorderSide(
-                                          color: Color(0xFF0D35B5),
-                                        ),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                        borderSide: BorderSide(
-                                          color: Color(0xFF777777),
-                                        ),
-                                      ),
-                                      errorBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                        borderSide: BorderSide(
-                                          color: Color(0x98ED0F0F),
-                                        ),
-                                      ),
-                                      focusedErrorBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                        borderSide: BorderSide(
-                                          color: Color(0x98ED0F0F),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              spacing: 5,
-                              children: [
-                                Text(
-                                  '  '
-                                  'Password',
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadiusGeometry.circular(30),
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+                              child: Container(
+                                padding: EdgeInsetsGeometry.symmetric(
+                                  horizontal: 20,
+                                  vertical: 20,
                                 ),
-                                TextField(
-                                  controller: _passwordTextController,
-                                  // style: AppTextStyle.primaryText.copyWith(
-                                  //   fontWeight: FontWeight.w900,
-                                  // ),
-                                  // autofocus: true,
-                                  obscureText: true,
-                                  onTapOutside: (_) {
-                                    FocusScope.of(context).unfocus();
-                                  },
-                                  decoration: InputDecoration(
-                                    contentPadding:
-                                        EdgeInsetsGeometry.symmetric(
-                                          vertical: 16,
-                                          horizontal: 30,
+                                child: Column(
+                                  spacing: 16,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      spacing: 5,
+                                      children: [
+                                        Text(
+                                          '  '
+                                          'Username',
                                         ),
-                                    prefixIcon: Icon(Icons.key_rounded),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: BorderSide(
-                                        color: Color(0xFF0D35B5),
-                                      ),
+                                        TextField(
+                                          controller: _usernameTextController,
+                                          // style: AppTextStyle.primaryText.copyWith(
+                                          //   fontWeight: FontWeight.w900,
+                                          // ),
+                                          // autofocus: true,
+                                          onTapOutside: (_) {
+                                            FocusScope.of(context).unfocus();
+                                          },
+                                          decoration: InputDecoration(
+                                            contentPadding:
+                                                EdgeInsetsGeometry.symmetric(
+                                                  vertical: 16,
+                                                  horizontal: 30,
+                                                ),
+                                            prefixIcon: Icon(Icons.person),
+                                            focusedBorder: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
+                                              borderSide: BorderSide(
+                                                color: Color(0xFF0D35B5),
+                                              ),
+                                            ),
+                                            enabledBorder: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
+                                              borderSide: BorderSide(
+                                                color: Color(0xFF777777),
+                                              ),
+                                            ),
+                                            errorBorder: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
+                                              borderSide: BorderSide(
+                                                color: Color(0x98ED0F0F),
+                                              ),
+                                            ),
+                                            focusedErrorBorder:
+                                                OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(16),
+                                                  borderSide: BorderSide(
+                                                    color: Color(0x98ED0F0F),
+                                                  ),
+                                                ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: BorderSide(
-                                        color: Color(0xFF777777),
+                                    if (!_isSignIn)
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        spacing: 5,
+                                        children: [
+                                          Text(
+                                            '  '
+                                            'Full name',
+                                          ),
+                                          TextField(
+                                            controller: _fullNameTextController,
+                                            // style: AppTextStyle.primaryText.copyWith(
+                                            //   fontWeight: FontWeight.w900,
+                                            // ),
+                                            // autofocus: true,
+                                            onTapOutside: (_) {
+                                              FocusScope.of(context).unfocus();
+                                            },
+                                            decoration: InputDecoration(
+                                              contentPadding:
+                                                  EdgeInsetsGeometry.symmetric(
+                                                    vertical: 16,
+                                                    horizontal: 30,
+                                                  ),
+                                              prefixIcon: Icon(
+                                                Icons.person_pin_outlined,
+                                              ),
+                                              focusedBorder: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(16),
+                                                borderSide: BorderSide(
+                                                  color: Color(0xFF0D35B5),
+                                                ),
+                                              ),
+                                              enabledBorder: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(16),
+                                                borderSide: BorderSide(
+                                                  color: Color(0xFF777777),
+                                                ),
+                                              ),
+                                              errorBorder: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(16),
+                                                borderSide: BorderSide(
+                                                  color: Color(0x98ED0F0F),
+                                                ),
+                                              ),
+                                              focusedErrorBorder:
+                                                  OutlineInputBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          16,
+                                                        ),
+                                                    borderSide: BorderSide(
+                                                      color: Color(0x98ED0F0F),
+                                                    ),
+                                                  ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    ),
-                                    errorBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: BorderSide(
-                                        color: Color(0x98ED0F0F),
+                                    if (!_isSignIn)
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        spacing: 5,
+                                        children: [
+                                          Text(
+                                            '  '
+                                            'Email',
+                                          ),
+                                          TextField(
+                                            controller: _emailTextController,
+                                            // style: AppTextStyle.primaryText.copyWith(
+                                            //   fontWeight: FontWeight.w900,
+                                            // ),
+                                            // autofocus: true,
+                                            onTapOutside: (_) {
+                                              FocusScope.of(context).unfocus();
+                                            },
+                                            decoration: InputDecoration(
+                                              contentPadding:
+                                                  EdgeInsetsGeometry.symmetric(
+                                                    vertical: 16,
+                                                    horizontal: 30,
+                                                  ),
+                                              prefixIcon: Icon(
+                                                Icons.email_outlined,
+                                              ),
+                                              focusedBorder: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(16),
+                                                borderSide: BorderSide(
+                                                  color: Color(0xFF0D35B5),
+                                                ),
+                                              ),
+                                              enabledBorder: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(16),
+                                                borderSide: BorderSide(
+                                                  color: Color(0xFF777777),
+                                                ),
+                                              ),
+                                              errorBorder: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(16),
+                                                borderSide: BorderSide(
+                                                  color: Color(0x98ED0F0F),
+                                                ),
+                                              ),
+                                              focusedErrorBorder:
+                                                  OutlineInputBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          16,
+                                                        ),
+                                                    borderSide: BorderSide(
+                                                      color: Color(0x98ED0F0F),
+                                                    ),
+                                                  ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    ),
-                                    focusedErrorBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: BorderSide(
-                                        color: Color(0x98ED0F0F),
+                                    if (!_isSignIn)
+                                      Row(
+                                        spacing: 20,
+                                        children: [
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            spacing: 5,
+                                            children: [
+                                              Text(
+                                                '  '
+                                                'Date of birth',
+                                              ),
+
+                                              GestureDetector(
+                                                onTap: () async {
+                                                  await pickDOB(context);
+                                                },
+
+                                                child: Container(
+                                                  // width: screenWidth,
+                                                  padding: EdgeInsets.all(16),
+
+                                                  decoration: BoxDecoration(
+                                                    border: Border.all(),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          12,
+                                                        ),
+                                                  ),
+
+                                                  child: Text(
+                                                    _selectedDate == null
+                                                        ? "Select DOB"
+                                                        : "${_selectedDate!.day}/"
+                                                              "${_selectedDate!.month}/"
+                                                              "${_selectedDate!.year}",
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              spacing: 4,
+                                              children: [
+                                                Text(
+                                                  '  '
+                                                  'Gender',
+                                                ),
+                                                // Expanded(
+                                                // child:
+                                                DropdownButtonFormField<String>(
+                                                  initialValue: _selectedGender,
+
+                                                  decoration: InputDecoration(
+                                                    // labelText: "Gender",
+                                                    border: OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            12,
+                                                          ),
+                                                    ),
+                                                  ),
+
+                                                  items:
+                                                      [
+                                                            "Male",
+                                                            "Female",
+                                                            "Other",
+                                                          ]
+                                                          .map(
+                                                            (gender) =>
+                                                                DropdownMenuItem(
+                                                                  value: gender,
+
+                                                                  child: Text(
+                                                                    gender,
+                                                                  ),
+                                                                ),
+                                                          )
+                                                          .toList(),
+
+                                                  onChanged: (value) {
+                                                    if (value != null) {
+                                                      setState(() {
+                                                        _selectedGender = value;
+                                                      });
+                                                    }
+                                                  },
+                                                ),
+                                                // ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
                                       ),
+                                    if (!_isSignIn)
+                                      Row(
+                                        spacing: 20,
+                                        children: [
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              spacing: 5,
+                                              children: [
+                                                Text(
+                                                  '  '
+                                                  'Height',
+                                                ),
+                                                TextField(
+                                                  controller:
+                                                      _heightTextController,
+                                                  // style: AppTextStyle.primaryText.copyWith(
+                                                  //   fontWeight: FontWeight.w900,
+                                                  // ),
+                                                  // autofocus: true,
+                                                  onTapOutside: (_) {
+                                                    FocusScope.of(
+                                                      context,
+                                                    ).unfocus();
+                                                  },
+                                                  maxLength: 3,
+                                                  decoration: InputDecoration(
+                                                    contentPadding:
+                                                        EdgeInsetsGeometry.symmetric(
+                                                          vertical: 16,
+                                                          horizontal: 30,
+                                                        ),
+                                                    prefixIcon: Icon(
+                                                      Icons.height,
+                                                    ),
+                                                    suffixText: 'cm',
+                                                    focusedBorder:
+                                                        OutlineInputBorder(
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                16,
+                                                              ),
+                                                          borderSide:
+                                                              BorderSide(
+                                                                color: Color(
+                                                                  0xFF0D35B5,
+                                                                ),
+                                                              ),
+                                                        ),
+                                                    enabledBorder:
+                                                        OutlineInputBorder(
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                16,
+                                                              ),
+                                                          borderSide:
+                                                              BorderSide(
+                                                                color: Color(
+                                                                  0xFF777777,
+                                                                ),
+                                                              ),
+                                                        ),
+                                                    errorBorder: OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            16,
+                                                          ),
+                                                      borderSide: BorderSide(
+                                                        color: Color(
+                                                          0x98ED0F0F,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    focusedErrorBorder:
+                                                        OutlineInputBorder(
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                16,
+                                                              ),
+                                                          borderSide:
+                                                              BorderSide(
+                                                                color: Color(
+                                                                  0x98ED0F0F,
+                                                                ),
+                                                              ),
+                                                        ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              spacing: 5,
+                                              children: [
+                                                Text(
+                                                  '  '
+                                                  'Weight',
+                                                ),
+                                                TextField(
+                                                  controller:
+                                                      _weightTextController,
+                                                  // style: AppTextStyle.primaryText.copyWith(
+                                                  //   fontWeight: FontWeight.w900,
+                                                  // ),
+                                                  // autofocus: true,
+                                                  onTapOutside: (_) {
+                                                    FocusScope.of(
+                                                      context,
+                                                    ).unfocus();
+                                                  },
+                                                  maxLength: 3,
+                                                  decoration: InputDecoration(
+                                                    contentPadding:
+                                                        EdgeInsetsGeometry.symmetric(
+                                                          vertical: 16,
+                                                          horizontal: 30,
+                                                        ),
+                                                    // prefixIcon: Icon(Icons.),
+                                                    suffixText: 'kg',
+                                                    focusedBorder:
+                                                        OutlineInputBorder(
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                16,
+                                                              ),
+                                                          borderSide:
+                                                              BorderSide(
+                                                                color: Color(
+                                                                  0xFF0D35B5,
+                                                                ),
+                                                              ),
+                                                        ),
+                                                    enabledBorder:
+                                                        OutlineInputBorder(
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                16,
+                                                              ),
+                                                          borderSide:
+                                                              BorderSide(
+                                                                color: Color(
+                                                                  0xFF777777,
+                                                                ),
+                                                              ),
+                                                        ),
+                                                    errorBorder: OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            16,
+                                                          ),
+                                                      borderSide: BorderSide(
+                                                        color: Color(
+                                                          0x98ED0F0F,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    focusedErrorBorder:
+                                                        OutlineInputBorder(
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                16,
+                                                              ),
+                                                          borderSide:
+                                                              BorderSide(
+                                                                color: Color(
+                                                                  0x98ED0F0F,
+                                                                ),
+                                                              ),
+                                                        ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      spacing: 5,
+                                      children: [
+                                        Text(
+                                          '  '
+                                          'Password',
+                                        ),
+                                        TextField(
+                                          controller: _passwordTextController,
+                                          // style: AppTextStyle.primaryText.copyWith(
+                                          //   fontWeight: FontWeight.w900,
+                                          // ),
+                                          // autofocus: true,
+                                          obscureText: true,
+                                          onTapOutside: (_) {
+                                            FocusScope.of(context).unfocus();
+                                          },
+                                          decoration: InputDecoration(
+                                            contentPadding:
+                                                EdgeInsetsGeometry.symmetric(
+                                                  vertical: 16,
+                                                  horizontal: 30,
+                                                ),
+                                            prefixIcon: Icon(Icons.key_rounded),
+                                            focusedBorder: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
+                                              borderSide: BorderSide(
+                                                color: Color(0xFF0D35B5),
+                                              ),
+                                            ),
+                                            enabledBorder: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
+                                              borderSide: BorderSide(
+                                                color: Color(0xFF777777),
+                                              ),
+                                            ),
+                                            errorBorder: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
+                                              borderSide: BorderSide(
+                                                color: Color(0x98ED0F0F),
+                                              ),
+                                            ),
+                                            focusedErrorBorder:
+                                                OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(16),
+                                                  borderSide: BorderSide(
+                                                    color: Color(0x98ED0F0F),
+                                                  ),
+                                                ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ),
+                                    if (!_isSignIn)
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        spacing: 5,
+                                        children: [
+                                          Text(
+                                            '  '
+                                            'Confirm password',
+                                          ),
+                                          TextField(
+                                            controller:
+                                                _confirmPasswordTextController,
+                                            // style: AppTextStyle.primaryText.copyWith(
+                                            //   fontWeight: FontWeight.w900,
+                                            // ),
+                                            // autofocus: true,
+                                            obscureText: true,
+                                            keyboardType:
+                                                TextInputType.visiblePassword,
+                                            onTapOutside: (_) {
+                                              FocusScope.of(context).unfocus();
+                                            },
+                                            decoration: InputDecoration(
+                                              contentPadding:
+                                                  EdgeInsetsGeometry.symmetric(
+                                                    vertical: 16,
+                                                    horizontal: 30,
+                                                  ),
+                                              prefixIcon: Icon(
+                                                Icons.key_rounded,
+                                              ),
+                                              focusedBorder: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(16),
+                                                borderSide: BorderSide(
+                                                  color: Color(0xFF0D35B5),
+                                                ),
+                                              ),
+                                              enabledBorder: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(16),
+                                                borderSide: BorderSide(
+                                                  color: Color(0xFF777777),
+                                                ),
+                                              ),
+                                              errorBorder: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(16),
+                                                borderSide: BorderSide(
+                                                  color: Color(0x98ED0F0F),
+                                                ),
+                                              ),
+                                              focusedErrorBorder:
+                                                  OutlineInputBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          16,
+                                                        ),
+                                                    borderSide: BorderSide(
+                                                      color: Color(0x98ED0F0F),
+                                                    ),
+                                                  ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                  ],
                                 ),
-                              ],
+                              ),
                             ),
-                            if (!_isSignIn)
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                spacing: 5,
-                                children: [
-                                  Text(
-                                    '  '
-                                    'Confirm password',
-                                  ),
-                                  TextField(
-                                    controller: _confirmPasswordTextController,
-                                    // style: AppTextStyle.primaryText.copyWith(
-                                    //   fontWeight: FontWeight.w900,
-                                    // ),
-                                    // autofocus: true,
-                                    keyboardType: TextInputType.visiblePassword,
-                                    onTapOutside: (_) {
-                                      FocusScope.of(context).unfocus();
-                                    },
-                                    decoration: InputDecoration(
-                                      contentPadding:
-                                          EdgeInsetsGeometry.symmetric(
-                                            vertical: 16,
-                                            horizontal: 30,
-                                          ),
-                                      prefixIcon: Icon(Icons.person),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                        borderSide: BorderSide(
-                                          color: Color(0xFF0D35B5),
-                                        ),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                        borderSide: BorderSide(
-                                          color: Color(0xFF777777),
-                                        ),
-                                      ),
-                                      errorBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                        borderSide: BorderSide(
-                                          color: Color(0x98ED0F0F),
-                                        ),
-                                      ),
-                                      focusedErrorBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                        borderSide: BorderSide(
-                                          color: Color(0x98ED0F0F),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                SizedBox(height: 30),
-
-                AnimatedButton(
-                  onTap: () async {
-                    final response = await AuthServices().login(
-                      username: _usernameTextController.text,
-                      password: _passwordTextController.text,
-                    );
-
-                    if(!context.mounted) return;
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        margin: EdgeInsetsGeometry.symmetric(
-                          horizontal: 40,
-                          vertical: 40,
-                        ),
-                        padding: EdgeInsetsGeometry.symmetric(
-                          horizontal: 20,
-                          vertical: 14,
-                        ),
-                        behavior: SnackBarBehavior.floating,
-                        backgroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        content: Text(
-                          response['message'],
-                          style: AppTextStyle.primaryText.copyWith(
-                            color: Color(0xFF000000),
                           ),
                         ),
-                      ),
-                    );
 
-                    if (response['status_ok']) {
-                      Navigator.pop(context, true);
-                    }
-                  },
-                  height: 54,
-                  width: screenWidth / 2,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Color(0xFFAAAAAA),
-                        offset: Offset(1, 1),
-                        spreadRadius: 0,
-                        blurRadius: 1,
-                      ),
-                    ],
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      stops: [0.0, 0.3, 0.7, 1.0],
-                      colors: [
-                        Color(0xFF6DBDF6),
-                        Colors.white,
-                        Colors.white,
-                        Color(0xFFDB7AF3),
-                      ],
-                    ),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadiusGeometry.circular(30),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                      child: SizedBox(
-                        height: screenHeight,
-                        width: screenWidth,
-                        child: Center(
+                        SizedBox(height: 10),
+
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              _isSignIn = _isSignIn ? false : true;
+                              if (_isSignIn) {
+                                _headingText = 'sign in';
+                              } else {
+                                _headingText = 'register';
+                              }
+                            });
+                          },
                           child: Text(
-                            'sign in',
-                            style: AppTextStyle.heading5.copyWith(
-                              color: Color(0xFF0D2968),
+                            _isSignIn
+                                ? 'Create new account'
+                                : 'Already have an account - sign in',
+                          ),
+                        ),
+
+                        SizedBox(height: 10),
+
+                        AnimatedButton(
+                          onTap: () async {
+                            if (_usernameTextController.text.isEmpty) {
+                              _showSnackBar(
+                                context,
+                                'Enter username (mandatory field)',
+                              );
+                              return;
+                            }
+                            if (!_isSignIn) {
+                              if (_passwordTextController.text.length < 8) {
+                                _showSnackBar(
+                                  context,
+                                  'password must have at least 8 character',
+                                );
+                                return;
+                              } else if (_passwordTextController.text !=
+                                  _confirmPasswordTextController.text) {
+                                _showSnackBar(context, 'password mismatch');
+                                return;
+                              }
+                            }
+
+                            final response = _isSignIn
+                                ? await AuthServices().login(
+                                    username: _usernameTextController.text,
+                                    password: _passwordTextController.text,
+                                  )
+                                : await AuthServices().register(
+                                    username: _usernameTextController.text,
+                                    password: _passwordTextController.text,
+                                    email: _emailTextController.text,
+                                    fullName: _fullNameTextController.text,
+                                    height: double.parse(
+                                      _heightTextController.text,
+                                    ),
+                                    weight: double.parse(
+                                      _weightTextController.text,
+                                    ),
+                                    age: _selectedDate == null
+                                        ? null
+                                        : DateTime.now().year -
+                                              _selectedDate!.year,
+                                    gender: _selectedGender?.toLowerCase(),
+                                  );
+
+                            if (!context.mounted) return;
+
+                            _showSnackBar(context, response['message']);
+                            // print(
+                            //   '/////////// ${response['message']} ////////////',
+                            // );
+                            // ScaffoldMessenger.of(context).showSnackBar(
+                            //   SnackBar(
+                            //     margin: EdgeInsetsGeometry.symmetric(
+                            //       horizontal: 40,
+                            //       vertical: 40,
+                            //     ),
+                            //     padding: EdgeInsetsGeometry.symmetric(
+                            //       horizontal: 20,
+                            //       vertical: 14,
+                            //     ),
+                            //     behavior: SnackBarBehavior.floating,
+                            //     backgroundColor: Colors.white,
+                            //     shape: RoundedRectangleBorder(
+                            //       borderRadius: BorderRadius.circular(14),
+                            //     ),
+                            //     content: Text(
+                            //       response['message'],
+                            //       style: AppTextStyle.primaryText.copyWith(
+                            //         color: Color(0xFF000000),
+                            //       ),
+                            //     ),
+                            //   ),
+                            // );
+
+                            if (response['status_ok']) {
+                              Navigator.pop(context, true);
+                            }
+                          },
+                          height: 54,
+                          width: screenWidth / 2,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(30),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color(0xFFAAAAAA),
+                                offset: Offset(1, 1),
+                                spreadRadius: 0,
+                                blurRadius: 1,
+                              ),
+                            ],
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              stops: [0.0, 0.3, 0.7, 1.0],
+                              colors: [
+                                Color(0xFF6DBDF6),
+                                Colors.white,
+                                Colors.white,
+                                Color(0xFF987AF3),
+                              ],
+                            ),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadiusGeometry.circular(30),
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                              child: SizedBox(
+                                height: screenHeight,
+                                width: screenWidth,
+                                child: Center(
+                                  child: Text(
+                                    _headingText,
+                                    style: AppTextStyle.heading5.copyWith(
+                                      color: Color(0xFF0D2968),
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
+
+                        SizedBox(height: 180),
+                      ],
                     ),
                   ),
                 ),

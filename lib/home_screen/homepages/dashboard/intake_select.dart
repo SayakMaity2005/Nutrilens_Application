@@ -3,11 +3,14 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:nutrilens_test/cores/constants/colors.dart';
 import 'package:nutrilens_test/cores/constants/text_styles.dart';
+import 'package:nutrilens_test/cores/daily_data/daily_data_services.dart';
+import 'package:nutrilens_test/cores/default_intakes/default_intake_service.dart';
 import 'package:nutrilens_test/custom_widget_library/animated_button.dart';
 import 'package:nutrilens_test/home_screen/homepages/dashboard/scan_food_screen.dart';
 import 'package:nutrilens_test/home_screen/homepages/dashboard/intake_details.dart';
 import 'package:nutrilens_test/home_screen/homepages/dashboard/select_intake_popup.dart';
 
+import '../../../cores/ai_usage/custom_recipe.dart';
 import '../../../cores/custom_datatypes/custom_classes.dart';
 
 class IntakeSelect extends StatefulWidget {
@@ -29,88 +32,32 @@ class _IntakeSelectState extends State<IntakeSelect>
 
   late final TabController _tabController;
 
-  final List<Intake> _availableLunchIntakes = [
-    Intake(
-      name: 'Nesfit Diet Cereal',
-      type: 'food',
-      unit: 'g',
-      quantity: 100,
-      energyPerUnit: 1.88,
-      carbsPerUnit: 0.362,
-      proteinPerUnit: 0.069,
-      fatPerUnit: 0.00,
-      ingredients: [],
-      recipe: '',
-    ),
-    Intake(
-      name: 'Navy Beans, raw',
-      type: 'food',
-      unit: 'g',
-      quantity: 200,
-      energyPerUnit: 0.5,
-      carbsPerUnit: 0.055,
-      proteinPerUnit: 0.013,
-      fatPerUnit: 0.027,
-      ingredients: [],
-      recipe: '',
-    ),
-    Intake(
-      name: 'Navy Beans, raw',
-      type: 'food',
-      unit: 'g',
-      quantity: 200,
-      energyPerUnit: 0.5,
-      carbsPerUnit: 0.055,
-      proteinPerUnit: 0.013,
-      fatPerUnit: 0.027,
-      ingredients: [],
-      recipe: '',
-    ),
-    Intake(
-      name: 'Navy Beans, raw',
-      type: 'food',
-      unit: 'g',
-      quantity: 200,
-      energyPerUnit: 0.5,
-      carbsPerUnit: 0.055,
-      proteinPerUnit: 0.013,
-      fatPerUnit: 0.027,
-      ingredients: [],
-      recipe: '',
-    ),
-    Intake(
-      name: 'Navy Beans, raw',
-      type: 'food',
-      unit: 'g',
-      quantity: 200,
-      energyPerUnit: 0.5,
-      carbsPerUnit: 0.055,
-      proteinPerUnit: 0.013,
-      fatPerUnit: 0.027,
-      ingredients: [],
-      recipe: '',
-    ),
-    Intake(
-      name: 'Rice Dal Vegetables',
-      type: 'food',
-      unit: 'g',
-      quantity: 450,
-      energyPerUnit: 0.95,
-      carbsPerUnit: 0.15,
-      proteinPerUnit: 0.035,
-      fatPerUnit: 0.02,
-      ingredients: [
-        'Rice',
-        'Dal',
-        'Raw vegetables like Potato, tomato,...',
-        'Oil, Ginger, Turmeric powder, salt',
-        'Cumin',
-      ],
-      recipe: 'Bla bla bla ......',
-    ),
-  ];
+  // late final List<Intake> _availableLunchIntakes;
+
+  // final List<Intake> _availableLunchIntakes = [
+  //   Intake(
+  //     name: 'Nesfit Diet Cereal',
+  //     type: 'food',
+  //     unit: 'g',
+  //     quantity: 100,
+  //     energyPerUnit: 1.88,
+  //     carbsPerUnit: 0.362,
+  //     proteinPerUnit: 0.069,
+  //     fatPerUnit: 0.00,
+  //     ingredients: [],
+  //     recipe: '',
+  //   ),
+  //
+  // ];
 
   final Map<String, List<Intake>> _allIntakes = {
+    'breakfast': [],
+    'lunch': [],
+    'dinner': [],
+    'snack': [],
+  };
+
+  final Map<String, List<Intake>> _customizedIntakes = {
     'breakfast': [],
     'lunch': [],
     'dinner': [],
@@ -127,8 +74,21 @@ class _IntakeSelectState extends State<IntakeSelect>
     super.initState();
     _currIntakeRoundIndex = widget.intakeRoundIndex;
     _tabController = TabController(length: 4, vsync: this);
-    _allIntakes['lunch'] = _availableLunchIntakes;
+    // _allIntakes['lunch'] = _availableLunchIntakes;
     _showSelectedIntakes = false;
+
+    _tabController.addListener(() {
+      // print('////////// $_allItemsLoading ///////////');
+      if (!_allItemsLoading && _tabController.index == 2) {
+        // print('............ change ................');
+        // customized
+        // _allItemsLoading = true;
+        getCustomizedData();
+      }
+
+    });
+
+    getDefaultData();
   }
 
   @override
@@ -136,6 +96,185 @@ class _IntakeSelectState extends State<IntakeSelect>
     // TODO: implement dispose
     _tabController.dispose();
     super.dispose();
+  }
+
+  bool _allItemsLoading = true;
+
+  Future<void> getDefaultData() async {
+    if (_currIntakeRoundIndex == 0 && _allIntakes['breakfast']!.isEmpty) {
+      // print('////////////////// fn call //////////////////');
+      _allItemsLoading = true;
+      final response = await DefaultIntakeService().getDefaultIntakes(
+        'breakfast',
+      );
+      if (response['data'] != null) {
+        setState(() {
+          final List<dynamic> breakfastList = response['data'];
+          for (int i = 0; i < breakfastList.length; i++) {
+            Intake intake = Intake(
+              id: breakfastList[i]['_id'],
+              name: breakfastList[i]['name'],
+              type: breakfastList[i]['type'],
+              unit: 'g',
+              quantity: breakfastList[i]['quantity'],
+              energyPerUnit: breakfastList[i]['energy_per_unit'],
+              carbsPerUnit: breakfastList[i]['carbs_per_unit'],
+              proteinPerUnit: breakfastList[i]['protein_per_unit'],
+              fatPerUnit: breakfastList[i]['fat_per_unit'],
+              ingredients: List<String>.from(breakfastList[i]["ingredients"]),
+              recipe: breakfastList[i]['recipe'],
+            );
+            _allIntakes['breakfast']!.add(intake);
+          }
+          _allItemsLoading = false;
+        });
+      } else {
+        setState(() {
+          _allItemsLoading = false;
+        });
+      }
+    } else if (_currIntakeRoundIndex == 1 && _allIntakes['lunch']!.isEmpty) {
+      _allItemsLoading = true;
+      final response = await DefaultIntakeService().getDefaultIntakes('lunch');
+      if (response['data'] != null) {
+        setState(() {
+          final List<dynamic> list = response['data'];
+          for (int i = 0; i < list.length; i++) {
+            Intake intake = Intake(
+              id: list[i]['_id'],
+              name: list[i]['name'],
+              type: list[i]['type'],
+              unit: 'g',
+              quantity: list[i]['quantity'],
+              energyPerUnit: list[i]['energy_per_unit'],
+              carbsPerUnit: list[i]['carbs_per_unit'],
+              proteinPerUnit: list[i]['protein_per_unit'],
+              fatPerUnit: list[i]['fat_per_unit'],
+              ingredients: List<String>.from(list[i]["ingredients"]),
+              recipe: list[i]['recipe'],
+            );
+            _allIntakes['lunch']!.add(intake);
+          }
+          _allItemsLoading = false;
+        });
+      } else {
+        setState(() {
+          _allItemsLoading = false;
+        });
+      }
+    } else if (_currIntakeRoundIndex == 2 && _allIntakes['dinner']!.isEmpty) {
+      _allItemsLoading = true;
+      final response = await DefaultIntakeService().getDefaultIntakes('dinner');
+      if (response['data'] != null) {
+        setState(() {
+          final List<dynamic> list = response['data'];
+          for (int i = 0; i < list.length; i++) {
+            Intake intake = Intake(
+              id: list[i]['_id'],
+              name: list[i]['name'],
+              type: list[i]['type'],
+              unit: 'g',
+              quantity: list[i]['quantity'],
+              energyPerUnit: list[i]['energy_per_unit'],
+              carbsPerUnit: list[i]['carbs_per_unit'],
+              proteinPerUnit: list[i]['protein_per_unit'],
+              fatPerUnit: list[i]['fat_per_unit'],
+              ingredients: List<String>.from(list[i]["ingredients"]),
+              recipe: list[i]['recipe'],
+            );
+            _allIntakes['dinner']!.add(intake);
+          }
+          _allItemsLoading = false;
+        });
+      } else {
+        setState(() {
+          _allItemsLoading = false;
+        });
+      }
+    } else if (_currIntakeRoundIndex == 3 && _allIntakes['snack']!.isEmpty) {
+      _allItemsLoading = true;
+      final response = await DefaultIntakeService().getDefaultIntakes('snacks');
+      if (response['data'] != null) {
+        setState(() {
+          final List<dynamic> list = response['data'];
+          for (int i = 0; i < list.length; i++) {
+            Intake intake = Intake(
+              id: list[i]['_id'],
+              name: list[i]['name'],
+              type: list[i]['type'],
+              unit: 'g',
+              quantity: list[i]['quantity'],
+              energyPerUnit: list[i]['energy_per_unit'],
+              carbsPerUnit: list[i]['carbs_per_unit'],
+              proteinPerUnit: list[i]['protein_per_unit'],
+              fatPerUnit: list[i]['fat_per_unit'],
+              ingredients: List<String>.from(list[i]["ingredients"]),
+              recipe: list[i]['recipe'],
+            );
+            _allIntakes['snack']!.add(intake);
+          }
+          _allItemsLoading = false;
+        });
+      } else {
+        setState(() {
+          _allItemsLoading = true;
+        });
+      }
+    }
+  }
+
+  Future<void> getCustomizedData() async {
+    if (_customizedIntakes['breakfast']!.isEmpty &&
+        _customizedIntakes['lunch']!.isEmpty &&
+        _customizedIntakes['dinner']!.isEmpty &&
+        _customizedIntakes['snack']!.isEmpty) {
+      // print('////////////////// fn call //////////////////');
+      setState(() {
+        _allItemsLoading = true;
+      });
+      final response = await CustomRecipe().getAllRecipe();
+      // print('////////////// ${response['data']} ////////////');
+      if (response['status_ok']) {
+        // print('////////////// ${response['data']} ////////////');
+        // List<Intake> customRecipeList = [];
+        setState(() {
+          for (int i = 0; i < response['data'].length; i++) {
+            Intake intake = Intake(
+              id: response['data'][i]['_id'],
+              name: response['data'][i]['intake_details']['name'],
+              type: response['data'][i]['intake_details']['type'],
+              unit: 'g',
+              quantity: response['data'][i]['intake_details']['quantity'],
+              energyPerUnit:
+                  response['data'][i]['intake_details']['energy_per_unit'],
+              carbsPerUnit:
+                  response['data'][i]['intake_details']['carbs_per_unit'],
+              proteinPerUnit:
+                  response['data'][i]['intake_details']['protein_per_unit'],
+              fatPerUnit: response['data'][i]['intake_details']['fat_per_unit'],
+              ingredients: List<String>.from(
+                response['data'][i]['intake_details']['ingredients'],
+              ),
+              recipe: response['data'][i]['intake_details']['recipe'],
+            );
+            if (response['data'][i]['intake_details']['meal_type'] == 'breakfast') {
+              _customizedIntakes['breakfast']!.add(intake);
+            } else if (response['data'][i]['intake_details']['meal_type'] == 'lunch') {
+              _customizedIntakes['lunch']!.add(intake);
+            } else if (response['data'][i]['intake_details']['meal_type'] == 'dinner') {
+              _customizedIntakes['dinner']!.add(intake);
+            } else if (response['data'][i]['intake_details']['meal_type'] == 'snacks') {
+              _customizedIntakes['snack']!.add(intake);
+            }
+          }
+          _allItemsLoading = false;
+        });
+      } else {
+        setState(() {
+          _allItemsLoading = false;
+        });
+      }
+    }
   }
 
   int _totalEnergy() {
@@ -165,6 +304,7 @@ class _IntakeSelectState extends State<IntakeSelect>
                 setState(() {
                   _currIntakeRoundIndex = i;
                   Navigator.pop(context);
+                  getDefaultData();
                 });
               },
               child: Container(
@@ -386,18 +526,31 @@ class _IntakeSelectState extends State<IntakeSelect>
                 child: TabBarView(
                   controller: _tabController,
                   children: <Widget>[
-                    AllTab(
+                    _allItemsLoading
+                        ? Center(child: CircularProgressIndicator())
+                        : AllTab(
+                            intakes:
+                                _allIntakes[_intakeRounds[_currIntakeRoundIndex]
+                                    .name]!,
+                            selectedIntakes: _selectedIntakes,
+                            onUpdate: () {
+                              setState(() {});
+                            },
+                          ),
+                    // Center(child: Text("It's cloudy here")),
+                    Center(child: Text("No item yet!")),
+                    // Center(child: Text("No item yet!")),
+                    _allItemsLoading
+                        ? Center(child: CircularProgressIndicator())
+                        : AllTab(
                       intakes:
-                          _allIntakes[_intakeRounds[_currIntakeRoundIndex]
-                              .name]!,
+                      _customizedIntakes[_intakeRounds[_currIntakeRoundIndex]
+                          .name]!,
                       selectedIntakes: _selectedIntakes,
                       onUpdate: () {
                         setState(() {});
                       },
                     ),
-                    // Center(child: Text("It's cloudy here")),
-                    Center(child: Text("No item yet!")),
-                    Center(child: Text("No item yet!")),
                     Center(child: Text("No item yet!")),
                   ],
                 ),
@@ -451,10 +604,15 @@ class _IntakeSelectState extends State<IntakeSelect>
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  _selectedIntakes[i].name(),
-                                  style: AppTextStyle.heading5.copyWith(
-                                    color: Color(0xFF333333),
+                                SizedBox(
+                                  width: screenWidth - 130,
+                                  child: Text(
+                                    _selectedIntakes[i].name(),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppTextStyle.heading5.copyWith(
+                                      color: Color(0xFF333333),
+                                    ),
                                   ),
                                 ),
                                 Text(
@@ -553,11 +711,52 @@ class _IntakeSelectState extends State<IntakeSelect>
                           color: Color(0xFF375EC5),
                           borderRadius: BorderRadius.circular(50),
                         ),
-                        onTap: () {
+                        onTap: () async {
+                          final response = await DailyDataServices().addMeal(
+                            (_currIntakeRoundIndex == 3)
+                                ? 'snacks'
+                                : _intakeRounds[_currIntakeRoundIndex].name,
+                            _selectedIntakes,
+                          );
+
+                          if (!context.mounted) {
+                            // Navigator.pop(context, {
+                            //   _intakeRounds[_currIntakeRoundIndex].name:
+                            //       _selectedIntakes,
+                            // });
+                            return;
+                          }
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              margin: EdgeInsetsGeometry.symmetric(
+                                horizontal: 40,
+                                vertical: 40,
+                              ),
+                              padding: EdgeInsetsGeometry.symmetric(
+                                horizontal: 20,
+                                vertical: 14,
+                              ),
+                              behavior: SnackBarBehavior.floating,
+                              backgroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              content: Text(
+                                response['message'],
+                                style: AppTextStyle.primaryText.copyWith(
+                                  color: Color(0xFF000000),
+                                ),
+                              ),
+                            ),
+                          );
+
                           Navigator.pop(context, {
                             _intakeRounds[_currIntakeRoundIndex].name:
                                 _selectedIntakes,
                           });
+
+                          // if (response['status_ok'])
                         },
                         child: Center(
                           child: Text(
@@ -660,12 +859,17 @@ class _AllTabState extends State<AllTab> with AutomaticKeepAliveClientMixin {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       spacing: 2,
                       children: [
-                        Text(
-                          widget.intakes[i].name(),
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Color(0xFF333333),
-                            fontWeight: FontWeight.w500,
+                        SizedBox(
+                          width: screenWidth - 136,
+                          child: Text(
+                            widget.intakes[i].name(),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Color(0xFF333333),
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
                         Text(

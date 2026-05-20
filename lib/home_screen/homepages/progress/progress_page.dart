@@ -110,7 +110,8 @@ class _ProgressPageState extends State<ProgressPage> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Row(
                           children: [
@@ -126,11 +127,11 @@ class _ProgressPageState extends State<ProgressPage> {
                             ),
                           ],
                         ),
-                        const CircleAvatar(
-                          radius: 18,
-                          backgroundColor: Color(0xFFE0E0E0),
-                          child: Icon(Icons.person, color: Colors.white, size: 24),
-                        ),
+                        // const CircleAvatar(
+                        //   radius: 18,
+                        //   backgroundColor: Color(0xFFE0E0E0),
+                        //   child: Icon(Icons.person, color: Colors.white, size: 24),
+                        // ),
                       ],
                     ),
                   ),

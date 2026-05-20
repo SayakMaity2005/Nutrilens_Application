@@ -12,10 +12,14 @@ import 'package:nutrilens_test/home_screen/homepages/dashboard/water_details.dar
 
 import '../../../cores/custom_datatypes/custom_classes.dart';
 import '../../../cores/user_operations/user_services.dart';
+import 'intake_details.dart';
 
 class Dashboard extends StatefulWidget {
   final Function(Map<String, dynamic>) updateUserdata;
-  const Dashboard({super.key, required this.updateUserdata});
+  const Dashboard({
+    super.key,
+    required this.updateUserdata,
+  });
 
   @override
   State<Dashboard> createState() => _DashboardState();
@@ -96,7 +100,9 @@ class _DashboardState extends State<Dashboard> {
 
   bool _authorized = false;
   Map<String, dynamic> _userData = {};
-  bool _got_dailyData = false;
+  bool _gotDailyData = false;
+
+  List<bool> _showIntakeRoundDetails = [false, false, false, false];
 
   @override
   void initState() {
@@ -196,7 +202,7 @@ class _DashboardState extends State<Dashboard> {
     final response = await DailyDataServices().getDailyData(_selectedDate);
     if (response['status_ok']) {
       setState(() {
-        _got_dailyData = true;
+        _gotDailyData = true;
 
         // print('////////////////////\n');
         // print(response['data']);
@@ -214,6 +220,7 @@ class _DashboardState extends State<Dashboard> {
           _drankWater = 0;
 
           updateConsumptionRecords();
+
           return;
         }
 
@@ -323,10 +330,11 @@ class _DashboardState extends State<Dashboard> {
         _drankWater = (response['data']['water']).toInt();
 
         updateConsumptionRecords();
+
       });
     } else {
       setState(() {
-        _got_dailyData = false;
+        _gotDailyData = false;
 
         _intakeRounds['breakfast']?.clearAllIntakes();
         _intakeRounds['lunch']?.clearAllIntakes();
@@ -336,6 +344,22 @@ class _DashboardState extends State<Dashboard> {
         _drankWater = 0;
       });
     }
+  }
+
+  void _showSnackBar(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        margin: EdgeInsetsGeometry.symmetric(horizontal: 40, vertical: 40),
+        padding: EdgeInsetsGeometry.symmetric(horizontal: 20, vertical: 14),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        content: Text(
+          msg,
+          style: AppTextStyle.primaryText.copyWith(color: Color(0xFF000000)),
+        ),
+      ),
+    );
   }
 
   bool isSameDate(DateTime a, DateTime b) {
@@ -426,11 +450,11 @@ class _DashboardState extends State<Dashboard> {
                           color: Color(0xFF888888),
                         ),
                       ),
-                      Icon(
-                        Icons.arrow_drop_down_rounded,
-                        size: 32,
-                        color: Color(0xFF999999),
-                      ),
+                      // Icon(
+                      //   Icons.arrow_drop_down_rounded,
+                      //   size: 32,
+                      //   color: Color(0xFF999999),
+                      // ),
                     ],
                   ),
                 ),
@@ -575,13 +599,23 @@ class _DashboardState extends State<Dashboard> {
                       },
                     );
                     if (res != null) {
+                      // setState(() {
+                      _requiredIntake['carbs'] = requiredIntakeCopy['carbs']!;
+                      _requiredIntake['protein'] =
+                          requiredIntakeCopy['protein']!;
+                      _requiredIntake['fat'] = requiredIntakeCopy['fat']!;
+                      _requiredIntake['energy'] = requiredIntakeCopy['energy']!;
+                      // });
+                      final response = await UserServices().updateDailyTarget(
+                        energy: _requiredIntake['energy']?.toDouble(),
+                        carbs: _requiredIntake['carbs']?.toDouble(),
+                        protein: _requiredIntake['protein']?.toDouble(),
+                        fat: _requiredIntake['fat']?.toDouble(),
+                      );
                       setState(() {
-                        _requiredIntake['carbs'] = requiredIntakeCopy['carbs']!;
-                        _requiredIntake['protein'] =
-                            requiredIntakeCopy['protein']!;
-                        _requiredIntake['fat'] = requiredIntakeCopy['fat']!;
-                        _requiredIntake['energy'] =
-                            requiredIntakeCopy['energy']!;
+                        if (response['message'] != null) {
+                          _showSnackBar(response['message']);
+                        }
                       });
                     }
                   },
@@ -1039,97 +1073,256 @@ class _DashboardState extends State<Dashboard> {
             ),
             SizedBox(height: 16),
             for (int i = 0; i < 4; i++)
-              Container(
-                // height: 70,
-                width: screenWidth,
-                margin: EdgeInsetsGeometry.symmetric(
-                  horizontal: 16,
-                  vertical: 4,
-                ),
-                padding: EdgeInsetsGeometry.symmetric(
-                  // horizontal: 16,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: BoxBorder.all(color: Color(0xFFE1E9FF), width: 1),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  spacing: 16,
-                  children: [
-                    Text(
-                      _intakeRounds.entries.elementAt(i).value.getIcon(),
-                      style: AppTextStyle.heading2,
-                    ),
-                    SizedBox(
-                      width: 110,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _showIntakeRoundDetails[i] = _showIntakeRoundDetails[i]
+                        ? false
+                        : true;
+                  });
+                },
+                child: Container(
+                  // height: 70,
+                  width: screenWidth,
+                  margin: EdgeInsetsGeometry.symmetric(
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
+                  padding: EdgeInsetsGeometry.symmetric(
+                    // horizontal: 16,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: BoxBorder.all(color: Color(0xFFE1E9FF), width: 1),
+                  ),
+                  child: Column(
+                    spacing: _showIntakeRoundDetails[i] ? 16 : 0,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        spacing: 16,
                         children: [
                           Text(
-                            _intakeRounds.entries.elementAt(i).value.getType(),
-                            style: AppTextStyle.heading5.copyWith(
-                              fontWeight: FontWeight.w600,
+                            _intakeRounds.entries.elementAt(i).value.getIcon(),
+                            style: AppTextStyle.heading2,
+                          ),
+                          SizedBox(
+                            width: 110,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _intakeRounds.entries
+                                      .elementAt(i)
+                                      .value
+                                      .getType(),
+                                  style: AppTextStyle.heading5.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    Text(
+                                      _intakeRounds.entries
+                                          .elementAt(i)
+                                          .value
+                                          .getConsumedEnergy()
+                                          .toStringAsFixed(0),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    Text(
+                                      ' / ${_intakeRounds.entries.elementAt(i).value.getRequiredEnergy().toStringAsFixed(0)} kcal',
+                                      style: TextStyle(
+                                        color: Color(0xFF888888),
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
-                          Row(
-                            children: [
-                              Text(
-                                _intakeRounds.entries
-                                    .elementAt(i)
-                                    .value
-                                    .getConsumedEnergy()
-                                    .toStringAsFixed(0),
-                                style: TextStyle(fontWeight: FontWeight.w600),
+                          SizedBox(width: screenWidth - 310),
+                          GestureDetector(
+                            onTap: () async {
+                              final Map<String, List<Intake>>? res =
+                                  await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          IntakeSelect(intakeRoundIndex: i),
+                                    ),
+                                  );
+                              if (res != null) {
+                                setState(() {
+                                  // _intakeRounds[res.entries.elementAt(0).key]!
+                                  //     .consumeAllIntakes(
+                                  //       res.entries.elementAt(0).value,
+                                  //     );
+                                  getDailyData();
+                                  updateConsumptionRecords();
+                                });
+                              }
+                            },
+                            child: Container(
+                              height: 40,
+                              width: 40,
+                              decoration: BoxDecoration(
+                                color: Color(0xFFDFF1FF),
+                                borderRadius: BorderRadius.circular(20),
                               ),
-                              Text(
-                                ' / ${_intakeRounds.entries.elementAt(i).value.getRequiredEnergy().toStringAsFixed(0)} kcal',
-                                style: TextStyle(
-                                  color: Color(0xFF888888),
-                                  fontWeight: FontWeight.w600,
+                              child: Center(
+                                child: Icon(
+                                  Icons.add,
+                                  color: Color(0xFF1457A5),
                                 ),
                               ),
-                            ],
+                            ),
                           ),
                         ],
                       ),
-                    ),
-                    SizedBox(width: screenWidth - 310),
-                    GestureDetector(
-                      onTap: () async {
-                        final Map<String, List<Intake>>? res =
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    IntakeSelect(intakeRoundIndex: i),
-                              ),
-                            );
-                        if (res != null) {
-                          setState(() {
-                            _intakeRounds[res.entries.elementAt(0).key]!
-                                .consumeAllIntakes(
-                                  res.entries.elementAt(0).value,
-                                );
-                            updateConsumptionRecords();
-                          });
-                        }
-                      },
-                      child: Container(
-                        height: 40,
-                        width: 40,
-                        decoration: BoxDecoration(
-                          color: Color(0xFFDFF1FF),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Center(
-                          child: Icon(Icons.add, color: Color(0xFF1457A5)),
+                      AnimatedContainer(
+                        duration: Duration(milliseconds: 250),
+                        height: _showIntakeRoundDetails[i] ? 160 : 0,
+                        child: SingleChildScrollView(
+                          child: Column(
+                            spacing: 10,
+                            children: [
+                              for (
+                                int idx = 0;
+                                idx <
+                                    _intakeRounds.values
+                                        .toList()[i]
+                                        .consumedIntakes()
+                                        .length;
+                                idx++
+                              )
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) {
+                                          return IntakeDetails(
+                                            selectedIntake: _intakeRounds
+                                                .entries
+                                                .elementAt(i)
+                                                .value
+                                                .consumedIntakes()[idx],
+                                          );
+                                        },
+                                      ),
+                                    );
+                                  },
+                                  child: Container(
+                                    margin: EdgeInsetsGeometry.symmetric(
+                                      horizontal: 20,
+                                    ),
+                                    padding: EdgeInsetsGeometry.all(10),
+                                    decoration: BoxDecoration(
+                                      // borderRadius: BorderRadius.circular(16),
+                                      border: BoxBorder.fromLTRB(
+                                        top: BorderSide(
+                                          color: Color(0xFFC1C8DA),
+                                          width: 1,
+                                        ),
+                                        bottom: BorderSide.none,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            SizedBox(
+                                              width: screenWidth - 130,
+                                              child: Text(
+                                                _intakeRounds.entries
+                                                    .elementAt(i)
+                                                    .value
+                                                    .consumedIntakes()[idx]
+                                                    .name(),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: AppTextStyle.heading6
+                                                    .copyWith(
+                                                      color: Color(0xFF555555),
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                    ),
+                                              ),
+                                            ),
+                                            Text(
+                                              '${_intakeRounds.entries.elementAt(i).value.consumedIntakes()[idx].energy()} kcal, ${_intakeRounds.entries.elementAt(i).value.consumedIntakes()[idx].quantity()} g',
+                                              style: AppTextStyle
+                                                  .primaryBoldText
+                                                  .copyWith(
+                                                    color: Color(0xFF999999),
+                                                  ),
+                                            ),
+                                          ],
+                                        ),
+                                        // Expanded(
+                                        //   child: Row(
+                                        //     mainAxisAlignment:
+                                        //         MainAxisAlignment.end,
+                                        //     children: [
+                                        //       GestureDetector(
+                                        //         onTap: () async {
+                                        //           final response =
+                                        //               await CustomRecipe()
+                                        //                   .deleteRecipe(
+                                        //                     _customRecipeList[i]
+                                        //                         .id(),
+                                        //                   );
+                                        //
+                                        //           _showSnackBar(
+                                        //             response['message'],
+                                        //           );
+                                        //
+                                        //           if (response['status_ok']) {
+                                        //             setState(() {
+                                        //               _customRecipeList.removeAt(
+                                        //                 i,
+                                        //               );
+                                        //               if (_customRecipeList
+                                        //                   .isEmpty) {
+                                        //                 // _showSelectedIntakes = false;
+                                        //               }
+                                        //             });
+                                        //           }
+                                        //         },
+                                        //         child: Container(
+                                        //           padding: EdgeInsetsGeometry.all(
+                                        //             8,
+                                        //           ),
+                                        //           decoration: BoxDecoration(
+                                        //             color: Color(0xFFEEEEEE),
+                                        //             shape: BoxShape.circle,
+                                        //           ),
+                                        //           child: Icon(
+                                        //             Icons.cancel_outlined,
+                                        //             color: Color(0xFFFF9898),
+                                        //           ),
+                                        //         ),
+                                        //       ),
+                                        //     ],
+                                        //   ),
+                                        // ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             SizedBox(height: 28),
@@ -1260,10 +1453,19 @@ class _DashboardState extends State<Dashboard> {
                             },
                           );
                       if (res != null) {
-                        setState(() {
-                          _requiredWater = int.parse(res['goal']!);
-                          _waterCupSize = int.parse(res['cup']!);
-                        });
+                        _requiredWater = int.parse(res['goal']!);
+                        _waterCupSize = int.parse(res['cup']!);
+                        final response = await UserServices().updateDailyTarget(
+                          water: _requiredWater.toDouble(),
+                        );
+                        // setState(() {
+                        if (response['message'] != null) {
+                          _showSnackBar(response['message']);
+                        }
+                        // });
+                        // if(response['status_ok']) {
+                        //   showSnackBar(response['massage']);
+                        // }
                       }
                     },
                     child: Row(
@@ -1379,12 +1581,46 @@ class _DashboardState extends State<Dashboard> {
                       ],
                     ),
                     GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          if (_drankWater < _requiredWater) {
+                      onTap: () async {
+                        // setState(() {
+                        if (_drankWater < _requiredWater) {
+                          setState(() {
                             _drankWater += _waterCupSize;
-                          }
-                        });
+                          });
+
+                          final response = await DailyDataServices().addWater(
+                            _waterCupSize.toDouble(),
+                          );
+
+                          if (!context.mounted) return;
+
+                          // print('////////////////// $response //////////////');
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              margin: EdgeInsetsGeometry.symmetric(
+                                horizontal: 40,
+                                vertical: 40,
+                              ),
+                              padding: EdgeInsetsGeometry.symmetric(
+                                horizontal: 20,
+                                vertical: 14,
+                              ),
+                              behavior: SnackBarBehavior.floating,
+                              backgroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              content: Text(
+                                response['message'],
+                                style: AppTextStyle.primaryText.copyWith(
+                                  color: Color(0xFF000000),
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+                        // });
                       },
                       child: Container(
                         height: 80,
