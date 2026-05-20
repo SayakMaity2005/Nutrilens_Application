@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 
 class UserServices {
   final storage = FlutterSecureStorage();
-  static const String _baseUrl = "http://192.168.1.4:8000";
+  static const String _baseUrl = "https://nutrilens-application.onrender.com";
 
   Future<Map<String, dynamic>> getUser() async {
     String? token = await storage.read(key: "access_token");

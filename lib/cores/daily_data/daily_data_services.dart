@@ -21,7 +21,7 @@ class DailyDataServices {
     try {
       final response = await http.get(
         Uri.parse(
-          "http://192.168.1.4:8000/daily_data/get_daily_data",
+          "https://nutrilens-application.onrender.com/daily_data/get_daily_data",
         ).replace(queryParameters: {"date": selectedDate}),
 
         headers: {"Authorization": "Bearer $token"},
@@ -65,7 +65,7 @@ class DailyDataServices {
     String? token = await storage.read(key: "access_token");
     try {
       final response = await http.post(
-        Uri.parse("http://192.168.1.4:8000/daily_data/add_meal"),
+        Uri.parse("https://nutrilens-application.onrender.com/daily_data/add_meal"),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token"
@@ -102,7 +102,7 @@ class DailyDataServices {
 
     try {
       final response = await http.post(
-        Uri.parse("http://192.168.1.4:8000/daily_data/add_meal"),
+        Uri.parse("https://nutrilens-application.onrender.com/daily_data/add_meal"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -127,7 +127,7 @@ class DailyDataServices {
     String? token = await storage.read(key: "access_token");
     try {
       final response = await http.post(
-        Uri.parse("http://192.168.1.4:8000/daily_data/add_water").replace(
+        Uri.parse("https://nutrilens-application.onrender.com/daily_data/add_water").replace(
           queryParameters: {"water_quantity": quantity.toString()}
         ),
         headers: {"Authorization": "Bearer $token"},

@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class MeetingServices {
-  static const String _baseUrl = "http://192.168.1.4:8000";
+  static const String _baseUrl = "https://nutrilens-application.onrender.com";
   final _storage = const FlutterSecureStorage();
 
   Future<Map<String, dynamic>> bookMeeting({
