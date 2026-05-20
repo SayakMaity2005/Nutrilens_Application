@@ -39,8 +39,8 @@ class CustomRecipe {
     try {
       final response = await http.post(
         Uri.parse(
-          // "https://nutrilens-application.onrender.com/custom_recipe/add_recipe",
-          "http://10.0.2.2:8000/custom_recipe/add_recipe",
+          "https://nutrilens-application.onrender.com/custom_recipe/add_recipe",
+          // "http://10.0.2.2:8000/custom_recipe/add_recipe",
         ),
 
         headers: {
@@ -78,7 +78,7 @@ class CustomRecipe {
       final response = await http.get(
         Uri.parse(
           // "https://nutrilens-application.onrender.com/custom_recipe/add_recipe",
-          "http://10.0.2.2:8000/custom_recipe/get_all",
+          "http://nutrilens-application.onrender.com/custom_recipe/get_all",
         ),
 
         headers: {"Authorization": "Bearer $token"},
@@ -112,7 +112,7 @@ class CustomRecipe {
       final response = await http.delete(
         Uri.parse(
           // "https://nutrilens-application.onrender.com/custom_recipe/add_recipe",
-          "http://10.0.2.2:8000/custom_recipe/delete_recipe",
+          "http://nutrilens-application.onrender.com/custom_recipe/delete_recipe",
         ).replace(queryParameters: {"recipe_id": recipeId}),
 
         headers: {"Authorization": "Bearer $token"},
