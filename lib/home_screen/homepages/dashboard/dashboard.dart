@@ -102,7 +102,7 @@ class _DashboardState extends State<Dashboard> {
   Map<String, dynamic> _userData = {};
   bool _gotDailyData = false;
   List<dynamic> _nudges = [];
-  List<bool> _showIntakeRoundDetails = [false, false, false, false];
+  List<bool>? _showIntakeRoundDetails = [false, false, false, false];
 
   @override
   void initState() {
@@ -432,6 +432,7 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   Widget build(BuildContext context) {
+    _showIntakeRoundDetails ??= [false, false, false, false];
     final screenSize = MediaQuery.of(context).size;
     final screenHeight = screenSize.height;
     final screenWidth = screenSize.width;
@@ -1123,7 +1124,7 @@ class _DashboardState extends State<Dashboard> {
               GestureDetector(
                 onTap: () {
                   setState(() {
-                    _showIntakeRoundDetails[i] = _showIntakeRoundDetails[i]
+                    _showIntakeRoundDetails![i] = _showIntakeRoundDetails![i]
                         ? false
                         : true;
                   });
@@ -1145,7 +1146,7 @@ class _DashboardState extends State<Dashboard> {
                     border: BoxBorder.all(color: Color(0xFFE1E9FF), width: 1),
                   ),
                   child: Column(
-                    spacing: _showIntakeRoundDetails[i] ? 16 : 0,
+                    spacing: _showIntakeRoundDetails![i] ? 16 : 0,
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -1234,7 +1235,7 @@ class _DashboardState extends State<Dashboard> {
                       ),
                       AnimatedContainer(
                         duration: Duration(milliseconds: 250),
-                        height: _showIntakeRoundDetails[i] ? 160 : 0,
+                        height: _showIntakeRoundDetails![i] ? 160 : 0,
                         child: SingleChildScrollView(
                           child: Column(
                             spacing: 10,
