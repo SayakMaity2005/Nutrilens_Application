@@ -29,6 +29,22 @@ class _AddWorkoutSheetState extends State<AddWorkoutSheet> {
     _fetchDefaultWorkouts();
   }
 
+  void _showSnackBar(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        margin: EdgeInsetsGeometry.symmetric(horizontal: 40, vertical: 40),
+        padding: EdgeInsetsGeometry.symmetric(horizontal: 20, vertical: 14),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        content: Text(
+          msg,
+          style: AppTextStyle.primaryText.copyWith(color: Color(0xFF000000)),
+        ),
+      ),
+    );
+  }
+
   Future<void> _fetchDefaultWorkouts() async {
     final response = await _workoutServices.getDefaultWorkouts();
     if (response['status_ok']) {
@@ -41,9 +57,7 @@ class _AddWorkoutSheetState extends State<AddWorkoutSheet> {
         _isLoadingWorkouts = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(response['message'] ?? "Failed to fetch workouts")),
-        );
+        _showSnackBar( response['message'] ?? "Failed to fetch workouts");
       }
     }
   }
@@ -69,16 +83,12 @@ class _AddWorkoutSheetState extends State<AddWorkoutSheet> {
 
     if (response['status_ok']) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Workout added successfully!")),
-        );
+        _showSnackBar("Workout added successfully!");
         Navigator.pop(context, true); // Return true to trigger refresh
       }
     } else {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(response['message'] ?? "Error adding workout")),
-        );
+        _showSnackBar(response['message'] ?? "Error adding workout");
       }
     }
   }

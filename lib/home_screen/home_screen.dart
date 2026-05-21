@@ -246,7 +246,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(height: 4),
+              // const SizedBox(height: 4),
               Container(
                 height: 10,
                 width: 28,
