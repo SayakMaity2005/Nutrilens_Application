@@ -5,6 +5,8 @@ import base64
 from dotenv import load_dotenv
 import httpx
 import json
+from io import BytesIO
+from PIL import Image
 from Nutrilens_backend_source.schemas import IntakeInMeal, MealType
 from Nutrilens_backend_source.auth import get_current_active_user
 
@@ -28,72 +30,133 @@ async def analyze_food(
     and calculate nutritional content simultaneously.
     """
     
-    gemini_api_key = os.environ.get("GEMINI_KEY")
-    if not gemini_api_key:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="GEMINI_KEY is not set in the environment variables."
+    gemini_keys = [
+        key for key in [os.environ.get("GEMINI_KEY"), os.environ.get("GEMINI_KEY_2")]
+        if key and key != "your_second_api_key_here"
+    ]
+
+    if not gemini_keys:
+        # Fallback gracefully if no keys are configured
+        return IntakeInMeal(
+            name="Unidentified Food (No AI Key)",
+            meal_type=meal_type.value,
+            amount=quantity,
+            energy_per_unit=0,
+            carbs_per_unit=0,
+            protein_per_unit=0,
+            fat_per_unit=0
         )
 
     try:
-        # Read and encode the uploaded image
+        # Read the uploaded image
         file_content = await file.read()
-        mime_type = file.content_type
-        if not mime_type or not mime_type.startswith("image/"):
+        
+        # --- Image Compression Logic ---
+        try:
+            image = Image.open(BytesIO(file_content))
+            # Convert to RGB if it has an alpha channel (e.g. PNG)
+            if image.mode in ("RGBA", "P"):
+                image = image.convert("RGB")
+            
+            # Resize if the image is too large (max dimension 1024)
+            max_size = (1024, 1024)
+            image.thumbnail(max_size, Image.Resampling.LANCZOS)
+            
+            # Save compressed image to bytes
+            compressed_io = BytesIO()
+            image.save(compressed_io, format="JPEG", quality=85)
+            file_content = compressed_io.getvalue()
             mime_type = "image/jpeg"
-        base64_image = base64.b64encode(file_content).decode("utf-8")
+        except Exception as compression_error:
+            print(f"Image compression skipped due to error: {compression_error}")
+            # Fallback to original content if PIL fails or is not installed
+            mime_type = file.content_type
+            if not mime_type or not mime_type.startswith("image/"):
+                mime_type = "image/jpeg"
+        # -------------------------------
         
-        system_prompt = (
-            "You are an expert nutritionist AI. The user has provided an image of food and specified the quantity consumed. "
-            "Your task is to visually identify the food and calculate its nutritional content for the specified amount. "
-            "Return ONLY a valid JSON object. Do NOT include markdown code blocks (```json) or any other text. "
-            "The JSON MUST have EXACTLY these keys: "
-            "'food_name' (string - clean and capitalized), 'energy_per_unit' (numeric kcal), 'carbs_per_unit' (numeric grams), "
-            "'protein_per_unit' (numeric grams), 'fat_per_unit' (numeric grams)."
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to read uploaded image: {e}"
         )
-        
-        user_prompt = f"Identify the food in this image. The user consumed {quantity} grams of it. Calculate the total nutritional values for {quantity} grams."
-        
-        async with httpx.AsyncClient() as client:
-            gemini_response = await client.post(
-                GEMINI_API_URL,
-                headers={
-                    "Content-Type": "application/json",
-                    "x-goog-api-key": gemini_api_key
-                },
-                json={
-                    "systemInstruction": {
-                        "parts": [{"text": system_prompt}]
+
+    base64_image = base64.b64encode(file_content).decode("utf-8")
+    
+    system_prompt = (
+        "You are an expert nutritionist AI. The user has provided an image of food and specified the quantity consumed. "
+        "Your task is to visually identify the food and calculate its nutritional content for the specified amount. "
+        "Return ONLY a valid JSON object. Do NOT include markdown code blocks (```json) or any other text. "
+        "The JSON MUST have EXACTLY these keys: "
+        "'food_name' (string - clean and capitalized), 'energy_per_unit' (numeric kcal), 'carbs_per_unit' (numeric grams), "
+        "'protein_per_unit' (numeric grams), 'fat_per_unit' (numeric grams)."
+    )
+    
+    user_prompt = f"Identify the food in this image. The user consumed {quantity} grams of it. Calculate the total nutritional values for {quantity} grams."
+    
+    reply_content = None
+    success = False
+
+    async with httpx.AsyncClient() as client:
+        for api_key in gemini_keys:
+            try:
+                gemini_response = await client.post(
+                    GEMINI_API_URL,
+                    headers={
+                        "Content-Type": "application/json",
+                        "x-goog-api-key": api_key
                     },
-                    "contents": [
-                        {
-                            "parts": [
-                                {"text": user_prompt},
-                                {
-                                    "inlineData": {
-                                        "mimeType": mime_type,
-                                        "data": base64_image
+                    json={
+                        "systemInstruction": {
+                            "parts": [{"text": system_prompt}]
+                        },
+                        "contents": [
+                            {
+                                "parts": [
+                                    {"text": user_prompt},
+                                    {
+                                        "inlineData": {
+                                            "mimeType": mime_type,
+                                            "data": base64_image
+                                        }
                                     }
-                                }
-                            ]
+                                ]
+                            }
+                        ],
+                        "generationConfig": {
+                            "temperature": 0.1
                         }
-                    ],
-                    "generationConfig": {
-                        "temperature": 0.1
-                    }
-                },
-                timeout=30.0
-            )
-            
-        if gemini_response.status_code != 200:
-            raise HTTPException(
-                status_code=status.HTTP_502_BAD_GATEWAY,
-                detail=f"Error from Gemini API: {gemini_response.text}"
-            )
-            
-        gemini_data = gemini_response.json()
-        reply_content = gemini_data['candidates'][0]['content']['parts'][0]['text'].strip()
-        
+                    },
+                    timeout=30.0
+                )
+                
+                if gemini_response.status_code == 200:
+                    gemini_data = gemini_response.json()
+                    reply_content = gemini_data['candidates'][0]['content']['parts'][0]['text'].strip()
+                    success = True
+                    break
+                else:
+                    print(f"Gemini API Error with key {api_key[:5]}...: {gemini_response.status_code} - {gemini_response.text}")
+                    # Attempt next key on failure
+                    continue
+                    
+            except Exception as e:
+                print(f"Exception during Gemini API call with key {api_key[:5]}...: {e}")
+                continue
+
+    if not success:
+        print("All Gemini API keys failed or exhausted. Returning graceful degradation fallback.")
+        return IntakeInMeal(
+            name="Unidentified Food (AI Offline)",
+            meal_type=meal_type.value,
+            amount=quantity,
+            energy_per_unit=0,
+            carbs_per_unit=0,
+            protein_per_unit=0,
+            fat_per_unit=0
+        )
+
+    try:
         # Strip potential markdown formatting if LLM ignores instructions
         if reply_content.startswith("```json"):
             reply_content = reply_content.replace("```json", "", 1)
@@ -115,12 +178,13 @@ async def analyze_food(
         return intake
         
     except json.JSONDecodeError:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to parse Gemini output as JSON: {reply_content}"
-        )
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to communicate with Gemini API: {str(e)}"
+        print(f"Failed to parse Gemini output as JSON: {reply_content}")
+        return IntakeInMeal(
+            name="Unidentified Food (Format Error)",
+            meal_type=meal_type.value,
+            amount=quantity,
+            energy_per_unit=0,
+            carbs_per_unit=0,
+            protein_per_unit=0,
+            fat_per_unit=0
         )

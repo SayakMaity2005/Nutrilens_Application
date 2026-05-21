@@ -4,10 +4,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:nutrilens_test/cores/api_config.dart';
 
 class UserServices {
   final storage = FlutterSecureStorage();
-  static const String _baseUrl = "https://nutrilens-application.onrender.com";
+  static String get _baseUrl => ApiConfig.baseUrl;
 
   Future<Map<String, dynamic>> getUser() async {
     String? token = await storage.read(key: "access_token");

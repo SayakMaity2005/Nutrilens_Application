@@ -6,9 +6,10 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 import '../custom_datatypes/custom_classes.dart';
+import 'package:nutrilens_test/cores/api_config.dart';
 
 class CustomRecipe {
-  static const String _baseUrl = "https://nutrilens-application.onrender.com";
+  static String get _baseUrl => ApiConfig.baseUrl;
   final storage = FlutterSecureStorage();
 
   Future<Map<String, dynamic>> addRecipe(
