@@ -65,30 +65,14 @@ class _AmountInputScreenState extends State<AmountInputScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        const Text(
-                          "Nutrilens",
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w900,
-                            color: Color(0xFF0F2D3F),
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Colors.teal.shade400,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Text(
-                            "PRO",
-                            style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
-                          ),
-                        )
-                      ],
+                    const Text(
+                      "Nutrilens",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF0F2D3F),
+                        letterSpacing: -0.5,
+                      ),
                     ),
                     IconButton(
                       icon: const Icon(Icons.close, color: Colors.grey, size: 28),

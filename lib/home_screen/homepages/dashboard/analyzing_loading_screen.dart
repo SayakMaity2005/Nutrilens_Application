@@ -178,30 +178,14 @@ class _AnalyzingLoadingScreenState extends State<AnalyzingLoadingScreen>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        const Text(
-                          "Nutrilens",
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w900,
-                            color: Color(0xFF0F2D3F),
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Colors.teal.shade400,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Text(
-                            "PRO",
-                            style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
-                          ),
-                        )
-                      ],
+                    const Text(
+                      "Nutrilens",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF0F2D3F),
+                        letterSpacing: -0.5,
+                      ),
                     ),
                     if (_showProAds)
                       IconButton(
@@ -282,13 +266,15 @@ class _AnalyzingLoadingScreenState extends State<AnalyzingLoadingScreen>
                 ),
               ),
 
+              SizedBox(height: 180,),
+
               // Bottom Section
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                child: _showProAds
-                    ? _buildPricingSection()
-                    : _buildLoadingState(),
-              ),
+              // AnimatedSwitcher(
+              //   duration: const Duration(milliseconds: 300),
+              //   child: _showProAds
+              //       ? _buildPricingSection()
+              //       : _buildLoadingState(),
+              // ),
             ],
           ),
         ),

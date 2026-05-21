@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:nutrilens_test/cores/constants/colors.dart';
@@ -69,7 +70,7 @@ class _ProgressPageState extends State<ProgressPage> {
         final heightCm = (profile['height'] ?? 170.0).toDouble();
         _currentHeightCm = heightCm;
         _currentWeightLbs = weightKg * 2.20462;
-        
+
         final heightM = heightCm / 100;
         if (heightM > 0) {
           _userBMI = weightKg / (heightM * heightM);
@@ -178,7 +179,7 @@ class _ProgressPageState extends State<ProgressPage> {
         final box = keyContext.findRenderObject() as RenderBox?;
         if (box != null && box.attached) {
           final position = box.localToGlobal(Offset.zero).dy;
-          
+
           // We want the index of the section that is closest to the top bar (approx 200px from top)
           double distance = (position - 220).abs();
           if (distance < minDistance) {
@@ -212,7 +213,7 @@ class _ProgressPageState extends State<ProgressPage> {
         alignment: 0.12, // Align near the top but below the sticky header
       );
     }
-    
+
     Future.delayed(const Duration(milliseconds: 100), () {
       _isScrollingFromTap = false;
     });
@@ -256,45 +257,38 @@ class _ProgressPageState extends State<ProgressPage> {
         SliverPersistentHeader(
           pinned: true,
           delegate: _StickyTopBarDelegate(
-            child: Container(
-              color: palette.screenColor.withOpacity(0.95), // Slight transparency
-              padding: const EdgeInsets.only(top: 10, bottom: 10),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Row(
-                      // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Row(
+            child: ClipRRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                child: Container(
+                  color: palette.screenColor.withValues(alpha: 0.0), // transparency
+                  padding: const EdgeInsets.only(top: 10, bottom: 10),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Row(
+                          // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text("Trends", style: AppTextStyle.heading2.copyWith(color: palette.headingBlueText, fontWeight: FontWeight.w800)),
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFE0F2F1),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: const Text("PRO", style: TextStyle(color: Color(0xFF00695C), fontSize: 10, fontWeight: FontWeight.bold)),
-                            ),
+                            Text("Trends", style: AppTextStyle.heading2.copyWith(color: palette.headingBlueText, fontWeight: FontWeight.w700)),
+                            // const CircleAvatar(
+                            //   radius: 18,
+                            //   backgroundColor: Color(0xFFE0E0E0),
+                            //   child: Icon(Icons.person, color: Colors.white, size: 24),
+                            // ),
                           ],
                         ),
-                        // const CircleAvatar(
-                        //   radius: 18,
-                        //   backgroundColor: Color(0xFFE0E0E0),
-                        //   child: Icon(Icons.person, color: Colors.white, size: 24),
-                        // ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildCategorySelector(palette),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  _buildCategorySelector(palette),
-                ],
+                ),
               ),
             ),
+
             maxExtent: 140,
             minExtent: 140,
           ),

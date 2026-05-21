@@ -9,11 +9,8 @@ import '../../home_screen.dart' as nutrilens_test_home;
 
 class IntakeDetails extends StatefulWidget {
   final Intake selectedIntake;
-  
-  const IntakeDetails({
-    super.key, 
-    required this.selectedIntake,
-  });
+
+  const IntakeDetails({super.key, required this.selectedIntake});
   @override
   State<IntakeDetails> createState() => _IntakeDetailsState();
 }
@@ -40,6 +37,22 @@ class _IntakeDetailsState extends State<IntakeDetails> {
       'protein': (protein * 100) / total,
       'fat': (fat * 100) / total,
     };
+  }
+
+  void _showSnackBar(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        margin: EdgeInsetsGeometry.symmetric(horizontal: 40, vertical: 40),
+        padding: EdgeInsetsGeometry.symmetric(horizontal: 20, vertical: 14),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        content: Text(
+          msg,
+          style: AppTextStyle.primaryText.copyWith(color: Color(0xFF000000)),
+        ),
+      ),
+    );
   }
 
   @override
@@ -84,8 +97,11 @@ class _IntakeDetailsState extends State<IntakeDetails> {
           // mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Container(
-              margin: EdgeInsetsGeometry.symmetric(horizontal: 20, vertical: 10),
-              child: Text(_selectIntake.name(), style: AppTextStyle.heading4,),
+              margin: EdgeInsetsGeometry.symmetric(
+                horizontal: 20,
+                vertical: 10,
+              ),
+              child: Text(_selectIntake.name(), style: AppTextStyle.heading4),
             ),
             Container(
               margin: EdgeInsetsGeometry.all(16),
@@ -382,72 +398,78 @@ class _IntakeDetailsState extends State<IntakeDetails> {
                 ],
               ),
             ),
-              SizedBox(height: 100), // space for FAB
+            SizedBox(height: 100), // space for FAB
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          // Show loading
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => Center(child: CircularProgressIndicator()),
+          );
+
+          // Determine meal type by time
+          final hour = DateTime.now().hour;
+          String computedMealType = "lunch";
+          if (hour < 11)
+            computedMealType = "breakfast";
+          else if (hour < 16)
+            computedMealType = "lunch";
+          else if (hour < 19)
+            computedMealType = "snacks";
+          else
+            computedMealType = "dinner";
+
+          // Prepare payload
+          final mealData = {
+            "meal_type": computedMealType,
+            "consumed_intakes": [
+              {
+                "name": _selectIntake.name(),
+                "type": _selectIntake.type(),
+                "energy_per_unit": _selectIntake.energyPerUnit(),
+                "quantity": _selectIntake.quantity(),
+                "carbs_per_unit": _selectIntake.carbsPerUnit(),
+                "protein_per_unit": _selectIntake.proteinPerUnit(),
+                "fat_per_unit": _selectIntake.fatPerUnit(),
+              },
             ],
-          ),
-        ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () async {
-            // Show loading
-            showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (context) => Center(child: CircularProgressIndicator()),
+          };
+
+          // Send to backend
+          // Requires importing 'package:nutrilens_test/cores/daily_data/daily_data_services.dart';
+          final response = await DailyDataServices().addMeal(mealData);
+
+          // Close loading
+          Navigator.pop(context);
+
+          if (response['status_ok']) {
+            if (!mounted) return;
+            _showSnackBar('Added to your progress!');
+
+            // Force the app to restart at HomeScreen so Dashboard refreshes its data!
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (context) => const nutrilens_test_home.HomeScreen(),
+              ),
+              (Route<dynamic> route) => false,
             );
-
-            // Determine meal type by time
-            final hour = DateTime.now().hour;
-            String computedMealType = "lunch";
-            if (hour < 11) computedMealType = "breakfast";
-            else if (hour < 16) computedMealType = "lunch";
-            else if (hour < 19) computedMealType = "snacks";
-            else computedMealType = "dinner";
-
-            // Prepare payload
-            final mealData = {
-              "meal_type": computedMealType,
-              "consumed_intakes": [
-                {
-                  "name": _selectIntake.name(),
-                  "type": _selectIntake.type(),
-                  "energy_per_unit": _selectIntake.energyPerUnit(),
-                  "quantity": _selectIntake.quantity(),
-                  "carbs_per_unit": _selectIntake.carbsPerUnit(),
-                  "protein_per_unit": _selectIntake.proteinPerUnit(),
-                  "fat_per_unit": _selectIntake.fatPerUnit(),
-                }
-              ]
-            };
-
-            // Send to backend
-            // Requires importing 'package:nutrilens_test/cores/daily_data/daily_data_services.dart';
-            final response = await DailyDataServices().addMeal(mealData);
-
-            // Close loading
-            Navigator.pop(context);
-
-            if (response['status_ok']) {
-              if (!mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Added to your diary!')),
-              );
-              
-              // Force the app to restart at HomeScreen so Dashboard refreshes its data!
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (context) => const nutrilens_test_home.HomeScreen()),
-                (Route<dynamic> route) => false,
-              );
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Error: ${response['message']}')),
-              );
-            }
-          },
-          label: Text('Add to Diary', style: TextStyle(fontWeight: FontWeight.bold)),
-          icon: Icon(Icons.add),
-          backgroundColor: Color(0xFF4A90E2),
+          } else {
+            _showSnackBar('Error: ${response['message']}');
+          }
+        },
+        label: Text(
+          'Add to Progress',
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
-      );
+        icon: Icon(Icons.add),
+        foregroundColor: Colors.white,
+        backgroundColor: Color(0xFF4A90E2),
+      ),
+    );
     // extendBodyBehindAppBar: true,
   }
 }

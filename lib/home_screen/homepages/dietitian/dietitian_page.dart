@@ -26,16 +26,16 @@ class _DietitianPageState extends State<DietitianPage> {
 
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
-    
+
     // Fetch data in parallel to reduce loading time by half
     final results = await Future.wait([
       DieticianServices().getAvailableDieticians(),
       MeetingServices().getMyMeetings(),
     ]);
-    
+
     final dieticians = results[0] as List<Map<String, dynamic>>;
     final meetings = results[1] as List<Map<String, dynamic>>;
-    
+
     setState(() {
       _availableDieticians = dieticians;
       _myMeetings = meetings.where((m) => m["status"] == "scheduled").toList();
@@ -71,13 +71,18 @@ class _DietitianPageState extends State<DietitianPage> {
                 children: [
                   Text("Book a Meeting", style: AppTextStyle.heading4),
                   const SizedBox(height: 10),
-                  Text("with ${dietician['full_name'] ?? dietician['username']}", style: const TextStyle(fontSize: 16)),
+                  Text(
+                    "with ${dietician['full_name'] ?? dietician['username']}",
+                    style: const TextStyle(fontSize: 16),
+                  ),
                   const SizedBox(height: 20),
-                  
+
                   // Date Picker
                   ListTile(
                     title: const Text("Select Date"),
-                    subtitle: Text("${selectedDate.day}/${selectedDate.month}/${selectedDate.year}"),
+                    subtitle: Text(
+                      "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}",
+                    ),
                     trailing: const Icon(Icons.calendar_today),
                     onTap: () async {
                       final picked = await showDatePicker(
@@ -91,7 +96,7 @@ class _DietitianPageState extends State<DietitianPage> {
                       }
                     },
                   ),
-                  
+
                   // Time Picker
                   ListTile(
                     title: const Text("Select Time"),
@@ -107,7 +112,7 @@ class _DietitianPageState extends State<DietitianPage> {
                       }
                     },
                   ),
-                  
+
                   const SizedBox(height: 10),
                   TextField(
                     controller: notesController,
@@ -118,23 +123,26 @@ class _DietitianPageState extends State<DietitianPage> {
                     maxLines: 2,
                   ),
                   const SizedBox(height: 20),
-                  
+
                   SizedBox(
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: palette.selectColor3,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                       onPressed: () async {
                         // Show loading on top of the modal
                         showDialog(
                           context: context,
                           barrierDismissible: false,
-                          builder: (c) => const Center(child: CircularProgressIndicator()),
+                          builder: (c) =>
+                              const Center(child: CircularProgressIndicator()),
                         );
-                        
+
                         final dateTime = DateTime(
                           selectedDate.year,
                           selectedDate.month,
@@ -142,27 +150,28 @@ class _DietitianPageState extends State<DietitianPage> {
                           selectedTime.hour,
                           selectedTime.minute,
                         );
-                        
+
                         final res = await MeetingServices().bookMeeting(
                           dieticianId: dietician['id'],
                           scheduledAt: dateTime,
                           notes: notesController.text,
                         );
-                        
+
                         if (!context.mounted) return;
-                        
+
                         Navigator.pop(context); // Close loading dialog
                         Navigator.pop(context); // Close modal bottom sheet
-                        
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(res['message'])),
-                        );
-                        
+
+                        _showSnackBar(res['message']);
+
                         if (res['status_ok']) {
                           _loadData();
                         }
                       },
-                      child: const Text("Confirm Booking", style: TextStyle(color: Colors.white, fontSize: 16)),
+                      child: const Text(
+                        "Confirm Booking",
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -201,14 +210,14 @@ class _DietitianPageState extends State<DietitianPage> {
             _buildFeaturedDieticianCard(screenWidth, palette),
             const SizedBox(height: 25),
             _buildNutritionSummaryCard(screenWidth, palette),
-            
+
             if (_myMeetings.isNotEmpty) ...[
               const SizedBox(height: 25),
               _buildSectionTitle("Upcoming Appointments"),
               const SizedBox(height: 15),
               _buildMyAppointmentsSection(screenWidth, palette),
             ],
-            
+
             const SizedBox(height: 25),
             _buildSectionTitle("Food Scan Review"),
             const SizedBox(height: 10),
@@ -254,7 +263,10 @@ class _DietitianPageState extends State<DietitianPage> {
               children: [
                 Icon(Icons.search, color: Colors.grey),
                 SizedBox(width: 10),
-                Text("Search by name or specialty", style: TextStyle(color: Colors.grey)),
+                Text(
+                  "Search by name or specialty",
+                  style: TextStyle(color: Colors.grey),
+                ),
               ],
             ),
           ),
@@ -264,7 +276,7 @@ class _DietitianPageState extends State<DietitianPage> {
           height: 50,
           width: 50,
           decoration: BoxDecoration(
-            color: palette.selectColor4.withOpacity(0.3),
+            color: palette.selectColor4.withValues(alpha: 0.3),
             shape: BoxShape.circle,
           ),
           child: Icon(Icons.tune, color: palette.headingBlueText),
@@ -276,7 +288,10 @@ class _DietitianPageState extends State<DietitianPage> {
   Widget _buildFeaturedDieticianCard(double width, AppPalette palette) {
     if (_availableDieticians.isEmpty) return const SizedBox.shrink();
     final topDietician = _availableDieticians.first;
-    final name = topDietician['full_name'] ?? topDietician['username'] ?? 'Expert Dietician';
+    final name =
+        topDietician['full_name'] ??
+        topDietician['username'] ??
+        'Expert Dietician';
     final spec = topDietician['specialization'] ?? 'General Nutrition';
 
     return Container(
@@ -284,17 +299,20 @@ class _DietitianPageState extends State<DietitianPage> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [palette.selectColor3, palette.selectColor3.withOpacity(0.7)],
+          colors: [
+            palette.selectColor3,
+            palette.selectColor3.withValues(alpha: 0.7),
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: palette.selectColor3.withOpacity(0.3),
+            color: palette.selectColor3.withValues(alpha: 0.3),
             blurRadius: 15,
             offset: const Offset(0, 8),
-          )
+          ),
         ],
       ),
       child: Row(
@@ -309,10 +327,14 @@ class _DietitianPageState extends State<DietitianPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text("Featured Pro", style: TextStyle(color: Colors.amber, fontSize: 12, fontWeight: FontWeight.bold)),
+                // const Text("Featured Pro", style: TextStyle(color: Colors.amber, fontSize: 12, fontWeight: FontWeight.bold)),
                 Text(
                   name,
-                  style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -324,17 +346,27 @@ class _DietitianPageState extends State<DietitianPage> {
                 GestureDetector(
                   onTap: () => _showBookingModal(topDietician, palette),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Text("Book Now", style: TextStyle(color: palette.selectColor3, fontSize: 12, fontWeight: FontWeight.bold)),
+                    child: Text(
+                      "Book Now",
+                      style: TextStyle(
+                        color: palette.selectColor3,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
@@ -375,9 +407,7 @@ class _DietitianPageState extends State<DietitianPage> {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     } else {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not launch video call')),
-        );
+        _showSnackBar('Could not launch video call');
       }
     }
   }
@@ -392,7 +422,12 @@ class _DietitianPageState extends State<DietitianPage> {
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: Colors.grey.shade200),
         ),
-        child: const Center(child: Text("No upcoming meetings.", style: TextStyle(color: Colors.grey))),
+        child: const Center(
+          child: Text(
+            "No upcoming meetings.",
+            style: TextStyle(color: Colors.grey),
+          ),
+        ),
       );
     }
 
@@ -401,7 +436,7 @@ class _DietitianPageState extends State<DietitianPage> {
         final dieticianName = meeting['dietician_name'] ?? 'Dietician';
         final date = DateTime.tryParse(meeting['scheduled_at'] ?? '');
         final status = meeting['status'] ?? 'scheduled';
-        
+
         return Container(
           width: width,
           margin: const EdgeInsets.only(bottom: 10),
@@ -421,22 +456,37 @@ class _DietitianPageState extends State<DietitianPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Meeting with $dieticianName", style: const TextStyle(fontWeight: FontWeight.bold)),
+                        Text(
+                          "Meeting with $dieticianName",
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
                         if (date != null)
-                          Text("${date.day}/${date.month}/${date.year} at ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}", 
-                               style: const TextStyle(color: Colors.grey, fontSize: 13)),
+                          Text(
+                            "${date.day}/${date.month}/${date.year} at ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}",
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 13,
+                            ),
+                          ),
                       ],
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.blue.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       status.toUpperCase(),
-                      style: const TextStyle(color: Colors.blue, fontSize: 10, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: Colors.blue,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
@@ -453,7 +503,10 @@ class _DietitianPageState extends State<DietitianPage> {
                     label: const Text("Join Call"),
                     style: TextButton.styleFrom(
                       foregroundColor: palette.selectColor1,
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                       minimumSize: Size.zero,
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
@@ -482,12 +535,17 @@ class _DietitianPageState extends State<DietitianPage> {
             children: [
               Icon(Icons.camera_alt, color: Colors.amber.shade800),
               const SizedBox(width: 10),
-              Text("Get a Pro-Review", style: AppTextStyle.heading5.copyWith(color: Colors.amber.shade900)),
+              Text(
+                "Get a Review",
+                style: AppTextStyle.heading5.copyWith(
+                  color: Colors.amber.shade900,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 10),
           const Text(
-            "Have a dietician analyze your last meal photo.",
+            "Have a dietitian analyze your last meal photo.",
             style: TextStyle(fontSize: 13, color: Colors.black87),
           ),
         ],
@@ -499,16 +557,27 @@ class _DietitianPageState extends State<DietitianPage> {
     if (_availableDieticians.isEmpty) {
       return const Padding(
         padding: EdgeInsets.all(20),
-        child: Center(child: Text("No verified dieticians available at the moment.", style: TextStyle(color: Colors.grey))),
+        child: Center(
+          child: Text(
+            "No verified dietitians available at the moment.",
+            style: TextStyle(color: Colors.grey),
+          ),
+        ),
       );
     }
-    
+
     return Column(
-      children: _availableDieticians.map((d) => _buildDieticianListItem(d, width, palette)).toList(),
+      children: _availableDieticians
+          .map((d) => _buildDieticianListItem(d, width, palette))
+          .toList(),
     );
   }
 
-  Widget _buildDieticianListItem(Map<String, dynamic> dietician, double width, AppPalette palette) {
+  Widget _buildDieticianListItem(
+    Map<String, dynamic> dietician,
+    double width,
+    AppPalette palette,
+  ) {
     final name = dietician['full_name'] ?? dietician['username'] ?? 'Dietician';
     final spec = dietician['specialization'] ?? 'General';
     final initial = name[0].toString().toUpperCase();
@@ -530,20 +599,49 @@ class _DietitianPageState extends State<DietitianPage> {
               color: palette.selectColor4.withOpacity(0.2),
               borderRadius: BorderRadius.circular(15),
             ),
-            child: Center(child: Text(initial, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: palette.headingBlueText))),
+            child: Center(
+              child: Text(
+                initial,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: palette.headingBlueText,
+                ),
+              ),
+            ),
           ),
           const SizedBox(width: 15),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16), maxLines: 1, overflow: TextOverflow.ellipsis),
-                Text(spec, style: const TextStyle(color: Colors.grey, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  spec,
+                  style: const TextStyle(color: Colors.grey, fontSize: 13),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 const SizedBox(height: 5),
                 Row(
                   children: [
-                    const Icon(Icons.supervised_user_circle, color: Colors.blue, size: 14),
-                    Text(" ${dietician['client_count'] ?? 0} clients", style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                    const Icon(
+                      Icons.supervised_user_circle,
+                      color: Colors.blue,
+                      size: 14,
+                    ),
+                    Text(
+                      " ${dietician['client_count'] ?? 0} clients",
+                      style: const TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
                   ],
                 ),
               ],
@@ -557,12 +655,34 @@ class _DietitianPageState extends State<DietitianPage> {
                 color: palette.selectColor3,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Text("Book", style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+              child: const Text(
+                "Book",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
-          )
+          ),
         ],
       ),
     );
   }
-}
 
+  void _showSnackBar(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        margin: EdgeInsetsGeometry.symmetric(horizontal: 40, vertical: 40),
+        padding: EdgeInsetsGeometry.symmetric(horizontal: 20, vertical: 14),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        content: Text(
+          msg,
+          style: AppTextStyle.primaryText.copyWith(color: Color(0xFF000000)),
+        ),
+      ),
+    );
+  }
+}

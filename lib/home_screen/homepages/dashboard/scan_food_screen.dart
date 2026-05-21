@@ -14,17 +14,19 @@ class ScanFoodScreen extends StatefulWidget {
 
 class _ScanFoodScreenState extends State<ScanFoodScreen> {
   CameraController? controller;
-  int _selectedModeIndex = 1; // 0: Barcode, 1: Food photo, 2: Ingredients
-  final List<String> _modes = ["Barcode", "Food photo", "Ingredients"];
+  int _selectedModeIndex = 0; // 0: Barcode, 1: Food photo, 2: Ingredients
+  final List<String> _modes = ["Food photo"];
 
   int _selectedCameraIndex = 0;
 
   Future<void> _initCamera(int cameraIndex) async {
     if (cameras.isEmpty) return;
-    
+
     // Default to back camera initially if possible
     if (controller == null) {
-      final backCameraIndex = cameras.indexWhere((c) => c.lensDirection == CameraLensDirection.back);
+      final backCameraIndex = cameras.indexWhere(
+        (c) => c.lensDirection == CameraLensDirection.back,
+      );
       if (backCameraIndex != -1) {
         cameraIndex = backCameraIndex;
         _selectedCameraIndex = backCameraIndex;
@@ -71,6 +73,24 @@ class _ScanFoodScreenState extends State<ScanFoodScreen> {
 
     return Scaffold(
       backgroundColor: Colors.black,
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        leadingWidth: 80,
+        title: const Text(
+          "Scan food",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+      ),
       body: Stack(
         children: [
           // Camera Preview
@@ -88,7 +108,7 @@ class _ScanFoodScreenState extends State<ScanFoodScreen> {
           Positioned.fill(
             child: ColorFiltered(
               colorFilter: ColorFilter.mode(
-                Colors.black.withOpacity(0.5),
+                Colors.black.withValues(alpha: 0.5),
                 BlendMode.srcOut,
               ),
               child: Stack(
@@ -122,36 +142,11 @@ class _ScanFoodScreenState extends State<ScanFoodScreen> {
               height: 300,
               width: 300,
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.white.withOpacity(0.5), width: 2),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.5),
+                  width: 2,
+                ),
                 borderRadius: BorderRadius.circular(30),
-              ),
-            ),
-          ),
-
-          // Top Controls
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  const Text(
-                    "Scan food",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.auto_fix_high, color: Colors.white),
-                    onPressed: () {},
-                  ),
-                ],
               ),
             ),
           ),
@@ -177,13 +172,16 @@ class _ScanFoodScreenState extends State<ScanFoodScreen> {
                           onTap: () async {
                             try {
                               final ImagePicker picker = ImagePicker();
-                              final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-                              
+                              final XFile? image = await picker.pickImage(
+                                source: ImageSource.gallery,
+                              );
+
                               if (image != null && mounted) {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => AmountInputScreen(imageFile: image),
+                                    builder: (context) =>
+                                        AmountInputScreen(imageFile: image),
                                   ),
                                 );
                               }
@@ -197,7 +195,11 @@ class _ScanFoodScreenState extends State<ScanFoodScreen> {
                               color: Colors.black26,
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Icon(Icons.image_outlined, color: Colors.white, size: 28),
+                            child: const Icon(
+                              Icons.image_outlined,
+                              color: Colors.white,
+                              size: 28,
+                            ),
                           ),
                         ),
                         // Capture button
@@ -206,11 +208,12 @@ class _ScanFoodScreenState extends State<ScanFoodScreen> {
                             try {
                               final image = await controller!.takePicture();
                               if (!mounted) return;
-                              
+
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => AmountInputScreen(imageFile: image),
+                                  builder: (context) =>
+                                      AmountInputScreen(imageFile: image),
                                 ),
                               );
                             } catch (e) {
@@ -241,7 +244,8 @@ class _ScanFoodScreenState extends State<ScanFoodScreen> {
                           onTap: () {
                             if (cameras.length > 1) {
                               setState(() {
-                                _selectedCameraIndex = (_selectedCameraIndex + 1) % cameras.length;
+                                _selectedCameraIndex =
+                                    (_selectedCameraIndex + 1) % cameras.length;
                               });
                               _initCamera(_selectedCameraIndex);
                             }
@@ -252,7 +256,11 @@ class _ScanFoodScreenState extends State<ScanFoodScreen> {
                               color: Colors.black26,
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Icon(Icons.flip_camera_ios_outlined, color: Colors.white, size: 28),
+                            child: const Icon(
+                              Icons.flip_camera_ios_outlined,
+                              color: Colors.white,
+                              size: 28,
+                            ),
                           ),
                         ),
                       ],
@@ -281,8 +289,12 @@ class _ScanFoodScreenState extends State<ScanFoodScreen> {
                                 Text(
                                   _modes[index],
                                   style: TextStyle(
-                                    color: isSelected ? Colors.white : Colors.white60,
-                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                    color: isSelected
+                                        ? Colors.white
+                                        : Colors.white60,
+                                    fontWeight: isSelected
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
                                     fontSize: 16,
                                   ),
                                 ),
@@ -292,7 +304,7 @@ class _ScanFoodScreenState extends State<ScanFoodScreen> {
                                     height: 2,
                                     width: 20,
                                     color: Colors.blueAccent,
-                                  )
+                                  ),
                               ],
                             ),
                           ),
