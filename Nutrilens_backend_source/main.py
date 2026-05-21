@@ -9,7 +9,7 @@ from Nutrilens_backend_source.routers.custom_recipe import add_custom_recipe, ge
 from Nutrilens_backend_source.routers.user_operations import get_user, update_profile, update_user_deatails, update_user_daily_target, get_nudges
 from Nutrilens_backend_source.routers.daily_data import add_meal, add_water, get_daily_data, get_default_intakes, analyze_food
 from Nutrilens_backend_source.routers.dietician import register_dietician, get_clients, get_client_progress, meetings, list_dieticians, update_client_targets, nudges
-from Nutrilens_backend_source.routers.workout_data import add_workout
+from Nutrilens_backend_source.routers.workout_data import add_workout, get_default_workouts
 
 
 app = FastAPI()
@@ -49,6 +49,7 @@ app.include_router(analyze_food.router)
 
 # workout data
 app.include_router(add_workout.router)
+app.include_router(get_default_workouts.router)
 
 # Dietician routers
 app.include_router(register_dietician.router)

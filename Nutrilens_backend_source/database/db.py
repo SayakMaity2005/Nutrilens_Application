@@ -23,6 +23,8 @@ users_daily_data_collection = db["users_daily_data"]
 
 # default intakes collection
 default_intakes_collection = db["default_intakes"]
+# default workout collection
+default_workouts_collection = db["default_workouts"]
 
 # custom recipe
 custom_recipe_collection = db["custom_recipe"]

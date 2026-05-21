@@ -194,8 +194,9 @@ class DailyDataUser(BaseModel):
 # Workout template
 class Workout(BaseModel):
     name: str
+    duration: float | None = None
     timestamp: datetime | None = None
-    count: int = 1
+    count: int | None = None
     energy: float
 
 # User Daily workout data
