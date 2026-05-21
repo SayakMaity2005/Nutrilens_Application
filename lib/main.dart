@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'cores/constants/themes.dart';
 import 'home_screen/home_screen.dart';
+import 'splash_screen.dart';
 
 List<CameraDescription> cameras = [];
 
@@ -24,7 +25,7 @@ class NutrilensApp extends StatelessWidget {
       darkTheme: AppTheme.darkTheme,
       theme: AppTheme.lightTheme,
       themeMode: ThemeMode.light,
-      home: HomeScreen(),
+      home: const SplashScreen(),
     );
   }
 }
