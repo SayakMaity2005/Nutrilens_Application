@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:nutrilens_test/home_screen/homepages/settings/profile_detail_page.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -22,7 +23,12 @@ class _SettingsPageState extends State<SettingsPage> {
         children: [
           _buildSectionHeader('Profile'),
           _buildCardGroup([
-            _buildArrowItem('Profile detail'),
+            _buildArrowItem('Profile detail', onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProfileDetailPage()),
+              );
+            }),
             _buildDivider(),
             _buildArrowItem('Goal'),
           ]),
