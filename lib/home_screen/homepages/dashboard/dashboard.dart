@@ -16,10 +16,7 @@ import 'intake_details.dart';
 
 class Dashboard extends StatefulWidget {
   final Function(Map<String, dynamic>) updateUserdata;
-  const Dashboard({
-    super.key,
-    required this.updateUserdata,
-  });
+  const Dashboard({super.key, required this.updateUserdata});
 
   @override
   State<Dashboard> createState() => _DashboardState();
@@ -141,7 +138,7 @@ class _DashboardState extends State<Dashboard> {
     getCurrentUser();
 
     updateConsumptionRecords();
-    
+
     _loadNudges();
   }
 
@@ -341,7 +338,6 @@ class _DashboardState extends State<Dashboard> {
         _drankWater = (response['data']['water']).toInt();
 
         updateConsumptionRecords();
-
       });
     } else {
       setState(() {
@@ -439,1260 +435,1350 @@ class _DashboardState extends State<Dashboard> {
     final palette = Theme.of(context).extension<AppPalette>()!;
 
     // TODO: implement build
-    return Container(
-      height: screenHeight - 110,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
+    return RefreshIndicator(
+      onRefresh: () async {
+        setState(() {
+          getCurrentUser();
+          updateConsumptionRecords();
+          _loadNudges();
+        });
+      },
 
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Align(
-              child: Container(
-                margin: EdgeInsetsGeometry.symmetric(horizontal: 10),
-                child: GestureDetector(
-                  onTap: () {},
-                  child: Row(
-                    children: [
-                      Text(
-                        isSameDate(_selectedDate, DateTime.now())
-                            ? 'Today'
-                            : '${_dayList[_selectedDate.weekday % 7]}, ${_monthList[_selectedDate.month - 1]} ${_selectedDate.day}',
-                        style: AppTextStyle.primaryText.copyWith(
-                          color: Color(0xFF888888),
-                        ),
-                      ),
-                      // Icon(
-                      //   Icons.arrow_drop_down_rounded,
-                      //   size: 32,
-                      //   color: Color(0xFF999999),
-                      // ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+      child: Container(
+        height: screenHeight - 110,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
 
-            if (_nudges.isNotEmpty)
-              ..._nudges.map((nudge) => Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.blue.shade200),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.tips_and_updates, color: Colors.blue),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text("Message from Dietitian", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue, fontSize: 12)),
-                          const SizedBox(height: 4),
-                          Text(nudge['message'], style: const TextStyle(color: Colors.black87, fontSize: 13)),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close, size: 16, color: Colors.grey),
-                      onPressed: () {
-                        setState(() {
-                          _nudges.remove(nudge);
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              )).toList(),
-
-            SizedBox(height: 8),
-
-            // Date Cards
-            SizedBox(
-              height: 70,
-              width: screenWidth - 10,
-              child: PageView(
-                controller: _datePageController,
-                children: [
-                  // Container(
-                  //   child:
-                  for (
-                    DateTime tempDate = _startDate;
-                    _endDate.difference(tempDate).inDays > 0;
-                    tempDate = tempDate.add(Duration(days: 7))
-                  )
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      spacing: 4,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Align(
+                child: Container(
+                  margin: EdgeInsetsGeometry.symmetric(horizontal: 10),
+                  child: GestureDetector(
+                    onTap: () {},
+                    child: Row(
                       children: [
-                        for (int i = 0; i < 7; i++)
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _selectedDate = tempDate.add(Duration(days: i));
-                                getDailyData();
-                              });
-                            },
-                            child: Container(
-                              height: 64,
-                              width: screenWidth / 7 - 6,
-                              decoration: BoxDecoration(
-                                color:
-                                    isSameDate(
-                                      tempDate.add(Duration(days: i)),
-                                      _selectedDate,
-                                    )
-                                    ? Colors.blue.shade700
-                                    : Colors.white,
-                                borderRadius: BorderRadius.circular(12),
-                                border:
-                                    isSameDate(
-                                      tempDate.add(Duration(days: i)),
-                                      _selectedDate,
-                                    )
-                                    ? null
-                                    : BoxBorder.all(
-                                        color:
-                                            isSameDate(
-                                              tempDate.add(Duration(days: i)),
-                                              DateTime.now(),
-                                            )
-                                            ? Colors.blue.shade700
-                                            : Color(0xFFBBBBBB),
-                                        width:
-                                            isSameDate(
-                                              tempDate.add(Duration(days: i)),
-                                              DateTime.now(),
-                                            )
-                                            ? 2
-                                            : 1,
-                                      ),
-                              ),
-                              // padding: EdgeInsets.only(top: 4),
-                              child: Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  spacing: 4,
-                                  children: [
-                                    Text(
-                                      _dayList[i][0],
-                                      style: AppTextStyle.primaryText.copyWith(
-                                        color:
-                                            isSameDate(
-                                              tempDate.add(Duration(days: i)),
-                                              _selectedDate,
-                                            )
-                                            ? Color(0xFFCCCCCC)
-                                            : Color(0xFF999999),
-                                      ),
-                                    ),
-                                    Text(
-                                      '${tempDate.add(Duration(days: i)).day}',
-                                      style: AppTextStyle.heading5.copyWith(
-                                        color:
-                                            isSameDate(
-                                              tempDate.add(Duration(days: i)),
-                                              _selectedDate,
-                                            )
-                                            ? Colors.white
-                                            : Color(0xFF3C3C3C),
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
+                        Text(
+                          isSameDate(_selectedDate, DateTime.now())
+                              ? 'Today'
+                              : '${_dayList[_selectedDate.weekday % 7]}, ${_monthList[_selectedDate.month - 1]} ${_selectedDate.day}',
+                          style: AppTextStyle.primaryText.copyWith(
+                            color: Color(0xFF888888),
                           ),
+                        ),
+                        // Icon(
+                        //   Icons.arrow_drop_down_rounded,
+                        //   size: 32,
+                        //   color: Color(0xFF999999),
+                        // ),
                       ],
-                      // ),
                     ),
-                ],
-              ),
-            ),
-
-            SizedBox(height: 28),
-
-            // Daily budget Section
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              spacing: screenWidth - 200,
-              children: [
-                Text('Daily budget', style: AppTextStyle.heading4),
-                GestureDetector(
-                  onTap: () async {
-                    Map<String, int> requiredIntakeCopy = {..._requiredIntake};
-                    final res = await showModalBottomSheet(
-                      context: context,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(20), // rounded top
-                        ),
-                      ),
-                      showDragHandle: true,
-                      isScrollControlled: true,
-                      builder: (context) {
-                        return StatefulBuilder(
-                          builder: (context, setState) {
-                            return EditBudget(
-                              requiredIntake: requiredIntakeCopy,
-                            );
-                          },
-                        );
-                      },
-                    );
-                    if (res != null) {
-                      // setState(() {
-                      _requiredIntake['carbs'] = requiredIntakeCopy['carbs']!;
-                      _requiredIntake['protein'] =
-                          requiredIntakeCopy['protein']!;
-                      _requiredIntake['fat'] = requiredIntakeCopy['fat']!;
-                      _requiredIntake['energy'] = requiredIntakeCopy['energy']!;
-                      // });
-                      final response = await UserServices().updateDailyTarget(
-                        energy: _requiredIntake['energy']?.toDouble(),
-                        carbs: _requiredIntake['carbs']?.toDouble(),
-                        protein: _requiredIntake['protein']?.toDouble(),
-                        fat: _requiredIntake['fat']?.toDouble(),
-                      );
-                      setState(() {
-                        if (response['message'] != null) {
-                          _showSnackBar(response['message']);
-                        }
-                      });
-                    }
-                  },
-                  child: Row(
-                    spacing: 4,
-                    children: [
-                      Icon(Icons.edit_note, size: 18, color: Color(0xFF555555)),
-                      Text(
-                        'Edit',
-                        style: TextStyle(
-                          color: Color(0xFF555555),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
                   ),
                 ),
-              ],
-            ),
-            Container(
-              margin: EdgeInsetsGeometry.symmetric(
-                horizontal: 16,
-                vertical: 10,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                spacing: 8,
-                children: [
-                  // Energy
-                  Container(
-                    height: (screenWidth - 40) * 0.6,
-                    width: (screenWidth - 40) * 0.5,
-                    decoration: BoxDecoration(
-                      color: palette.screenColor,
-                      borderRadius: BorderRadius.circular(16),
-                      border: BoxBorder.all(color: Color(0xFFE1E9FF), width: 1),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      spacing: 20,
-                      children: [
-                        Stack(
-                          alignment: Alignment.center,
+
+              if (_nudges.isNotEmpty)
+                ..._nudges
+                    .map(
+                      (nudge) => Container(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.blue.shade200),
+                        ),
+                        child: Row(
                           children: [
-                            TweenAnimationBuilder<double>(
-                              tween: Tween<double>(
-                                begin:
-                                    _consumedIntake['energy']! /
-                                    _requiredIntake['energy']!,
-                                end:
-                                    _consumedIntermediateIntake['energy']! /
-                                    _requiredIntake['energy']!,
-                              ),
-                              duration: Duration(milliseconds: 500),
-                              curve: Curves.easeOutCubic,
-                              onEnd: () {
-                                setState(() {
-                                  _consumedIntake['energy'] =
-                                      _consumedIntermediateIntake['energy']!;
-                                });
-                              },
-                              builder: (context, value, child) {
-                                return CircularProgressIndicator(
-                                  constraints: BoxConstraints(
-                                    minHeight: (screenWidth - 40) * 0.37,
-                                    minWidth: (screenWidth - 40) * 0.37,
-                                  ),
-                                  strokeWidth: 8,
-                                  strokeCap: StrokeCap.round,
-                                  value: value,
-                                  backgroundColor: Color(0xFFDDDDDD),
-                                  color: Color(0xFF237FCA),
-                                );
-                              },
+                            const Icon(
+                              Icons.tips_and_updates,
+                              color: Colors.blue,
                             ),
-                            Container(
-                              height: (screenWidth - 40) * 0.32,
-                              width: (screenWidth - 40) * 0.32,
-                              decoration: BoxDecoration(
-                                color: Color(0xFF92C5FF),
-                                borderRadius: BorderRadius.circular(
-                                  (screenWidth - 40) * 0.34,
-                                ),
-                              ),
+                            const SizedBox(width: 12),
+                            Expanded(
                               child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    'Remaining',
-                                    style: TextStyle(color: Color(0xFF666666)),
-                                  ),
-                                  TweenAnimationBuilder<double>(
-                                    tween: Tween<double>(
-                                      begin: _consumedIntake['energy']!
-                                          .toDouble(),
-                                      end:
-                                          _consumedIntermediateIntake['energy']!
-                                              .toDouble(),
-                                    ),
-                                    duration: Duration(milliseconds: 500),
-                                    curve: Curves.easeOutCubic,
-                                    builder: (context, value, child) {
-                                      return Text(
-                                        (_requiredIntake['energy']! - value)
-                                            .toStringAsFixed(0),
-                                        style: AppTextStyle.heading1.copyWith(
-                                          color: Color(0xFF081227),
-                                          fontWeight: FontWeight.w800,
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                  // Text(
-                                  //   (_requiredIntake['energy']! -
-                                  //           _consumedIntake['energy']!)
-                                  //       .toString(),
-                                  //   style: AppTextStyle.heading1.copyWith(
-                                  //     color: Color(0xFF081227),
-                                  //     fontWeight: FontWeight.w800,
-                                  //   ),
-                                  // ),
-                                  Text(
-                                    'kcal',
+                                  const Text(
+                                    "Message from Dietitian",
                                     style: TextStyle(
-                                      color: Color(0xFF081227),
-                                      fontWeight: FontWeight.w700,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.blue,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    nudge['message'],
+                                    style: const TextStyle(
+                                      color: Colors.black87,
+                                      fontSize: 13,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.close,
+                                size: 16,
+                                color: Colors.grey,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _nudges.remove(nudge);
+                                });
+                              },
+                            ),
                           ],
                         ),
-                        Text(
-                          'Goal ${_requiredIntake['energy']} kcal',
-                          style: TextStyle(color: Color(0xFF666666)),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Nutrients
-                  Column(
-                    spacing:
-                        1.5 *
-                        ((screenWidth - 40) * 0.2 - (screenWidth - 40) * 0.185),
-                    children: [
-                      for (int i = 0; i < 3; i++)
-                        Container(
-                          height: (screenWidth - 40) * 0.185,
-                          width: (screenWidth - 40) * 0.5,
-                          decoration: BoxDecoration(
-                            color: palette.screenColor,
-                            borderRadius: BorderRadius.circular(20),
-                            border: BoxBorder.all(
-                              color: Color(0xFFE1E9FF),
-                              width: 1,
-                            ),
-                          ),
-                          child: Center(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              spacing: 28,
-                              children: [
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        TweenAnimationBuilder<double>(
-                                          tween: Tween<double>(
-                                            begin: _consumedIntake.entries
-                                                .elementAt(i)
-                                                .value
-                                                .toDouble(),
-                                            end: _consumedIntermediateIntake
-                                                .entries
-                                                .elementAt(i)
-                                                .value
-                                                .toDouble(),
-                                          ),
-                                          duration: Duration(milliseconds: 500),
-                                          curve: Curves.easeOutCubic,
-                                          builder: (context, value, child) {
-                                            return Text(
-                                              value.toStringAsFixed(0),
-                                              style: AppTextStyle.heading5
-                                                  .copyWith(
-                                                    color: Color(0xFF3C3C3C),
-                                                    fontWeight: FontWeight.w800,
-                                                  ),
-                                            );
-                                          },
-                                        ),
-                                        Text(
-                                          ' / ${_requiredIntake.entries.elementAt(i).value}g',
-                                          style: TextStyle(
-                                            color: Color(0xFF888888),
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Text(
-                                      _requiredIntake.entries
-                                              .elementAt(i)
-                                              .key[0]
-                                              .toUpperCase() +
-                                          _requiredIntake.entries
-                                              .elementAt(i)
-                                              .key
-                                              .substring(1),
-                                      style: TextStyle(
-                                        color: Color(0xFF555555),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Stack(
-                                  alignment: Alignment.center,
-                                  children: [
-                                    TweenAnimationBuilder<double>(
-                                      tween: Tween<double>(
-                                        begin:
-                                            _consumedIntake.entries
-                                                .elementAt(i)
-                                                .value /
-                                            _requiredIntake.entries
-                                                .elementAt(i)
-                                                .value,
-                                        end:
-                                            _consumedIntermediateIntake.entries
-                                                .elementAt(i)
-                                                .value /
-                                            _requiredIntake.entries
-                                                .elementAt(i)
-                                                .value,
-                                      ),
-                                      duration: Duration(milliseconds: 500),
-                                      curve: Curves.easeOutCubic,
-                                      onEnd: () {
-                                        // setState(() {
-                                        final key = _consumedIntake.entries
-                                            .elementAt(i)
-                                            .key;
-                                        _consumedIntake[key] =
-                                            _consumedIntermediateIntake[key]!;
-                                        // });
-                                      },
-                                      builder: (context, value, child) {
-                                        return CircularProgressIndicator(
-                                          constraints: BoxConstraints(
-                                            minWidth: 40,
-                                            minHeight: 40,
-                                          ),
-                                          backgroundColor: Color(0xFFDDDDDD),
-                                          color:
-                                              (_requiredIntake.entries
-                                                      .elementAt(i)
-                                                      .key ==
-                                                  'carbs')
-                                              ? Color(0xFF4AD851)
-                                              : (_requiredIntake.entries
-                                                        .elementAt(i)
-                                                        .key ==
-                                                    'protein')
-                                              ? Colors.orangeAccent
-                                              : Colors.amberAccent,
-                                          value: value,
-                                          // _consumedIntake.entries
-                                          //     .elementAt(i)
-                                          //     .value /
-                                          // _requiredIntake.entries
-                                          //     .elementAt(i)
-                                          //     .value,
-                                          strokeCap: StrokeCap.round,
-                                        );
-                                      },
-                                    ),
-                                    if (_requiredIntake.entries
-                                            .elementAt(i)
-                                            .key ==
-                                        'carbs')
-                                      Text('🍞'),
-                                    if (_requiredIntake.entries
-                                            .elementAt(i)
-                                            .key ==
-                                        'protein')
-                                      Text('🥚'),
-                                    if (_requiredIntake.entries
-                                            .elementAt(i)
-                                            .key ==
-                                        'fat')
-                                      Text('🧀'),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+                      ),
+                    )
+                    .toList(),
 
-            // Customize Recipe
-            Stack(
-              children: [
-                Container(
-                  height: 120,
-                  width: screenWidth,
-                  margin: EdgeInsetsGeometry.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: AssetImage('assets/recipe_bg_image.jpg'),
-                    ),
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsetsGeometry.symmetric(
-                    horizontal: 20,
-                    vertical: 10,
-                  ),
-                  height: 120,
-                  width: screenWidth,
-                  margin: EdgeInsetsGeometry.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    gradient: LinearGradient(
-                      begin: Alignment.topRight,
-                      end: Alignment.bottomLeft,
-                      // stops: [0.0, 0.2, 0.6, 1],
-                      colors: [
-                        Color(0x807FF1C0),
-                        Color(0x99DDF7FA),
-                        Color(0xFFDAF9FD),
-                        // Color(0xCC72F8F8),
-                        Color(0xFF9AEFFF),
-                      ],
-                    ),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Customize Your Recipe',
-                        style: AppTextStyle.heading5,
-                      ),
-                      Text(
-                        'Input ingredients and generate a custom recipe',
-                        style: TextStyle(color: Color(0xFF555555)),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          // setState(() {
-                          //   // _consumedIntermediateIntake['energy'] =
-                          //   //     _consumedIntermediateIntake['energy']! + 400;
-                          //
-                          // });
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => AiCustomRecipe(),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          // height: 20,
-                          width: 164,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            color: Color(0xFF17233C),
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              stops: [0.7, 1.0],
-                              colors: [Color(0xFF17233C), Color(0xFF7C899F)],
-                            ),
-                          ),
-                          padding: EdgeInsetsGeometry.symmetric(
-                            horizontal: 20,
-                            vertical: 5,
-                          ),
-                          margin: EdgeInsetsGeometry.only(top: 8),
-                          child: Row(
-                            spacing: 4,
-                            children: [
-                              Text(
-                                'Check it out',
-                                style: AppTextStyle.heading6.copyWith(
-                                  color: Colors.white,
-                                ),
-                              ),
-                              Icon(
-                                Icons.keyboard_double_arrow_right_rounded,
-                                color: Colors.white,
-                                size: 28,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              spacing: screenWidth - 220,
-              children: [
-                Text('Intake', style: AppTextStyle.heading4),
-                SizedBox(
-                  width: 120,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    spacing: 8,
-                    children: [
-                      Icon(
-                        Icons.local_fire_department,
-                        size: 20,
-                        color: Color(0xFF4D8EEA),
-                      ),
-                      TweenAnimationBuilder<double>(
-                        tween: Tween<double>(
-                          begin: _consumedIntake['energy']!.toDouble(),
-                          end: _consumedIntermediateIntake['energy']!
-                              .toDouble(),
-                        ),
-                        duration: Duration(milliseconds: 500),
-                        builder: (context, value, child) {
-                          return Text(
-                            '${value.toStringAsFixed(0)} kcal',
-                            style: AppTextStyle.heading5,
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
-            for (int i = 0; i < 4; i++)
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _showIntakeRoundDetails![i] = _showIntakeRoundDetails![i]
-                        ? false
-                        : true;
-                  });
-                },
-                child: Container(
-                  // height: 70,
-                  width: screenWidth,
-                  margin: EdgeInsetsGeometry.symmetric(
-                    horizontal: 16,
-                    vertical: 4,
-                  ),
-                  padding: EdgeInsetsGeometry.symmetric(
-                    // horizontal: 16,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: BoxBorder.all(color: Color(0xFFE1E9FF), width: 1),
-                  ),
-                  child: Column(
-                    spacing: _showIntakeRoundDetails![i] ? 16 : 0,
-                    children: [
+              SizedBox(height: 8),
+
+              // Date Cards
+              SizedBox(
+                height: 70,
+                width: screenWidth - 10,
+                child: PageView(
+                  controller: _datePageController,
+                  children: [
+                    // Container(
+                    //   child:
+                    for (
+                      DateTime tempDate = _startDate;
+                      _endDate.difference(tempDate).inDays > 0;
+                      tempDate = tempDate.add(Duration(days: 7))
+                    )
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        spacing: 16,
+                        spacing: 4,
                         children: [
-                          Text(
-                            _intakeRounds.entries.elementAt(i).value.getIcon(),
-                            style: AppTextStyle.heading2,
-                          ),
-                          SizedBox(
-                            width: 110,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _intakeRounds.entries
-                                      .elementAt(i)
-                                      .value
-                                      .getType(),
-                                  style: AppTextStyle.heading5.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                Row(
-                                  children: [
-                                    Text(
-                                      _intakeRounds.entries
-                                          .elementAt(i)
-                                          .value
-                                          .getConsumedEnergy()
-                                          .toStringAsFixed(0),
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    Text(
-                                      ' / ${_intakeRounds.entries.elementAt(i).value.getRequiredEnergy().toStringAsFixed(0)} kcal',
-                                      style: TextStyle(
-                                        color: Color(0xFF888888),
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(width: screenWidth - 310),
-                          GestureDetector(
-                            onTap: () async {
-                              final Map<String, List<Intake>>? res =
-                                  await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          IntakeSelect(intakeRoundIndex: i),
-                                    ),
-                                  );
-                              if (res != null) {
+                          for (int i = 0; i < 7; i++)
+                            GestureDetector(
+                              onTap: () {
                                 setState(() {
-                                  // _intakeRounds[res.entries.elementAt(0).key]!
-                                  //     .consumeAllIntakes(
-                                  //       res.entries.elementAt(0).value,
-                                  //     );
+                                  _selectedDate = tempDate.add(
+                                    Duration(days: i),
+                                  );
                                   getDailyData();
-                                  updateConsumptionRecords();
                                 });
-                              }
-                            },
-                            child: Container(
-                              height: 40,
-                              width: 40,
-                              decoration: BoxDecoration(
-                                color: Color(0xFFDFF1FF),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Center(
-                                child: Icon(
-                                  Icons.add,
-                                  color: Color(0xFF1457A5),
+                              },
+                              child: Container(
+                                height: 64,
+                                width: screenWidth / 7 - 6,
+                                decoration: BoxDecoration(
+                                  color:
+                                      isSameDate(
+                                        tempDate.add(Duration(days: i)),
+                                        _selectedDate,
+                                      )
+                                      ? Colors.blue.shade700
+                                      : Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border:
+                                      isSameDate(
+                                        tempDate.add(Duration(days: i)),
+                                        _selectedDate,
+                                      )
+                                      ? null
+                                      : BoxBorder.all(
+                                          color:
+                                              isSameDate(
+                                                tempDate.add(Duration(days: i)),
+                                                DateTime.now(),
+                                              )
+                                              ? Colors.blue.shade700
+                                              : Color(0xFFBBBBBB),
+                                          width:
+                                              isSameDate(
+                                                tempDate.add(Duration(days: i)),
+                                                DateTime.now(),
+                                              )
+                                              ? 2
+                                              : 1,
+                                        ),
                                 ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      AnimatedContainer(
-                        duration: Duration(milliseconds: 250),
-                        height: _showIntakeRoundDetails![i] ? 160 : 0,
-                        child: SingleChildScrollView(
-                          child: Column(
-                            spacing: 10,
-                            children: [
-                              for (
-                                int idx = 0;
-                                idx <
-                                    _intakeRounds.values
-                                        .toList()[i]
-                                        .consumedIntakes()
-                                        .length;
-                                idx++
-                              )
-                                GestureDetector(
-                                  onTap: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) {
-                                          return IntakeDetails(
-                                            selectedIntake: _intakeRounds
-                                                .entries
-                                                .elementAt(i)
-                                                .value
-                                                .consumedIntakes()[idx],
-                                          );
-                                        },
-                                      ),
-                                    );
-                                  },
-                                  child: Container(
-                                    margin: EdgeInsetsGeometry.symmetric(
-                                      horizontal: 20,
-                                    ),
-                                    padding: EdgeInsetsGeometry.all(10),
-                                    decoration: BoxDecoration(
-                                      // borderRadius: BorderRadius.circular(16),
-                                      border: BoxBorder.fromLTRB(
-                                        top: BorderSide(
-                                          color: Color(0xFFC1C8DA),
-                                          width: 1,
-                                        ),
-                                        bottom: BorderSide.none,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            SizedBox(
-                                              width: screenWidth - 130,
-                                              child: Text(
-                                                _intakeRounds.entries
-                                                    .elementAt(i)
-                                                    .value
-                                                    .consumedIntakes()[idx]
-                                                    .name(),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: AppTextStyle.heading6
-                                                    .copyWith(
-                                                      color: Color(0xFF555555),
-                                                      fontWeight:
-                                                          FontWeight.w400,
+                                // padding: EdgeInsets.only(top: 4),
+                                child: Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    spacing: 4,
+                                    children: [
+                                      Text(
+                                        _dayList[i][0],
+                                        style: AppTextStyle.primaryText
+                                            .copyWith(
+                                              color:
+                                                  isSameDate(
+                                                    tempDate.add(
+                                                      Duration(days: i),
                                                     ),
-                                              ),
+                                                    _selectedDate,
+                                                  )
+                                                  ? Color(0xFFCCCCCC)
+                                                  : Color(0xFF999999),
                                             ),
-                                            Text(
-                                              '${_intakeRounds.entries.elementAt(i).value.consumedIntakes()[idx].energy()} kcal, ${_intakeRounds.entries.elementAt(i).value.consumedIntakes()[idx].quantity()} g',
-                                              style: AppTextStyle
-                                                  .primaryBoldText
-                                                  .copyWith(
-                                                    color: Color(0xFF999999),
-                                                  ),
-                                            ),
-                                          ],
+                                      ),
+                                      Text(
+                                        '${tempDate.add(Duration(days: i)).day}',
+                                        style: AppTextStyle.heading5.copyWith(
+                                          color:
+                                              isSameDate(
+                                                tempDate.add(Duration(days: i)),
+                                                _selectedDate,
+                                              )
+                                              ? Colors.white
+                                              : Color(0xFF3C3C3C),
+                                          fontWeight: FontWeight.w800,
                                         ),
-                                        // Expanded(
-                                        //   child: Row(
-                                        //     mainAxisAlignment:
-                                        //         MainAxisAlignment.end,
-                                        //     children: [
-                                        //       GestureDetector(
-                                        //         onTap: () async {
-                                        //           final response =
-                                        //               await CustomRecipe()
-                                        //                   .deleteRecipe(
-                                        //                     _customRecipeList[i]
-                                        //                         .id(),
-                                        //                   );
-                                        //
-                                        //           _showSnackBar(
-                                        //             response['message'],
-                                        //           );
-                                        //
-                                        //           if (response['status_ok']) {
-                                        //             setState(() {
-                                        //               _customRecipeList.removeAt(
-                                        //                 i,
-                                        //               );
-                                        //               if (_customRecipeList
-                                        //                   .isEmpty) {
-                                        //                 // _showSelectedIntakes = false;
-                                        //               }
-                                        //             });
-                                        //           }
-                                        //         },
-                                        //         child: Container(
-                                        //           padding: EdgeInsetsGeometry.all(
-                                        //             8,
-                                        //           ),
-                                        //           decoration: BoxDecoration(
-                                        //             color: Color(0xFFEEEEEE),
-                                        //             shape: BoxShape.circle,
-                                        //           ),
-                                        //           child: Icon(
-                                        //             Icons.cancel_outlined,
-                                        //             color: Color(0xFFFF9898),
-                                        //           ),
-                                        //         ),
-                                        //       ),
-                                        //     ],
-                                        //   ),
-                                        // ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            SizedBox(height: 28),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              spacing: screenWidth - 228,
-              children: [
-                Text('Burned', style: AppTextStyle.heading4),
-                SizedBox(
-                  width: 120,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    spacing: 8,
-                    children: [
-                      Icon(
-                        Icons.local_fire_department,
-                        size: 20,
-                        color: Color(0xFFFBAC50),
-                      ),
-                      TweenAnimationBuilder<double>(
-                        tween: Tween<double>(
-                          begin: _energyBurned.toDouble(),
-                          end: _energyBurnedIntermediate.toDouble(),
-                        ),
-                        duration: Duration(milliseconds: 500),
-                        onEnd: () {
-                          setState(() {
-                            _energyBurned = _workoutRound.totalEnergyBurned();
-                          });
-                        },
-                        builder: (context, value, child) {
-                          return Text(
-                            '${value.toStringAsFixed(0)} kcal',
-                            style: AppTextStyle.heading5,
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            Container(
-              // height: 120,
-              width: screenWidth,
-              margin: EdgeInsetsGeometry.symmetric(
-                horizontal: 16,
-                vertical: 16,
-              ),
-              padding: EdgeInsetsGeometry.symmetric(
-                horizontal: 16,
-                vertical: 24,
-              ),
-              decoration: BoxDecoration(
-                color: Color(0xFFD6EBF6),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                spacing: 8,
-                children: [
-                  Text(
-                    "You haven't uploaded any workout",
-                    style: AppTextStyle.heading5,
-                  ),
-                  Text(
-                    'You can search in our database',
-                    style: TextStyle(color: Color(0xFF555555)),
-                  ),
-                  Container(
-                    margin: EdgeInsetsGeometry.symmetric(vertical: 6),
-                    padding: EdgeInsetsGeometry.symmetric(
-                      horizontal: screenWidth / 2 - 100,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Color(0xFF17233C),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      '+  Add workout',
-                      style: AppTextStyle.heading6.copyWith(
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            SizedBox(height: 14),
-            // Water section
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              spacing: screenWidth - 222,
-              children: [
-                Text('Water', style: AppTextStyle.heading4),
-                SizedBox(
-                  width: 120,
-                  child: GestureDetector(
-                    onTap: () async {
-                      final Map<String, String>? res =
-                          await showModalBottomSheet(
-                            context: context,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.vertical(
-                                top: Radius.circular(20), // rounded top
                               ),
                             ),
-                            showDragHandle: true,
-                            isScrollControlled: true,
-                            builder: (context) {
-                              return StatefulBuilder(
-                                builder: (context, setState) {
-                                  return Padding(
-                                    padding: EdgeInsets.only(
-                                      bottom: MediaQuery.of(
-                                        context,
-                                      ).viewInsets.bottom,
-                                    ),
-                                    child: WaterDetails(
-                                      requiredWater: _requiredWater,
-                                      waterCupSize: _waterCupSize,
-                                    ),
-                                  );
-                                },
+                        ],
+                        // ),
+                      ),
+                  ],
+                ),
+              ),
+
+              SizedBox(height: 28),
+
+              // Daily budget Section
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                spacing: screenWidth - 200,
+                children: [
+                  Text('Daily budget', style: AppTextStyle.heading4),
+                  GestureDetector(
+                    onTap: () async {
+                      Map<String, int> requiredIntakeCopy = {
+                        ..._requiredIntake,
+                      };
+                      final res = await showModalBottomSheet(
+                        context: context,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(20), // rounded top
+                          ),
+                        ),
+                        showDragHandle: true,
+                        isScrollControlled: true,
+                        builder: (context) {
+                          return StatefulBuilder(
+                            builder: (context, setState) {
+                              return EditBudget(
+                                requiredIntake: requiredIntakeCopy,
                               );
                             },
                           );
+                        },
+                      );
                       if (res != null) {
-                        _requiredWater = int.parse(res['goal']!);
-                        _waterCupSize = int.parse(res['cup']!);
-                        final response = await UserServices().updateDailyTarget(
-                          water: _requiredWater.toDouble(),
-                        );
                         // setState(() {
-                        if (response['message'] != null) {
-                          _showSnackBar(response['message']);
-                        }
+                        _requiredIntake['carbs'] = requiredIntakeCopy['carbs']!;
+                        _requiredIntake['protein'] =
+                            requiredIntakeCopy['protein']!;
+                        _requiredIntake['fat'] = requiredIntakeCopy['fat']!;
+                        _requiredIntake['energy'] =
+                            requiredIntakeCopy['energy']!;
                         // });
-                        // if(response['status_ok']) {
-                        //   showSnackBar(response['massage']);
-                        // }
+                        final response = await UserServices().updateDailyTarget(
+                          energy: _requiredIntake['energy']?.toDouble(),
+                          carbs: _requiredIntake['carbs']?.toDouble(),
+                          protein: _requiredIntake['protein']?.toDouble(),
+                          fat: _requiredIntake['fat']?.toDouble(),
+                        );
+                        setState(() {
+                          if (response['message'] != null) {
+                            _showSnackBar(response['message']);
+                          }
+                        });
                       }
                     },
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      // spacing: 8,
+                      spacing: 4,
                       children: [
+                        Icon(
+                          Icons.edit_note,
+                          size: 18,
+                          color: Color(0xFF555555),
+                        ),
                         Text(
-                          'More',
-                          style: AppTextStyle.heading6.copyWith(
-                            color: Color(0xFF888888),
+                          'Edit',
+                          style: TextStyle(
+                            color: Color(0xFF555555),
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                        Icon(Icons.chevron_right, color: Color(0xFF888888)),
                       ],
                     ),
                   ),
-                ),
-              ],
-            ),
-
-            SizedBox(height: 14),
-
-            // water section
-            // Container(
-            //   // height: 133,
-            //   width: screenWidth,
-            //   margin: EdgeInsetsGeometry.symmetric(horizontal: 16, vertical: 4),
-            //   // padding: EdgeInsetsGeometry.symmetric(
-            //   //   // horizontal: 16,
-            //   //   vertical: 16,
-            //   // ),
-            //   decoration: BoxDecoration(
-            //     color: Colors.white,
-            //     borderRadius: BorderRadius.circular(16),
-            //     border: BoxBorder.all(color: Color(0xFFE1E9FF), width: 1),
-            //   ),
-            //   child: Stack(
-            //     children: [
-            //       ClipRRect(
-            //         borderRadius: BorderRadius.circular(16),
-            //         // child: Positioned.fill(child: WaterWave()),
-            //         // child: WaterWave(),
-            //       ),
-            WaterWave(
-              key: Key(_drankWater.toString()),
-              fillFraction: _drankWater.toDouble() / _requiredWater.toDouble(),
-              fillFractionCopy:
-                  _drankWaterCopy.toDouble() / _requiredWater.toDouble(),
-              updateCopy: () {
-                setState(() {
-                  _drankWaterCopy = _drankWater;
-                });
-              },
-              margin: EdgeInsetsGeometry.symmetric(horizontal: 16, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: BoxBorder.all(color: Color(0xFFE1E9FF), width: 1),
+                ],
               ),
-              // RotatingIcon(),
-              child: Container(
-                padding: EdgeInsetsGeometry.symmetric(
-                  // horizontal: 16,
-                  vertical: 16,
+              Container(
+                margin: EdgeInsetsGeometry.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  spacing: screenWidth - 250,
+                  spacing: 8,
                   children: [
+                    // Energy
+                    Container(
+                      height: (screenWidth - 40) * 0.6,
+                      width: (screenWidth - 40) * 0.5,
+                      decoration: BoxDecoration(
+                        color: palette.screenColor,
+                        borderRadius: BorderRadius.circular(16),
+                        border: BoxBorder.all(
+                          color: Color(0xFFE1E9FF),
+                          width: 1,
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        spacing: 20,
+                        children: [
+                          Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              TweenAnimationBuilder<double>(
+                                tween: Tween<double>(
+                                  begin:
+                                      _consumedIntake['energy']! /
+                                      _requiredIntake['energy']!,
+                                  end:
+                                      _consumedIntermediateIntake['energy']! /
+                                      _requiredIntake['energy']!,
+                                ),
+                                duration: Duration(milliseconds: 500),
+                                curve: Curves.easeOutCubic,
+                                onEnd: () {
+                                  setState(() {
+                                    _consumedIntake['energy'] =
+                                        _consumedIntermediateIntake['energy']!;
+                                  });
+                                },
+                                builder: (context, value, child) {
+                                  return CircularProgressIndicator(
+                                    constraints: BoxConstraints(
+                                      minHeight: (screenWidth - 40) * 0.37,
+                                      minWidth: (screenWidth - 40) * 0.37,
+                                    ),
+                                    strokeWidth: 8,
+                                    strokeCap: StrokeCap.round,
+                                    value: value,
+                                    backgroundColor: Color(0xFFDDDDDD),
+                                    color: Color(0xFF237FCA),
+                                  );
+                                },
+                              ),
+                              Container(
+                                height: (screenWidth - 40) * 0.32,
+                                width: (screenWidth - 40) * 0.32,
+                                decoration: BoxDecoration(
+                                  color: Color(0xFF92C5FF),
+                                  borderRadius: BorderRadius.circular(
+                                    (screenWidth - 40) * 0.34,
+                                  ),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Remaining',
+                                      style: TextStyle(
+                                        color: Color(0xFF666666),
+                                      ),
+                                    ),
+                                    TweenAnimationBuilder<double>(
+                                      tween: Tween<double>(
+                                        begin: _consumedIntake['energy']!
+                                            .toDouble(),
+                                        end:
+                                            _consumedIntermediateIntake['energy']!
+                                                .toDouble(),
+                                      ),
+                                      duration: Duration(milliseconds: 500),
+                                      curve: Curves.easeOutCubic,
+                                      builder: (context, value, child) {
+                                        return Text(
+                                          (_requiredIntake['energy']! - value)
+                                              .toStringAsFixed(0),
+                                          style: AppTextStyle.heading1.copyWith(
+                                            color: Color(0xFF081227),
+                                            fontWeight: FontWeight.w800,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                    // Text(
+                                    //   (_requiredIntake['energy']! -
+                                    //           _consumedIntake['energy']!)
+                                    //       .toString(),
+                                    //   style: AppTextStyle.heading1.copyWith(
+                                    //     color: Color(0xFF081227),
+                                    //     fontWeight: FontWeight.w800,
+                                    //   ),
+                                    // ),
+                                    Text(
+                                      'kcal',
+                                      style: TextStyle(
+                                        color: Color(0xFF081227),
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          Text(
+                            'Goal ${_requiredIntake['energy']} kcal',
+                            style: TextStyle(color: Color(0xFF666666)),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Nutrients
                     Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing:
+                          1.5 *
+                          ((screenWidth - 40) * 0.2 -
+                              (screenWidth - 40) * 0.185),
                       children: [
-                        Row(
-                          spacing: 2,
-                          children: [
-                            Text(
-                              _drankWater.toString(),
-                              style: AppTextStyle.heading1.copyWith(
-                                color: Color(0xFF050F2C),
+                        for (int i = 0; i < 3; i++)
+                          Container(
+                            height: (screenWidth - 40) * 0.185,
+                            width: (screenWidth - 40) * 0.5,
+                            decoration: BoxDecoration(
+                              color: palette.screenColor,
+                              borderRadius: BorderRadius.circular(20),
+                              border: BoxBorder.all(
+                                color: Color(0xFFE1E9FF),
+                                width: 1,
                               ),
                             ),
+                            child: Center(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                spacing: 28,
+                                children: [
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          TweenAnimationBuilder<double>(
+                                            tween: Tween<double>(
+                                              begin: _consumedIntake.entries
+                                                  .elementAt(i)
+                                                  .value
+                                                  .toDouble(),
+                                              end: _consumedIntermediateIntake
+                                                  .entries
+                                                  .elementAt(i)
+                                                  .value
+                                                  .toDouble(),
+                                            ),
+                                            duration: Duration(
+                                              milliseconds: 500,
+                                            ),
+                                            curve: Curves.easeOutCubic,
+                                            builder: (context, value, child) {
+                                              return Text(
+                                                value.toStringAsFixed(0),
+                                                style: AppTextStyle.heading5
+                                                    .copyWith(
+                                                      color: Color(0xFF3C3C3C),
+                                                      fontWeight:
+                                                          FontWeight.w800,
+                                                    ),
+                                              );
+                                            },
+                                          ),
+                                          Text(
+                                            ' / ${_requiredIntake.entries.elementAt(i).value}g',
+                                            style: TextStyle(
+                                              color: Color(0xFF888888),
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Text(
+                                        _requiredIntake.entries
+                                                .elementAt(i)
+                                                .key[0]
+                                                .toUpperCase() +
+                                            _requiredIntake.entries
+                                                .elementAt(i)
+                                                .key
+                                                .substring(1),
+                                        style: TextStyle(
+                                          color: Color(0xFF555555),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      TweenAnimationBuilder<double>(
+                                        tween: Tween<double>(
+                                          begin:
+                                              _consumedIntake.entries
+                                                  .elementAt(i)
+                                                  .value /
+                                              _requiredIntake.entries
+                                                  .elementAt(i)
+                                                  .value,
+                                          end:
+                                              _consumedIntermediateIntake
+                                                  .entries
+                                                  .elementAt(i)
+                                                  .value /
+                                              _requiredIntake.entries
+                                                  .elementAt(i)
+                                                  .value,
+                                        ),
+                                        duration: Duration(milliseconds: 500),
+                                        curve: Curves.easeOutCubic,
+                                        onEnd: () {
+                                          // setState(() {
+                                          final key = _consumedIntake.entries
+                                              .elementAt(i)
+                                              .key;
+                                          _consumedIntake[key] =
+                                              _consumedIntermediateIntake[key]!;
+                                          // });
+                                        },
+                                        builder: (context, value, child) {
+                                          return CircularProgressIndicator(
+                                            constraints: BoxConstraints(
+                                              minWidth: 40,
+                                              minHeight: 40,
+                                            ),
+                                            backgroundColor: Color(0xFFDDDDDD),
+                                            color:
+                                                (_requiredIntake.entries
+                                                        .elementAt(i)
+                                                        .key ==
+                                                    'carbs')
+                                                ? Color(0xFF4AD851)
+                                                : (_requiredIntake.entries
+                                                          .elementAt(i)
+                                                          .key ==
+                                                      'protein')
+                                                ? Colors.orangeAccent
+                                                : Colors.amberAccent,
+                                            value: value,
+                                            // _consumedIntake.entries
+                                            //     .elementAt(i)
+                                            //     .value /
+                                            // _requiredIntake.entries
+                                            //     .elementAt(i)
+                                            //     .value,
+                                            strokeCap: StrokeCap.round,
+                                          );
+                                        },
+                                      ),
+                                      if (_requiredIntake.entries
+                                              .elementAt(i)
+                                              .key ==
+                                          'carbs')
+                                        Text('🍞'),
+                                      if (_requiredIntake.entries
+                                              .elementAt(i)
+                                              .key ==
+                                          'protein')
+                                        Text('🥚'),
+                                      if (_requiredIntake.entries
+                                              .elementAt(i)
+                                              .key ==
+                                          'fat')
+                                        Text('🧀'),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              // Customize Recipe
+              Stack(
+                children: [
+                  Container(
+                    height: 120,
+                    width: screenWidth,
+                    margin: EdgeInsetsGeometry.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      image: DecorationImage(
+                        fit: BoxFit.cover,
+                        image: AssetImage('assets/recipe_bg_image.jpg'),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsetsGeometry.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
+                    height: 120,
+                    width: screenWidth,
+                    margin: EdgeInsetsGeometry.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: LinearGradient(
+                        begin: Alignment.topRight,
+                        end: Alignment.bottomLeft,
+                        // stops: [0.0, 0.2, 0.6, 1],
+                        colors: [
+                          Color(0x807FF1C0),
+                          Color(0x99DDF7FA),
+                          Color(0xFFDAF9FD),
+                          // Color(0xCC72F8F8),
+                          Color(0xFF9AEFFF),
+                        ],
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Customize Your Recipe',
+                          style: AppTextStyle.heading5,
+                        ),
+                        Text(
+                          'Input ingredients and generate a custom recipe',
+                          style: TextStyle(color: Color(0xFF555555)),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            // setState(() {
+                            //   // _consumedIntermediateIntake['energy'] =
+                            //   //     _consumedIntermediateIntake['energy']! + 400;
+                            //
+                            // });
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AiCustomRecipe(),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            // height: 20,
+                            width: 164,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              color: Color(0xFF17233C),
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                stops: [0.7, 1.0],
+                                colors: [Color(0xFF17233C), Color(0xFF7C899F)],
+                              ),
+                            ),
+                            padding: EdgeInsetsGeometry.symmetric(
+                              horizontal: 20,
+                              vertical: 5,
+                            ),
+                            margin: EdgeInsetsGeometry.only(top: 8),
+                            child: Row(
+                              spacing: 4,
+                              children: [
+                                Text(
+                                  'Check it out',
+                                  style: AppTextStyle.heading6.copyWith(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.keyboard_double_arrow_right_rounded,
+                                  color: Colors.white,
+                                  size: 28,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                spacing: screenWidth - 220,
+                children: [
+                  Text('Intake', style: AppTextStyle.heading4),
+                  SizedBox(
+                    width: 120,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      spacing: 8,
+                      children: [
+                        Icon(
+                          Icons.local_fire_department,
+                          size: 20,
+                          color: Color(0xFF4D8EEA),
+                        ),
+                        TweenAnimationBuilder<double>(
+                          tween: Tween<double>(
+                            begin: _consumedIntake['energy']!.toDouble(),
+                            end: _consumedIntermediateIntake['energy']!
+                                .toDouble(),
+                          ),
+                          duration: Duration(milliseconds: 500),
+                          builder: (context, value, child) {
+                            return Text(
+                              '${value.toStringAsFixed(0)} kcal',
+                              style: AppTextStyle.heading5,
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 16),
+              for (int i = 0; i < 4; i++)
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _showIntakeRoundDetails![i] = _showIntakeRoundDetails![i]
+                          ? false
+                          : true;
+                    });
+                  },
+                  child: Container(
+                    // height: 70,
+                    width: screenWidth,
+                    margin: EdgeInsetsGeometry.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
+                    ),
+                    padding: EdgeInsetsGeometry.symmetric(
+                      // horizontal: 16,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: BoxBorder.all(color: Color(0xFFE1E9FF), width: 1),
+                    ),
+                    child: Column(
+                      spacing: _showIntakeRoundDetails![i] ? 16 : 0,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          spacing: 16,
+                          children: [
                             Text(
-                              'ml',
-                              style: AppTextStyle.heading6.copyWith(
-                                color: Color(0xFF050F2C),
+                              _intakeRounds.entries
+                                  .elementAt(i)
+                                  .value
+                                  .getIcon(),
+                              style: AppTextStyle.heading2,
+                            ),
+                            SizedBox(
+                              width: 110,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _intakeRounds.entries
+                                        .elementAt(i)
+                                        .value
+                                        .getType(),
+                                    style: AppTextStyle.heading5.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        _intakeRounds.entries
+                                            .elementAt(i)
+                                            .value
+                                            .getConsumedEnergy()
+                                            .toStringAsFixed(0),
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      Text(
+                                        ' / ${_intakeRounds.entries.elementAt(i).value.getRequiredEnergy().toStringAsFixed(0)} kcal',
+                                        style: TextStyle(
+                                          color: Color(0xFF888888),
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(width: screenWidth - 310),
+                            GestureDetector(
+                              onTap: () async {
+                                final Map<String, List<Intake>>? res =
+                                    await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            IntakeSelect(intakeRoundIndex: i),
+                                      ),
+                                    );
+                                if (res != null) {
+                                  setState(() {
+                                    // _intakeRounds[res.entries.elementAt(0).key]!
+                                    //     .consumeAllIntakes(
+                                    //       res.entries.elementAt(0).value,
+                                    //     );
+                                    getDailyData();
+                                    updateConsumptionRecords();
+                                  });
+                                }
+                              },
+                              child: Container(
+                                height: 40,
+                                width: 40,
+                                decoration: BoxDecoration(
+                                  color: Color(0xFFDFF1FF),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Center(
+                                  child: Icon(
+                                    Icons.add,
+                                    color: Color(0xFF1457A5),
+                                  ),
+                                ),
                               ),
                             ),
                           ],
                         ),
-                        Text(
-                          'Goal ${_requiredWater}ml',
-                          style: AppTextStyle.primaryBoldText.copyWith(
-                            color: Color(0xFF888888),
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Container(
-                          padding: EdgeInsetsGeometry.symmetric(
-                            horizontal: 6,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Color(0xFFEDEDED),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            '1 cup = ${_waterCupSize}ml',
-                            style: AppTextStyle.extraSmallText.copyWith(
-                              color: Color(0xFF555555),
+                        AnimatedContainer(
+                          duration: Duration(milliseconds: 250),
+                          height: _showIntakeRoundDetails![i] ? 160 : 0,
+                          child: SingleChildScrollView(
+                            child: Column(
+                              spacing: 10,
+                              children: [
+                                for (
+                                  int idx = 0;
+                                  idx <
+                                      _intakeRounds.values
+                                          .toList()[i]
+                                          .consumedIntakes()
+                                          .length;
+                                  idx++
+                                )
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) {
+                                            return IntakeDetails(
+                                              selectedIntake: _intakeRounds
+                                                  .entries
+                                                  .elementAt(i)
+                                                  .value
+                                                  .consumedIntakes()[idx],
+                                            );
+                                          },
+                                        ),
+                                      );
+                                    },
+                                    child: Container(
+                                      margin: EdgeInsetsGeometry.symmetric(
+                                        horizontal: 20,
+                                      ),
+                                      padding: EdgeInsetsGeometry.all(10),
+                                      decoration: BoxDecoration(
+                                        // borderRadius: BorderRadius.circular(16),
+                                        border: BoxBorder.fromLTRB(
+                                          top: BorderSide(
+                                            color: Color(0xFFC1C8DA),
+                                            width: 1,
+                                          ),
+                                          bottom: BorderSide.none,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              SizedBox(
+                                                width: screenWidth - 130,
+                                                child: Text(
+                                                  _intakeRounds.entries
+                                                      .elementAt(i)
+                                                      .value
+                                                      .consumedIntakes()[idx]
+                                                      .name(),
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: AppTextStyle.heading6
+                                                      .copyWith(
+                                                        color: Color(
+                                                          0xFF555555,
+                                                        ),
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                      ),
+                                                ),
+                                              ),
+                                              Text(
+                                                '${_intakeRounds.entries.elementAt(i).value.consumedIntakes()[idx].energy()} kcal, ${_intakeRounds.entries.elementAt(i).value.consumedIntakes()[idx].quantity()} g',
+                                                style: AppTextStyle
+                                                    .primaryBoldText
+                                                    .copyWith(
+                                                      color: Color(0xFF999999),
+                                                    ),
+                                              ),
+                                            ],
+                                          ),
+                                          // Expanded(
+                                          //   child: Row(
+                                          //     mainAxisAlignment:
+                                          //         MainAxisAlignment.end,
+                                          //     children: [
+                                          //       GestureDetector(
+                                          //         onTap: () async {
+                                          //           final response =
+                                          //               await CustomRecipe()
+                                          //                   .deleteRecipe(
+                                          //                     _customRecipeList[i]
+                                          //                         .id(),
+                                          //                   );
+                                          //
+                                          //           _showSnackBar(
+                                          //             response['message'],
+                                          //           );
+                                          //
+                                          //           if (response['status_ok']) {
+                                          //             setState(() {
+                                          //               _customRecipeList.removeAt(
+                                          //                 i,
+                                          //               );
+                                          //               if (_customRecipeList
+                                          //                   .isEmpty) {
+                                          //                 // _showSelectedIntakes = false;
+                                          //               }
+                                          //             });
+                                          //           }
+                                          //         },
+                                          //         child: Container(
+                                          //           padding: EdgeInsetsGeometry.all(
+                                          //             8,
+                                          //           ),
+                                          //           decoration: BoxDecoration(
+                                          //             color: Color(0xFFEEEEEE),
+                                          //             shape: BoxShape.circle,
+                                          //           ),
+                                          //           child: Icon(
+                                          //             Icons.cancel_outlined,
+                                          //             color: Color(0xFFFF9898),
+                                          //           ),
+                                          //         ),
+                                          //       ),
+                                          //     ],
+                                          //   ),
+                                          // ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
                         ),
                       ],
                     ),
-                    GestureDetector(
-                      onTap: () async {
-                        if (_drankWater < _requiredWater) {
-                          setState(() {
-                            _drankWater += _waterCupSize;
-                          });
-
-                          final response = await DailyDataServices().addWater(
-                            _waterCupSize.toDouble(),
-                          );
-
-                          if (!context.mounted) return;
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              margin: EdgeInsetsGeometry.symmetric(
-                                horizontal: 40,
-                                vertical: 40,
-                              ),
-                              padding: EdgeInsetsGeometry.symmetric(
-                                horizontal: 20,
-                                vertical: 14,
-                              ),
-                              behavior: SnackBarBehavior.floating,
-                              backgroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              content: Text(
-                                response['message'] ?? 'Water added successfully',
-                                style: AppTextStyle.primaryText.copyWith(
-                                  color: Color(0xFF000000),
-                                ),
-                              ),
-                            ),
-                          );
-                        }
-                      },
-                      child: Container(
-                        height: 80,
-                        width: 50,
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: AssetImage(
-                              'assets/glass_of_water_image.png',
-                            ),
-                          ),
+                  ),
+                ),
+              SizedBox(height: 28),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                spacing: screenWidth - 228,
+                children: [
+                  Text('Burned', style: AppTextStyle.heading4),
+                  SizedBox(
+                    width: 120,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      spacing: 8,
+                      children: [
+                        Icon(
+                          Icons.local_fire_department,
+                          size: 20,
+                          color: Color(0xFFFBAC50),
                         ),
-                        child: Icon(
-                          Icons.add_rounded,
-                          size: 28,
-                          color: Color(0xFF2A3145),
+                        TweenAnimationBuilder<double>(
+                          tween: Tween<double>(
+                            begin: _energyBurned.toDouble(),
+                            end: _energyBurnedIntermediate.toDouble(),
+                          ),
+                          duration: Duration(milliseconds: 500),
+                          onEnd: () {
+                            setState(() {
+                              _energyBurned = _workoutRound.totalEnergyBurned();
+                            });
+                          },
+                          builder: (context, value, child) {
+                            return Text(
+                              '${value.toStringAsFixed(0)} kcal',
+                              style: AppTextStyle.heading5,
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                // height: 120,
+                width: screenWidth,
+                margin: EdgeInsetsGeometry.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
+                padding: EdgeInsetsGeometry.symmetric(
+                  horizontal: 16,
+                  vertical: 24,
+                ),
+                decoration: BoxDecoration(
+                  color: Color(0xFFD6EBF6),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  spacing: 8,
+                  children: [
+                    Text(
+                      "You haven't uploaded any workout",
+                      style: AppTextStyle.heading5,
+                    ),
+                    Text(
+                      'You can search in our database',
+                      style: TextStyle(color: Color(0xFF555555)),
+                    ),
+                    Container(
+                      margin: EdgeInsetsGeometry.symmetric(vertical: 6),
+                      padding: EdgeInsetsGeometry.symmetric(
+                        horizontal: screenWidth / 2 - 100,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Color(0xFF17233C),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '+  Add workout',
+                        style: AppTextStyle.heading6.copyWith(
+                          color: Colors.white,
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
 
-            //   ],
-            // ),
-            // ),
-            SizedBox(height: 120),
-          ],
+              SizedBox(height: 14),
+              // Water section
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                spacing: screenWidth - 222,
+                children: [
+                  Text('Water', style: AppTextStyle.heading4),
+                  SizedBox(
+                    width: 120,
+                    child: GestureDetector(
+                      onTap: () async {
+                        final Map<String, String>? res =
+                            await showModalBottomSheet(
+                              context: context,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.vertical(
+                                  top: Radius.circular(20), // rounded top
+                                ),
+                              ),
+                              showDragHandle: true,
+                              isScrollControlled: true,
+                              builder: (context) {
+                                return StatefulBuilder(
+                                  builder: (context, setState) {
+                                    return Padding(
+                                      padding: EdgeInsets.only(
+                                        bottom: MediaQuery.of(
+                                          context,
+                                        ).viewInsets.bottom,
+                                      ),
+                                      child: WaterDetails(
+                                        requiredWater: _requiredWater,
+                                        waterCupSize: _waterCupSize,
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                            );
+                        if (res != null) {
+                          _requiredWater = int.parse(res['goal']!);
+                          _waterCupSize = int.parse(res['cup']!);
+                          final response = await UserServices()
+                              .updateDailyTarget(
+                                water: _requiredWater.toDouble(),
+                              );
+                          // setState(() {
+                          if (response['message'] != null) {
+                            _showSnackBar(response['message']);
+                          }
+                          // });
+                          // if(response['status_ok']) {
+                          //   showSnackBar(response['massage']);
+                          // }
+                        }
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        // spacing: 8,
+                        children: [
+                          Text(
+                            'More',
+                            style: AppTextStyle.heading6.copyWith(
+                              color: Color(0xFF888888),
+                            ),
+                          ),
+                          Icon(Icons.chevron_right, color: Color(0xFF888888)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: 14),
+
+              // water section
+              // Container(
+              //   // height: 133,
+              //   width: screenWidth,
+              //   margin: EdgeInsetsGeometry.symmetric(horizontal: 16, vertical: 4),
+              //   // padding: EdgeInsetsGeometry.symmetric(
+              //   //   // horizontal: 16,
+              //   //   vertical: 16,
+              //   // ),
+              //   decoration: BoxDecoration(
+              //     color: Colors.white,
+              //     borderRadius: BorderRadius.circular(16),
+              //     border: BoxBorder.all(color: Color(0xFFE1E9FF), width: 1),
+              //   ),
+              //   child: Stack(
+              //     children: [
+              //       ClipRRect(
+              //         borderRadius: BorderRadius.circular(16),
+              //         // child: Positioned.fill(child: WaterWave()),
+              //         // child: WaterWave(),
+              //       ),
+              WaterWave(
+                key: Key(_drankWater.toString()),
+                fillFraction:
+                    _drankWater.toDouble() / _requiredWater.toDouble(),
+                fillFractionCopy:
+                    _drankWaterCopy.toDouble() / _requiredWater.toDouble(),
+                updateCopy: () {
+                  setState(() {
+                    _drankWaterCopy = _drankWater;
+                  });
+                },
+                margin: EdgeInsetsGeometry.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: BoxBorder.all(color: Color(0xFFE1E9FF), width: 1),
+                ),
+                // RotatingIcon(),
+                child: Container(
+                  padding: EdgeInsetsGeometry.symmetric(
+                    // horizontal: 16,
+                    vertical: 16,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    spacing: screenWidth - 250,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            spacing: 2,
+                            children: [
+                              TweenAnimationBuilder(
+                                tween: Tween<double>(
+                                  begin: _drankWaterCopy.toDouble(),
+                                  end: _drankWater.toDouble(),
+                                ),
+                                onEnd: () {
+                                  // setState(() {
+                                  //   // _fillFractionCopy = _fillFraction;
+                                  //   // widget.updateCopy?.call();
+                                  // });
+                                },
+                                duration: Duration(seconds: 2),
+                                curve: Curves.easeInOut,
+
+                                builder: (context, value, child) {
+                                  return Text(
+                                    value.toStringAsFixed(0),
+                                    style: AppTextStyle.heading1.copyWith(
+                                      color: Color(0xFF050F2C),
+                                    ),
+                                  );
+                                },
+                              ),
+                              Text(
+                                'ml',
+                                style: AppTextStyle.heading6.copyWith(
+                                  color: Color(0xFF050F2C),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Text(
+                            'Goal ${_requiredWater}ml',
+                            style: AppTextStyle.primaryBoldText.copyWith(
+                              color: Color(0xFF888888),
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Container(
+                            padding: EdgeInsetsGeometry.symmetric(
+                              horizontal: 6,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Color(0xFFEDEDED),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              '1 cup = ${_waterCupSize}ml',
+                              style: AppTextStyle.extraSmallText.copyWith(
+                                color: Color(0xFF555555),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      GestureDetector(
+                        onTap: () async {
+                          if (_drankWater < _requiredWater) {
+                            setState(() {
+                              _drankWater += _waterCupSize;
+                            });
+
+                            final response = await DailyDataServices().addWater(
+                              _waterCupSize.toDouble(),
+                            );
+
+                            if (!context.mounted) return;
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                margin: EdgeInsetsGeometry.symmetric(
+                                  horizontal: 40,
+                                  vertical: 40,
+                                ),
+                                padding: EdgeInsetsGeometry.symmetric(
+                                  horizontal: 20,
+                                  vertical: 14,
+                                ),
+                                behavior: SnackBarBehavior.floating,
+                                backgroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                content: Text(
+                                  response['message'] ??
+                                      'Water added successfully',
+                                  style: AppTextStyle.primaryText.copyWith(
+                                    color: Color(0xFF000000),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        child: Container(
+                          height: 80,
+                          width: 50,
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              image: AssetImage(
+                                'assets/glass_of_water_image.png',
+                              ),
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.add_rounded,
+                            size: 28,
+                            color: Color(0xFF2A3145),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              //   ],
+              // ),
+              // ),
+              SizedBox(height: 120),
+            ],
+          ),
         ),
       ),
     );

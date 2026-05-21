@@ -3,7 +3,7 @@
     "short_name": "Nutrilens",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0FFFFFF",
+    "background_color": "#FFFFFF",
     "theme_color": "#80CBC4",
     "description": "A new Flutter project.",
     "orientation": "portrait-primary",
