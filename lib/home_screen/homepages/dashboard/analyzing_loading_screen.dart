@@ -7,7 +7,8 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:nutrilens_test/cores/custom_datatypes/custom_classes.dart';
 import 'package:nutrilens_test/home_screen/homepages/dashboard/intake_details.dart';
-import 'package:nutrilens_test/home_screen/homepages/dashboard/amount_input_screen.dart'; // For ScannerBracketsPainter
+import 'package:nutrilens_test/home_screen/homepages/dashboard/amount_input_screen.dart'; import 'package:nutrilens_test/cores/api_config.dart';
+// For ScannerBracketsPainter
 
 class AnalyzingLoadingScreen extends StatefulWidget {
   final XFile imageFile;
@@ -65,7 +66,7 @@ class _AnalyzingLoadingScreenState extends State<AnalyzingLoadingScreen>
         _statusMessage = "Connecting to Neural Engine...";
       });
 
-      final baseUrl = "https://nutrilens-application.onrender.com";
+      final baseUrl = ApiConfig.baseUrl;
 
       var request = http.MultipartRequest(
         'POST',

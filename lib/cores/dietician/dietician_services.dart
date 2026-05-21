@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:nutrilens_test/cores/api_config.dart';
 
 class DieticianServices {
-  static const String _baseUrl = "https://nutrilens-application.onrender.com";
+  static String get _baseUrl => ApiConfig.baseUrl;
   final _storage = const FlutterSecureStorage();
 
   Future<Map<String, dynamic>> registerDietician({

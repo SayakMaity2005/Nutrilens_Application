@@ -4,10 +4,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:nutrilens_test/cores/api_config.dart';
 
 class UserServices {
   final storage = FlutterSecureStorage();
-  static const String _baseUrl = "https://nutrilens-application.onrender.com";
+  static String get _baseUrl => ApiConfig.baseUrl;
 
   Future<Map<String, dynamic>> getUser() async {
     String? token = await storage.read(key: "access_token");
@@ -117,6 +118,82 @@ class UserServices {
       return {'status_ok': false, 'message': data['detail'] ?? 'Failed to get nudges'};
     } catch (e) {
       return {'status_ok': false, 'message': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> updateProfile({
+    double? height,
+    double? weight,
+    int? age,
+    String? gender,
+  }) async {
+    String? token = await storage.read(key: "access_token");
+    if (token == null) {
+      return {'status_ok': false, 'message': 'Authentication token not found.'};
+    }
+
+    Map<String, dynamic> request = {};
+    if (height != null) request['height'] = height;
+    if (weight != null) request['weight'] = weight;
+    if (age != null) request['age'] = age;
+    if (gender != null) request['gender'] = gender;
+
+    if (request.isEmpty) return {'status_ok': true, 'message': 'No changes detected.'};
+
+    try {
+      final response = await http.patch(
+        Uri.parse("$_baseUrl/users/update/profile"),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(request),
+      );
+
+      if (response.statusCode == 200) {
+        return {'status_ok': true, 'message': 'Profile updated successfully'};
+      }
+
+      final data = jsonDecode(response.body);
+      return {'status_ok': false, 'message': data['detail'] ?? 'Failed to update profile'};
+    } catch (e) {
+      return {'status_ok': false, 'message': 'Update profile error: $e'};
+    }
+  }
+
+  Future<Map<String, dynamic>> updateUserDetails({
+    String? fullName,
+    String? email,
+  }) async {
+    String? token = await storage.read(key: "access_token");
+    if (token == null) {
+      return {'status_ok': false, 'message': 'Authentication token not found.'};
+    }
+
+    Map<String, dynamic> request = {};
+    if (fullName != null) request['full_name'] = fullName;
+    if (email != null) request['email'] = email;
+
+    if (request.isEmpty) return {'status_ok': true, 'message': 'No changes detected.'};
+
+    try {
+      final response = await http.patch(
+        Uri.parse("$_baseUrl/users/update/details"),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(request),
+      );
+
+      if (response.statusCode == 200) {
+        return {'status_ok': true, 'message': 'User details updated successfully'};
+      }
+
+      final data = jsonDecode(response.body);
+      return {'status_ok': false, 'message': data['detail'] ?? 'Failed to update details'};
+    } catch (e) {
+      return {'status_ok': false, 'message': 'Update details error: $e'};
     }
   }
 }
