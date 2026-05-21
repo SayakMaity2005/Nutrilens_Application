@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:nutrilens_test/cores/custom_datatypes/custom_classes.dart';
 import 'package:nutrilens_test/home_screen/homepages/dashboard/intake_details.dart';
+import 'package:nutrilens_test/home_screen/homepages/dashboard/amount_input_screen.dart'; // For ScannerBracketsPainter
 
 class AnalyzingLoadingScreen extends StatefulWidget {
   final XFile imageFile;
@@ -30,6 +31,9 @@ class _AnalyzingLoadingScreenState extends State<AnalyzingLoadingScreen>
   late Animation<double> _animation;
   final storage = const FlutterSecureStorage();
   String _statusMessage = "Analyzing image with AI...";
+  
+  bool _showProAds = true;
+  int _selectedPlanIndex = 1;
 
   @override
   void initState() {
@@ -37,7 +41,7 @@ class _AnalyzingLoadingScreenState extends State<AnalyzingLoadingScreen>
 
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 2),
+      duration: const Duration(milliseconds: 1500),
     )..repeat(reverse: true);
 
     _animation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -61,7 +65,6 @@ class _AnalyzingLoadingScreenState extends State<AnalyzingLoadingScreen>
         _statusMessage = "Connecting to Neural Engine...";
       });
 
-      // Use deployed backend URL
       final baseUrl = "https://nutrilens-application.onrender.com";
 
       var request = http.MultipartRequest(
@@ -73,8 +76,6 @@ class _AnalyzingLoadingScreenState extends State<AnalyzingLoadingScreen>
         request.headers['Authorization'] = 'Bearer $token';
       }
       
-      // We send the amount regardless of 'grams' or 'servings'.
-      // If it's servings, maybe grok handles it, but backend defaults to grams prompt right now.
       request.fields['quantity'] = widget.amount.toString();
 
       final bytes = await widget.imageFile.readAsBytes();
@@ -96,17 +97,15 @@ class _AnalyzingLoadingScreenState extends State<AnalyzingLoadingScreen>
           _statusMessage = "Generating macros...";
         });
         
-        // Short delay for visual effect
         await Future.delayed(const Duration(milliseconds: 500));
         
         final data = jsonDecode(response.body);
         
-        // Parse JSON data to Intake object
         final intakeObj = Intake(
           name: data['name'] ?? 'Unknown',
           type: data['type'] ?? 'Solid',
           unit: widget.unit,
-          quantity: widget.amount, // Intake quantity is usually handled inside the object, but if API returns per unit, we pass 1.0 or the amount. Wait, if Grok calculates TOTAL, then perUnit = total / quantity
+          quantity: widget.amount,
           energyPerUnit: (data['energy_per_unit'] ?? 0) / widget.amount,
           carbsPerUnit: (data['carbs_per_unit'] ?? 0) / widget.amount,
           proteinPerUnit: (data['protein_per_unit'] ?? 0) / widget.amount,
@@ -156,96 +155,381 @@ class _AnalyzingLoadingScreenState extends State<AnalyzingLoadingScreen>
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          // Background Image
-          Positioned.fill(
-            child: kIsWeb
-                ? Image.network(
-                    widget.imageFile.path,
-                    fit: BoxFit.cover,
-                  )
-                : Image.file(
-                    File(widget.imageFile.path),
-                    fit: BoxFit.cover,
-                  ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.cyan.shade100.withOpacity(0.4),
+              Colors.white,
+              Colors.white,
+            ],
+            stops: const [0.0, 0.4, 1.0],
           ),
-          
-          // Dark Overlay
-          Positioned.fill(
-            child: Container(color: Colors.black.withOpacity(0.4)),
-          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Top Bar
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        const Text(
+                          "Nutrilens",
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFF0F2D3F),
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.teal.shade400,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Text(
+                            "PRO",
+                            style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                          ),
+                        )
+                      ],
+                    ),
+                    if (_showProAds)
+                      IconButton(
+                        icon: const Icon(Icons.close, color: Colors.grey, size: 28),
+                        onPressed: () => setState(() => _showProAds = false),
+                      )
+                  ],
+                ),
+              ),
 
-          // Animated Laser Scanner
-          AnimatedBuilder(
-            animation: _animation,
-            builder: (context, child) {
-              return Positioned(
-                top: _animation.value * size.height,
-                left: 0,
-                right: 0,
-                child: Container(
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.blueAccent,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.blueAccent.withOpacity(0.8),
-                        blurRadius: 10,
-                        spreadRadius: 2,
+              const SizedBox(height: 10),
+
+              // Image Viewer with Scanner Brackets & Laser
+              Expanded(
+                child: Center(
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        width: 250,
+                        height: 250,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
+                            )
+                          ],
+                          image: DecorationImage(
+                            image: kIsWeb ? NetworkImage(widget.imageFile.path) as ImageProvider : FileImage(File(widget.imageFile.path)),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        child: ClipOval(
+                          child: AnimatedBuilder(
+                            animation: _animation,
+                            builder: (context, child) {
+                              return Stack(
+                                children: [
+                                  Positioned(
+                                    top: _animation.value * 250,
+                                    left: 0,
+                                    right: 0,
+                                    child: Container(
+                                      height: 4,
+                                      decoration: BoxDecoration(
+                                        color: Colors.blueAccent,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.blueAccent.withOpacity(0.8),
+                                            blurRadius: 10,
+                                            spreadRadius: 2,
+                                          ),
+                                          BoxShadow(
+                                            color: Colors.white.withOpacity(0.5),
+                                            blurRadius: 20,
+                                            spreadRadius: 5,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
                       ),
-                      BoxShadow(
-                        color: Colors.white.withOpacity(0.5),
-                        blurRadius: 20,
-                        spreadRadius: 5,
+                      SizedBox(
+                        width: 310,
+                        height: 310,
+                        child: CustomPaint(painter: ScannerBracketsPainter()),
                       ),
                     ],
                   ),
                 ),
-              );
-            },
+              ),
+
+              // Bottom Section
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: _showProAds
+                    ? _buildPricingSection()
+                    : _buildLoadingState(),
+              ),
+            ],
           ),
-          
-          // Scanning Frame (Corners)
-          Center(
-            child: Container(
-              height: 300,
-              width: 300,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.white.withOpacity(0.2), width: 2),
-                borderRadius: BorderRadius.circular(30),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Container(
+      key: const ValueKey('loading'),
+      padding: const EdgeInsets.symmetric(vertical: 50.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const CircularProgressIndicator(color: Colors.blueAccent),
+          const SizedBox(height: 20),
+          Text(
+            _statusMessage,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.black87,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.2,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPricingSection() {
+    return Container(
+      key: const ValueKey('pricing'),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              _buildPricingCard(
+                index: 0,
+                title: "3\nMONTHS",
+                pricePerMonth: "₹ 766.66 /mo",
+                totalPrice: "₹2,300.00",
+              ),
+              const SizedBox(width: 12),
+              _buildPricingCard(
+                index: 1,
+                title: "12\nMONTHS",
+                pricePerMonth: "₹ 433.33 /mo",
+                totalPrice: "₹5,200.00",
+                badgeText: "60% OFF",
+                isFeatured: true,
+              ),
+              const SizedBox(width: 12),
+              _buildPricingCard(
+                index: 2,
+                title: "1\nMONTH",
+                pricePerMonth: "₹ 1,050.00 /mo",
+                totalPrice: "₹1,050.00",
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Text(
+            _selectedPlanIndex == 1 
+              ? "Just ₹5,200.00/year, ₹ 433.33/month" 
+              : (_selectedPlanIndex == 0 ? "Just ₹2,300.00/quarter, ₹ 766.66/month" : "Just ₹1,050.00/month"),
+            style: const TextStyle(
+              color: Colors.blue,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 15),
+          SizedBox(
+            width: double.infinity,
+            height: 55,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                elevation: 0,
+              ),
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Payment Gateway Integration Required')),
+                );
+              },
+              child: const Text(
+                "Continue",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
+          const SizedBox(height: 15),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.verified_user, color: Colors.green.shade600, size: 16),
+              const SizedBox(width: 5),
+              const Text(
+                "Cancel in the Google Play Anytime",
+                style: TextStyle(
+                  color: Colors.black54,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 15),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("Privacy policy", style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Text("|", style: TextStyle(color: Colors.grey.shade400, fontSize: 11)),
+              ),
+              Text("Terms of use", style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Text("|", style: TextStyle(color: Colors.grey.shade400, fontSize: 11)),
+              ),
+              Text("Restore", style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            "According to GooglePlay policy, your subscription is automatically renewed. If you do not cancel, your Google account will be charged for the next period 24 hours before the end of the current subscription period. If you need to cancel, please manually turn off automatic renewal in the Google Play settings at least 24 hours before the end of the current subscription.",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.grey.shade400,
+              fontSize: 10,
+              height: 1.3,
+            ),
+          ),
+          const SizedBox(height: 15),
+        ],
+      ),
+    );
+  }
 
-          // Status Text
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 80.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const CircularProgressIndicator(color: Colors.blueAccent),
-                  const SizedBox(height: 20),
-                  Text(
-                    _statusMessage,
-                    textAlign: TextAlign.center,
+  Widget _buildPricingCard({
+    required int index,
+    required String title,
+    required String pricePerMonth,
+    required String totalPrice,
+    String? badgeText,
+    bool isFeatured = false,
+  }) {
+    final isSelected = _selectedPlanIndex == index;
+
+    return GestureDetector(
+      onTap: () => setState(() => _selectedPlanIndex = index),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            height: 120,
+            width: isFeatured ? 110 : 90,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isSelected ? Colors.blue : Colors.grey.shade300,
+                width: isSelected ? 2 : 1,
+              ),
+              boxShadow: [
+                if (isSelected)
+                  BoxShadow(
+                    color: Colors.blue.withOpacity(0.1),
+                    blurRadius: 10,
+                    spreadRadius: 2,
+                  )
+              ],
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (badgeText != null) const SizedBox(height: 10),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.black87,
+                    fontWeight: FontWeight.w500,
+                    fontSize: isFeatured ? 15 : 13,
+                    height: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  pricePerMonth,
+                  style: TextStyle(
+                    color: isSelected ? Colors.blue.shade700 : Colors.black87,
+                    fontWeight: FontWeight.bold,
+                    fontSize: isFeatured ? 13 : 11,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  totalPrice,
+                  style: TextStyle(
+                    color: Colors.grey.shade500,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (badgeText != null)
+            Positioned(
+              top: -10,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    badgeText,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 18,
+                      fontSize: 10,
                       fontWeight: FontWeight.bold,
-                      letterSpacing: 1.2,
                     ),
                   ),
-                ],
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

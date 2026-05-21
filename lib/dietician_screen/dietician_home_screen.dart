@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nutrilens_test/cores/constants/colors.dart';
+import 'package:nutrilens_test/cores/user_operations/user_services.dart';
+import 'package:nutrilens_test/dietician_screen/dietician_dashboard.dart';
 import 'package:nutrilens_test/dietician_screen/client_list_page.dart';
 import 'package:nutrilens_test/dietician_screen/meetings_page.dart';
 import 'package:nutrilens_test/profile_screen/profile_page.dart';
@@ -21,6 +23,16 @@ class _DieticianHomeScreenState extends State<DieticianHomeScreen> {
   void initState() {
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    _fetchUserData();
+  }
+
+  Future<void> _fetchUserData() async {
+    final response = await UserServices().getUser();
+    if (response['status_ok']) {
+      setState(() {
+        _userData = response['data'];
+      });
+    }
   }
 
   @override
@@ -29,16 +41,24 @@ class _DieticianHomeScreenState extends State<DieticianHomeScreen> {
     final palette = Theme.of(context).extension<AppPalette>() ?? ThemePalette.lightPalette;
 
     final pages = <Widget>[
+      DieticianDashboard(userData: _userData),
       const ClientListPage(),
       const MeetingsPage(),
     ];
 
+    String appBarTitle;
+    if (_currentIndex == 0) {
+      appBarTitle = 'Dashboard';
+    } else if (_currentIndex == 1) {
+      appBarTitle = 'My Clients';
+    } else {
+      appBarTitle = 'Meetings';
+    }
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text(
-          _currentIndex == 0 ? 'My Clients' : 'Meetings',
-        ),
+        title: Text(appBarTitle),
         titleTextStyle: GoogleFonts.nunito(
           textStyle: TextStyle(
             color: palette.headingBlueText,
@@ -75,7 +95,15 @@ class _DieticianHomeScreenState extends State<DieticianHomeScreen> {
                     ),
                   );
                 },
-                icon: const Icon(Icons.person, size: 28),
+                icon: (_userData == null || _userData?['full_name'] == null)
+                    ? const Icon(Icons.person, size: 28)
+                    : Text(
+                        _userData!['full_name'][0].toString().toUpperCase(),
+                        style: const TextStyle(
+                          color: Color(0xFF555555),
+                          fontSize: 22,
+                        ),
+                      ),
               ),
             ),
           ),
@@ -113,8 +141,13 @@ class _DieticianHomeScreenState extends State<DieticianHomeScreen> {
         indicatorColor: palette.selectColor4,
         destinations: const [
           NavigationDestination(
-            icon: Icon(Icons.people_outline, size: 28),
-            selectedIcon: Icon(Icons.people, size: 24),
+            icon: Icon(Icons.dashboard_outlined, size: 26),
+            selectedIcon: Icon(Icons.dashboard, size: 26),
+            label: 'Dashboard',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.people_outline, size: 26),
+            selectedIcon: Icon(Icons.people, size: 26),
             label: 'Clients',
           ),
           NavigationDestination(

@@ -13,21 +13,21 @@ router = APIRouter()
 @router.post("/daily_data/add_water")
 async def add_water_in_daily_data(
     water_quantity: float,
-    current_user: Annotated[UserInDB, Depends(get_current_active_user)]
+    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
+    date: str | None = None
 ):
     
-    if water_quantity > current_user.profile.daily_target.water:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Water quantity exceeding target"
-        )
+    # Removed water target checks that were causing 400 Bad Request
 
     # pymongo does not support date so I had to make the date (of daily_data) as datetime type with min time
     # this make date with min time 00.00.00 like 2026-05-16 00:00:00
-    today: datetime = datetime.combine(
-        datetime.now().date(),
-        datetime.min.time()
-    )
+    if date:
+        try:
+            today: datetime = datetime.combine(datetime.strptime(date, "%Y-%m-%d").date(), datetime.min.time())
+        except Exception:
+            today: datetime = datetime.combine(datetime.now().date(), datetime.min.time())
+    else:
+        today: datetime = datetime.combine(datetime.now().date(), datetime.min.time())
 
     
     try:
@@ -68,12 +68,6 @@ async def add_water_in_daily_data(
     
     else:
         water_drunk: float = users_daily_data_dict["water"]
-
-        if water_drunk >= current_user.profile.daily_target.water:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Water drinking target reached"
-        )
     
         try:
             await users_daily_data_collection.update_one(

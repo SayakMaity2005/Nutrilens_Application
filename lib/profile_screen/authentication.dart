@@ -105,537 +105,365 @@ class _AuthenticationState extends State<Authentication> {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    final screenHeight = screenSize.height;
     final screenWidth = screenSize.width;
-    final palette = Theme.of(context).extension<AppPalette>()!;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        centerTitle: true,
-        title: Text(_headingText),
-        titleTextStyle: GoogleFonts.nunito(
-          textStyle: TextStyle(
-            color: palette.headingBlueText,
-            fontSize: 24,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
         backgroundColor: Colors.transparent,
-        toolbarHeight: 50,
         elevation: 0,
-        scrolledUnderElevation: 0,
         leading: GestureDetector(
-          onTap: () {
-            Navigator.pop(context);
-          },
+          onTap: () => Navigator.pop(context),
           child: Container(
-            height: 16,
-            width: 16,
-            margin: const EdgeInsets.symmetric(horizontal: 6),
-            decoration: const BoxDecoration(
-              color: Color(0xFFD9EEFF),
+            margin: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white,
               shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 5,
+                  offset: const Offset(0, 2),
+                )
+              ],
             ),
             child: const Icon(
-              Icons.arrow_back_ios_rounded,
-              size: 24,
-              color: Color(0xFF393939),
+              Icons.arrow_back_ios_new_rounded,
+              size: 20,
+              color: Color(0xFF334155),
             ),
           ),
         ),
       ),
       body: Container(
-        height: screenHeight,
+        height: screenSize.height,
         width: screenWidth,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              palette.topGradient2,
-              palette.midGradient2,
-              palette.midGradient2,
-              palette.bottomGradient2,
+              Colors.cyan.shade100.withOpacity(0.6),
+              Colors.white,
+              Colors.white,
             ],
+            stops: const [0.0, 0.4, 1.0],
           ),
         ),
-        child: Column(
-          children: [
-            const SizedBox(height: 110),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 10,
+        child: SafeArea(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header Texts
+                Text(
+                  _isSignIn ? "Welcome Back!" : "Create Account",
+                  style: const TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF1E293B),
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _isSignIn ? "Sign in to access your AI assistant and history." : "Join NutriLens to track your nutrition seamlessly.",
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Color(0xFF64748B),
+                  ),
+                ),
+                const SizedBox(height: 32),
+
+                // Form Card
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.04),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
                       ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(30),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0xFFAAAAAA),
-                            offset: Offset(1, 1),
-                            spreadRadius: 0,
-                            blurRadius: 1,
-                          ),
-                        ],
-                        gradient: const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          stops: [0.0, 0.3, 0.7, 1.0],
-                          colors: [
-                            Color(0xFF6DBDF6),
-                            Colors.white,
-                            Colors.white,
-                            Color(0xFFE59FF6),
-                          ],
+                    ],
+                  ),
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    children: [
+                      // Toggle Switch
+                      Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(25),
                         ),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(30),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 20,
-                            ),
-                            child: Column(
-                              spacing: 16,
-                              children: [
-                                // Username Field
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  spacing: 5,
-                                  children: [
-                                    const Text('  Username'),
-                                    TextField(
-                                      controller: _usernameTextController,
-                                      onTapOutside: (_) => FocusScope.of(context).unfocus(),
-                                      decoration: InputDecoration(
-                                        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 30),
-                                        prefixIcon: const Icon(Icons.person),
-                                        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF0D35B5))),
-                                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF777777))),
-                                      ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () => setState(() {
+                                  _isSignIn = true;
+                                  _isDietician = false;
+                                }),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: _isSignIn ? Colors.white : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(25),
+                                    boxShadow: _isSignIn
+                                        ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 2))]
+                                        : [],
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    "Sign In",
+                                    style: TextStyle(
+                                      color: _isSignIn ? Colors.blue.shade700 : const Color(0xFF64748B),
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                  ],
-                                ),
-                                // Full name Field
-                                if (!_isSignIn)
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    spacing: 5,
-                                    children: [
-                                      const Text('  Full name'),
-                                      TextField(
-                                        controller: _fullNameTextController,
-                                        onTapOutside: (_) => FocusScope.of(context).unfocus(),
-                                        decoration: InputDecoration(
-                                          contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 30),
-                                          prefixIcon: const Icon(Icons.person_pin_outlined),
-                                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF0D35B5))),
-                                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF777777))),
-                                        ),
-                                      ),
-                                    ],
                                   ),
-                                // Email Field
-                                if (!_isSignIn)
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    spacing: 5,
-                                    children: [
-                                      const Text('  Email'),
-                                      TextField(
-                                        controller: _emailTextController,
-                                        onTapOutside: (_) => FocusScope.of(context).unfocus(),
-                                        decoration: InputDecoration(
-                                          contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 30),
-                                          prefixIcon: const Icon(Icons.email_outlined),
-                                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF0D35B5))),
-                                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF777777))),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-
-                                // User specific registration fields: DOB, Gender, Height, Weight
-                                if (!_isSignIn && !_isDietician) ...[
-                                  Row(
-                                    spacing: 20,
-                                    children: [
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        spacing: 5,
-                                        children: [
-                                          const Text('  Date of birth'),
-                                          GestureDetector(
-                                            onTap: () => pickDOB(context),
-                                            child: Container(
-                                              padding: const EdgeInsets.all(16),
-                                              decoration: BoxDecoration(
-                                                border: Border.all(color: const Color(0xFF777777)),
-                                                borderRadius: BorderRadius.circular(12),
-                                              ),
-                                              child: Text(
-                                                _selectedDate == null
-                                                    ? "Select DOB"
-                                                    : "${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}",
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          spacing: 4,
-                                          children: [
-                                            const Text('  Gender'),
-                                            DropdownButtonFormField<String>(
-                                              value: _selectedGender,
-                                              decoration: InputDecoration(
-                                                border: OutlineInputBorder(
-                                                  borderRadius: BorderRadius.circular(12),
-                                                ),
-                                              ),
-                                              items: ["Male", "Female", "Other"]
-                                                  .map((gender) => DropdownMenuItem(value: gender, child: Text(gender)))
-                                                  .toList(),
-                                              onChanged: (value) {
-                                                if (value != null) {
-                                                  setState(() {
-                                                    _selectedGender = value;
-                                                  });
-                                                }
-                                              },
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Row(
-                                    spacing: 20,
-                                    children: [
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          spacing: 5,
-                                          children: [
-                                            const Text('  Height'),
-                                            TextField(
-                                              controller: _heightTextController,
-                                              onTapOutside: (_) => FocusScope.of(context).unfocus(),
-                                              maxLength: 3,
-                                              keyboardType: TextInputType.number,
-                                              decoration: InputDecoration(
-                                                contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 30),
-                                                prefixIcon: const Icon(Icons.height),
-                                                suffixText: 'cm',
-                                                counterText: '',
-                                                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF0D35B5))),
-                                                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF777777))),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          spacing: 5,
-                                          children: [
-                                            const Text('  Weight'),
-                                            TextField(
-                                              controller: _weightTextController,
-                                              onTapOutside: (_) => FocusScope.of(context).unfocus(),
-                                              maxLength: 3,
-                                              keyboardType: TextInputType.number,
-                                              decoration: InputDecoration(
-                                                contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 30),
-                                                prefixIcon: const Icon(Icons.monitor_weight_outlined),
-                                                suffixText: 'kg',
-                                                counterText: '',
-                                                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF0D35B5))),
-                                                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF777777))),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-
-                                // Dietitian specific registration fields
-                                if (!_isSignIn && _isDietician) ...[
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    spacing: 5,
-                                    children: [
-                                      const Text('  Specialization'),
-                                      TextField(
-                                        controller: _specializationController,
-                                        onTapOutside: (_) => FocusScope.of(context).unfocus(),
-                                        decoration: InputDecoration(
-                                          contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 30),
-                                          prefixIcon: const Icon(Icons.work),
-                                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF0D35B5))),
-                                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF777777))),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    spacing: 5,
-                                    children: [
-                                      const Text('  Qualification'),
-                                      TextField(
-                                        controller: _qualificationController,
-                                        onTapOutside: (_) => FocusScope.of(context).unfocus(),
-                                        decoration: InputDecoration(
-                                          contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 30),
-                                          prefixIcon: const Icon(Icons.school),
-                                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF0D35B5))),
-                                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF777777))),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    spacing: 5,
-                                    children: [
-                                      const Text('  Experience (Years)'),
-                                      TextField(
-                                        controller: _experienceController,
-                                        keyboardType: TextInputType.number,
-                                        onTapOutside: (_) => FocusScope.of(context).unfocus(),
-                                        decoration: InputDecoration(
-                                          contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 30),
-                                          prefixIcon: const Icon(Icons.timeline),
-                                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF0D35B5))),
-                                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF777777))),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-
-                                // Password Field
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  spacing: 5,
-                                  children: [
-                                    const Text('  Password'),
-                                    TextField(
-                                      controller: _passwordTextController,
-                                      obscureText: true,
-                                      onTapOutside: (_) => FocusScope.of(context).unfocus(),
-                                      decoration: InputDecoration(
-                                        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 30),
-                                        prefixIcon: const Icon(Icons.key_rounded),
-                                        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF0D35B5))),
-                                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF777777))),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                // Confirm Password Field
-                                if (!_isSignIn)
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    spacing: 5,
-                                    children: [
-                                      const Text('  Confirm password'),
-                                      TextField(
-                                        controller: _confirmPasswordTextController,
-                                        obscureText: true,
-                                        keyboardType: TextInputType.visiblePassword,
-                                        onTapOutside: (_) => FocusScope.of(context).unfocus(),
-                                        decoration: InputDecoration(
-                                          contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 30),
-                                          prefixIcon: const Icon(Icons.key_rounded),
-                                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF0D35B5))),
-                                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF777777))),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 30),
-                    AnimatedButton(
-                      onTap: () async {
-                        if (_usernameTextController.text.isEmpty) {
-                          _showSnackBar(context, 'Enter username (mandatory field)');
-                          return;
-                        }
-                        if (_passwordTextController.text.isEmpty) {
-                          _showSnackBar(context, 'Enter password');
-                          return;
-                        }
-                        if (!_isSignIn) {
-                          if (_passwordTextController.text.length < 8) {
-                            _showSnackBar(context, 'Password must have at least 8 characters');
-                            return;
-                          }
-                          if (_passwordTextController.text != _confirmPasswordTextController.text) {
-                            _showSnackBar(context, 'Password mismatch');
-                            return;
-                          }
-                        }
-
-                        // Show loading
-                        showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (context) => const Center(child: CircularProgressIndicator()),
-                        );
-
-                        Map<String, dynamic> response;
-
-                        if (_isSignIn) {
-                          response = await AuthServices().login(
-                            username: _usernameTextController.text,
-                            password: _passwordTextController.text,
-                          );
-                        } else {
-                          if (_isDietician) {
-                            response = await DieticianServices().registerDietician(
-                              username: _usernameTextController.text,
-                              email: _emailTextController.text,
-                              fullName: _fullNameTextController.text,
-                              password: _passwordTextController.text,
-                              specialization: _specializationController.text,
-                              qualification: _qualificationController.text,
-                              experienceYears: int.tryParse(_experienceController.text),
-                            );
-                          } else {
-                            final double? height = double.tryParse(_heightTextController.text);
-                            final double? weight = double.tryParse(_weightTextController.text);
-                            final int? age = _selectedDate == null ? null : DateTime.now().year - _selectedDate!.year;
-
-                            response = await AuthServices().register(
-                              username: _usernameTextController.text,
-                              email: _emailTextController.text,
-                              fullName: _fullNameTextController.text,
-                              height: height,
-                              weight: weight,
-                              age: age,
-                              gender: _selectedGender?.toLowerCase(),
-                              password: _passwordTextController.text,
-                            );
-                          }
-                        }
-
-                        if (!context.mounted) return;
-                        Navigator.pop(context); // Close loading
-
-                        _showSnackBar(context, response['message'] ?? 'Authentication updated');
-
-                        if (response['status_ok'] == true) {
-                          Navigator.pop(context, true);
-                        }
-                      },
-                      height: 54,
-                      width: screenWidth / 2,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(30),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0xFFAAAAAA),
-                            offset: Offset(1, 1),
-                            spreadRadius: 0,
-                            blurRadius: 1,
-                          ),
-                        ],
-                        gradient: const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          stops: [0.0, 0.3, 0.7, 1.0],
-                          colors: [
-                            Color(0xFF6DBDF6),
-                            Colors.white,
-                            Colors.white,
-                            Color(0xFF987AF3),
-                          ],
-                        ),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(30),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                          child: SizedBox(
-                            height: screenHeight,
-                            width: screenWidth,
-                            child: Center(
-                              child: Text(
-                                _isSignIn ? 'Sign In' : 'Sign Up',
-                                style: AppTextStyle.heading5.copyWith(
-                                  color: const Color(0xFF0D2968),
                                 ),
                               ),
                             ),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () => setState(() => _isSignIn = false),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: !_isSignIn ? Colors.white : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(25),
+                                    boxShadow: !_isSignIn
+                                        ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 2))]
+                                        : [],
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    "Sign Up",
+                                    style: TextStyle(
+                                      color: !_isSignIn ? Colors.blue.shade700 : const Color(0xFF64748B),
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+
+                      // Form Fields
+                      _buildTextField("Username", Icons.person, _usernameTextController),
+                      if (!_isSignIn) const SizedBox(height: 16),
+                      if (!_isSignIn) _buildTextField("Full Name", Icons.badge_outlined, _fullNameTextController),
+                      if (!_isSignIn) const SizedBox(height: 16),
+                      if (!_isSignIn) _buildTextField("Email", Icons.email_outlined, _emailTextController),
+                      
+                      if (!_isSignIn && !_isDietician) ...[
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () => pickDOB(context),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade50,
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.calendar_month, color: Colors.grey.shade500, size: 22),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          _selectedDate == null ? "DOB" : "${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}",
+                                          style: TextStyle(color: _selectedDate == null ? Colors.grey.shade500 : const Color(0xFF334155), fontSize: 15),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: DropdownButtonFormField<String>(
+                                value: _selectedGender,
+                                decoration: InputDecoration(
+                                  filled: true,
+                                  fillColor: Colors.grey.shade50,
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                                ),
+                                icon: Icon(Icons.arrow_drop_down, color: Colors.grey.shade500),
+                                items: ["Male", "Female", "Other"]
+                                    .map((g) => DropdownMenuItem(value: g, child: Text(g, style: const TextStyle(fontSize: 15, color: Color(0xFF334155)))))
+                                    .toList(),
+                                onChanged: (val) {
+                                  if (val != null) setState(() => _selectedGender = val);
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(child: _buildTextField("Height (cm)", Icons.height, _heightTextController, isNumber: true)),
+                            const SizedBox(width: 12),
+                            Expanded(child: _buildTextField("Weight (kg)", Icons.monitor_weight_outlined, _weightTextController, isNumber: true)),
+                          ],
+                        ),
+                      ],
+
+                      if (!_isSignIn && _isDietician) ...[
+                        const SizedBox(height: 16),
+                        _buildTextField("Specialization", Icons.work_outline, _specializationController),
+                        const SizedBox(height: 16),
+                        _buildTextField("Qualification", Icons.school_outlined, _qualificationController),
+                        const SizedBox(height: 16),
+                        _buildTextField("Experience (Years)", Icons.timeline, _experienceController, isNumber: true),
+                      ],
+
+                      const SizedBox(height: 16),
+                      _buildTextField("Password", Icons.lock_outline, _passwordTextController, isObscure: true),
+                      if (!_isSignIn) const SizedBox(height: 16),
+                      if (!_isSignIn) _buildTextField("Confirm Password", Icons.lock_outline, _confirmPasswordTextController, isObscure: true),
+
+                      const SizedBox(height: 30),
+
+                      // Submit Button
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: ElevatedButton(
+                          onPressed: _handleSubmit,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue.shade600,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            shadowColor: Colors.blue.withOpacity(0.5),
+                          ),
+                          child: Text(
+                            _isSignIn ? "Sign In" : "Create Account",
+                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    TextButton(
-                      onPressed: () {
-                        setState(() {
-                          _isSignIn = !_isSignIn;
-                          _headingText = _isSignIn ? 'Sign In' : 'Create Account';
-                          if (_isSignIn) _isDietician = false; // reset when going to sign in
-                        });
-                      },
-                      child: Text(
-                        _isSignIn ? "Don't have an account? Sign Up" : "Already have an account? Sign In",
-                        style: TextStyle(
-                          color: palette.headingBlueText,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                    if (!_isSignIn)
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            _isDietician = !_isDietician;
-                          });
-                        },
-                        child: Text(
-                          _isDietician ? "Register as a normal user instead" : "Are you a Dietician? Sign up here",
-                          style: TextStyle(
-                            color: Colors.blue.shade700,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                            decoration: TextDecoration.underline,
+                      
+                      if (!_isSignIn) const SizedBox(height: 20),
+                      if (!_isSignIn)
+                        GestureDetector(
+                          onTap: () => setState(() => _isDietician = !_isDietician),
+                          child: Text(
+                            _isDietician ? "Register as a normal user instead" : "Are you a Dietitian? Sign up here",
+                            style: TextStyle(color: Colors.blue.shade700, fontWeight: FontWeight.w600, fontSize: 14),
                           ),
                         ),
-                      ),
-                    const SizedBox(height: 40),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
+  }
+
+  Widget _buildTextField(String hint, IconData icon, TextEditingController controller, {bool isObscure = false, bool isNumber = false}) {
+    return TextField(
+      controller: controller,
+      obscureText: isObscure,
+      keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+      onTapOutside: (_) => FocusScope.of(context).unfocus(),
+      style: const TextStyle(color: Color(0xFF334155), fontSize: 16),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 15),
+        prefixIcon: Icon(icon, color: Colors.grey.shade500, size: 22),
+        filled: true,
+        fillColor: Colors.grey.shade50,
+        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.blue.shade400, width: 1.5)),
+      ),
+    );
+  }
+
+  Future<void> _handleSubmit() async {
+    if (_usernameTextController.text.isEmpty) {
+      _showSnackBar(context, 'Enter username (mandatory field)');
+      return;
+    }
+    if (_passwordTextController.text.isEmpty) {
+      _showSnackBar(context, 'Enter password');
+      return;
+    }
+    if (!_isSignIn) {
+      if (_passwordTextController.text.length < 8) {
+        _showSnackBar(context, 'Password must have at least 8 characters');
+        return;
+      }
+      if (_passwordTextController.text != _confirmPasswordTextController.text) {
+        _showSnackBar(context, 'Password mismatch');
+        return;
+      }
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator(color: Colors.white)),
+    );
+
+    Map<String, dynamic> response;
+
+    if (_isSignIn) {
+      response = await AuthServices().login(
+        username: _usernameTextController.text,
+        password: _passwordTextController.text,
+      );
+    } else {
+      if (_isDietician) {
+        response = await DieticianServices().registerDietician(
+          username: _usernameTextController.text,
+          email: _emailTextController.text,
+          fullName: _fullNameTextController.text,
+          password: _passwordTextController.text,
+          specialization: _specializationController.text,
+          qualification: _qualificationController.text,
+          experienceYears: int.tryParse(_experienceController.text),
+        );
+      } else {
+        final double? height = double.tryParse(_heightTextController.text);
+        final double? weight = double.tryParse(_weightTextController.text);
+        final int? age = _selectedDate == null ? null : DateTime.now().year - _selectedDate!.year;
+
+        response = await AuthServices().register(
+          username: _usernameTextController.text,
+          email: _emailTextController.text,
+          fullName: _fullNameTextController.text,
+          height: height,
+          weight: weight,
+          age: age,
+          gender: _selectedGender?.toLowerCase(),
+          password: _passwordTextController.text,
+        );
+      }
+    }
+
+    if (!context.mounted) return;
+    Navigator.pop(context); // Close loading
+
+    _showSnackBar(context, response['message'] ?? 'Authentication updated');
+
+    if (response['status_ok'] == true) {
+      Navigator.pop(context, true);
+    }
   }
 }

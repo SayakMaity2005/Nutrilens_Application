@@ -9,6 +9,7 @@ import 'package:nutrilens_test/profile_screen/authentication.dart';
 
 import '../cores/constants/colors.dart';
 import '../cores/user_operations/user_services.dart';
+import '../home_screen/home_screen.dart';
 import '../dietician_screen/dietician_home_screen.dart' as nutrilens_test_dietician;
 
 class ProfilePage extends StatefulWidget {
@@ -47,14 +48,6 @@ class _ProfilePageState extends State<ProfilePage> {
         _userData = response['data'];
         widget.updateUserdata(_userData);
       });
-      
-      if (_userData['role'] == 'dietician') {
-        if (!mounted) return;
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const nutrilens_test_dietician.DieticianHomeScreen()),
-          (Route<dynamic> route) => false,
-        );
-      }
     } else {
       setState(() {
         _authorized = false;
@@ -69,76 +62,71 @@ class _ProfilePageState extends State<ProfilePage> {
     final screenSize = MediaQuery.of(context).size;
     final screenHeight = screenSize.height;
     final screenWidth = screenSize.width;
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
-    final palette = Theme.of(context).extension<AppPalette>()!;
 
-    // TODO: implement build
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         centerTitle: true,
-        title: Text(_headingText),
-        titleTextStyle: GoogleFonts.nunito(
-          textStyle: TextStyle(
-            color: palette.headingBlueText,
-            fontSize: 24,
+        title: Text(
+          _authorized ? "Profile" : "Sign In",
+          style: const TextStyle(
+            color: Color(0xFF1E293B),
+            fontSize: 22,
             fontWeight: FontWeight.w800,
+            letterSpacing: -0.5,
+          ),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Container(
+            margin: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 5,
+                  offset: const Offset(0, 2),
+                )
+              ],
+            ),
+            child: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              size: 20,
+              color: Color(0xFF334155),
+            ),
           ),
         ),
         actions: [
           if (_authorized)
             GestureDetector(
-              onTap: () {
-                setState(() {
-                  AuthServices().logout();
-                  getCurrentUser();
-                });
+              onTap: () async {
+                await AuthServices().logout();
+                if (!context.mounted) return;
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => const HomeScreen()),
+                  (Route<dynamic> route) => false,
+                );
               },
               child: Container(
-                // height: 16,
-                // width: 16,
-                margin: EdgeInsetsGeometry.symmetric(horizontal: 6),
-                padding: EdgeInsetsGeometry.all(10),
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Color(0xFFD9EEFF),
+                  color: Colors.red.shade50,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.logout_rounded,
-                  size: 24,
-                  color: Color(0xFF882828),
+                  size: 22,
+                  color: Colors.red.shade700,
                 ),
               ),
             ),
         ],
-        backgroundColor: Colors.transparent,
-        toolbarHeight: 50,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-
-        // automaticallyImplyLeading: false,
-        leading: GestureDetector(
-          onTap: () {
-            Navigator.pop(context);
-          },
-          child: Container(
-            height: 16,
-            width: 16,
-            margin: EdgeInsetsGeometry.symmetric(horizontal: 6),
-            decoration: BoxDecoration(
-              color: Color(0xFFD9EEFF),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.arrow_back_ios_rounded,
-              size: 24,
-              color: Color(0xFF393939),
-            ),
-          ),
-        ),
-        // flexibleSpace: IconButton(onPressed: () {}, icon: Icon(Icons.person))
       ),
-
       body: Container(
         height: screenHeight,
         width: screenWidth,
@@ -147,338 +135,203 @@ class _ProfilePageState extends State<ProfilePage> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              palette.topGradient2,
-              palette.midGradient2,
-              palette.midGradient2,
-              palette.bottomGradient2,
+              Colors.cyan.shade100.withOpacity(0.6),
+              Colors.white,
+              Colors.white,
             ],
+            stops: const [0.0, 0.4, 1.0],
           ),
         ),
-        child: Stack(
-          children: [
-            if (!_authorized)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(height: 110, width: screenWidth),
-                  // Dashboard(),
-                  SizedBox(height: 40),
-                  Container(
-                    margin: EdgeInsetsGeometry.symmetric(
-                      horizontal: 20,
-                      vertical: 10,
-                    ),
-                    child: Text(
-                      "You haven't signed in yet!\nTo use all the AI and history tracking features of this app you need to create an account first or sign in if you already have an account",
-                      textAlign: TextAlign.center,
-                      style: AppTextStyle.primaryText.copyWith(
-                        color: Color(0xFF555555),
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(height: 30),
-
-                  AnimatedButton(
-                    onTap: () async {
-                      final res = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) {
-                            return Authentication();
-                          },
-                        ),
-                      );
-
-                      if (res != null) {
-                        setState(() async {
-                          getCurrentUser();
-                        });
-                      }
-                    },
-                    height: 54,
-                    width: screenWidth / 2,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(30),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Color(0xFFAAAAAA),
-                          offset: Offset(1, 1),
-                          spreadRadius: 0,
-                          blurRadius: 1,
-                        ),
-                      ],
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        stops: [0.0, 0.3, 0.7, 1.0],
-                        colors: [
-                          Color(0xFF6DBDF6),
-                          Colors.white,
-                          Colors.white,
-                          Color(0xFF947AF3),
-                        ],
-                      ),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadiusGeometry.circular(30),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                        child: SizedBox(
-                          height: screenHeight,
-                          width: screenWidth,
-                          child: Center(
-                            child: Text(
-                              'sign in',
-                              style: AppTextStyle.heading5.copyWith(
-                                color: Color(0xFF0D2968),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-            if (_authorized)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(height: 110, width: screenWidth),
-                  // Dashboard(),
-                  SizedBox(height: 40),
-
-                  Container(
-                    padding: EdgeInsetsGeometry.all(30),
-                    decoration: BoxDecoration(
-                      color: Color(0xFF47DDB4),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Text(
-                      _userData['full_name'][0].toString().toUpperCase(),
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 48,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(height: 10),
-
-                  Container(
-                    width: screenWidth,
-                    margin: EdgeInsetsGeometry.symmetric(
-                      horizontal: 20,
-                      vertical: 10,
-                    ),
-                    child: Text('User details', style: AppTextStyle.heading5),
-                  ),
-
-                  Container(
-                    // height: 70,
-                    width: screenWidth,
-                    margin: EdgeInsetsGeometry.symmetric(
-                      horizontal: 20,
-                      vertical: 4,
-                    ),
-                    padding: EdgeInsetsGeometry.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: BoxBorder.all(color: Color(0xFFE1E9FF), width: 1),
-                    ),
-                    child: Row(
-                      spacing: 28,
-                      children: [
-                        Icon(Icons.person_pin_outlined),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Name', style: AppTextStyle.heading6),
-                            Text('${_userData['full_name'] ?? '--'}'),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    // height: 70,
-                    width: screenWidth,
-                    margin: EdgeInsetsGeometry.symmetric(
-                      horizontal: 20,
-                      vertical: 4,
-                    ),
-                    padding: EdgeInsetsGeometry.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: BoxBorder.all(color: Color(0xFFE1E9FF), width: 1),
-                    ),
-                    child: Row(
-                      spacing: 28,
-                      children: [
-                        Icon(Icons.email_outlined),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Email', style: AppTextStyle.heading6),
-                            Text('${_userData['email'] ?? '--'}'),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  SizedBox(height: 10),
-
-                  Container(
-                    width: screenWidth,
-                    margin: EdgeInsetsGeometry.symmetric(
-                      horizontal: 20,
-                      vertical: 10,
-                    ),
-                    child: Text('Profile', style: AppTextStyle.heading5),
-                  ),
-
-                  Container(
-                    // height: 70,
-                    width: screenWidth,
-                    margin: EdgeInsetsGeometry.symmetric(
-                      horizontal: 20,
-                      vertical: 4,
-                    ),
-                    padding: EdgeInsetsGeometry.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: BoxBorder.all(color: Color(0xFFE1E9FF), width: 1),
-                    ),
-                    child: Row(
-                      spacing: 28,
-                      children: [
-                        Icon(Icons.calendar_month_outlined),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Age', style: AppTextStyle.heading6),
-                            Text('${_userData['profile']['age'] ?? '--'}'),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    // height: 70,
-                    width: screenWidth,
-                    margin: EdgeInsetsGeometry.symmetric(
-                      horizontal: 20,
-                      vertical: 4,
-                    ),
-                    padding: EdgeInsetsGeometry.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: BoxBorder.all(color: Color(0xFFE1E9FF), width: 1),
-                    ),
-                    child: Row(
-                      spacing: 28,
-                      children: [
-                        Icon(Icons.person),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Gender', style: AppTextStyle.heading6),
-                            Text('${_userData['profile']['gender'] ?? '--'}'),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    // height: 70,
-                    width: screenWidth,
-                    margin: EdgeInsetsGeometry.symmetric(
-                      horizontal: 20,
-                      vertical: 4,
-                    ),
-                    padding: EdgeInsetsGeometry.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: BoxBorder.all(color: Color(0xFFE1E9FF), width: 1),
-                    ),
-                    child: Row(
-                      spacing: 28,
-                      children: [
-                        Icon(Icons.height),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Height', style: AppTextStyle.heading6),
-                            Text(
-                              '${_userData['profile']['height'] ?? '--'}'
-                              '${_userData['profile']['height'] != null ? ' cm' : ''}',
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    // height: 70,
-                    width: screenWidth,
-                    margin: EdgeInsetsGeometry.symmetric(
-                      horizontal: 20,
-                      vertical: 4,
-                    ),
-                    padding: EdgeInsetsGeometry.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: BoxBorder.all(color: Color(0xFFE1E9FF), width: 1),
-                    ),
-                    child: Row(
-                      spacing: 28,
-                      children: [
-                        Icon(Icons.monitor_weight_outlined),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Weight', style: AppTextStyle.heading6),
-                            Text(
-                              '${_userData['profile']['weight'] ?? '--'}'
-                              '${_userData['profile']['weight'] != null ? ' kg' : ''}',
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-          ],
+        child: SafeArea(
+          child: !_authorized
+              ? _buildUnauthorizedState(context, screenWidth)
+              : _buildAuthorizedState(screenWidth),
         ),
+      ),
+    );
+  }
+
+  Widget _buildUnauthorizedState(BuildContext context, double screenWidth) {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(height: 60),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, 10)),
+              ],
+            ),
+            child: Icon(Icons.person_outline_rounded, size: 80, color: Colors.blue.shade200),
+          ),
+          const SizedBox(height: 30),
+          const Text(
+            "You haven't signed in yet!",
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            "To use all the AI and history tracking features of this app you need to create an account first or sign in.",
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 16, color: Color(0xFF64748B), height: 1.5),
+          ),
+          const SizedBox(height: 40),
+          SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: ElevatedButton(
+              onPressed: () async {
+                final res = await Navigator.push(context, MaterialPageRoute(builder: (context) => const Authentication()));
+                if (res != null) await getCurrentUser();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue.shade600,
+                elevation: 0,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shadowColor: Colors.blue.withOpacity(0.5),
+              ),
+              child: const Text("Sign In / Create Account", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAuthorizedState(double screenWidth) {
+    final String initial = _userData['full_name'] != null ? _userData['full_name'][0].toString().toUpperCase() : '?';
+    final String name = _userData['full_name'] ?? 'User';
+    final String email = _userData['email'] ?? 'No email';
+    final String age = _userData['profile']?['age']?.toString() ?? '--';
+    final String gender = _userData['profile']?['gender']?.toString() ?? '--';
+    final String height = _userData['profile']?['height']?.toString() ?? '--';
+    final String weight = _userData['profile']?['weight']?.toString() ?? '--';
+
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      child: Column(
+        children: [
+          // Hero Header
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 20, offset: const Offset(0, 10)),
+              ],
+            ),
+            child: Column(
+              children: [
+                Container(
+                  height: 100,
+                  width: 100,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.blue.shade300, Colors.blue.shade600],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(color: Colors.blue.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 8)),
+                    ],
+                  ),
+                  child: Center(
+                    child: Text(
+                      initial,
+                      style: const TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  name,
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  email,
+                  style: const TextStyle(fontSize: 16, color: Color(0xFF64748B)),
+                ),
+              ],
+            ),
+          ),
+          
+          const SizedBox(height: 30),
+          
+          // Stats Grid
+          Align(
+            alignment: Alignment.centerLeft,
+            child: const Text(
+              "Health Profile",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+            ),
+          ),
+          const SizedBox(height: 16),
+          
+          Row(
+            children: [
+              Expanded(child: _buildStatCard("Age", age, Icons.cake_outlined, Colors.orange)),
+              const SizedBox(width: 16),
+              Expanded(child: _buildStatCard("Gender", gender, Icons.person_outline, Colors.purple)),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(child: _buildStatCard("Height", "$height cm", Icons.height, Colors.green)),
+              const SizedBox(width: 16),
+              Expanded(child: _buildStatCard("Weight", "$weight kg", Icons.monitor_weight_outlined, Colors.blue)),
+            ],
+          ),
+          
+          const SizedBox(height: 40),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatCard(String title, String value, IconData icon, MaterialColor color) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 15, offset: const Offset(0, 8)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: color.shade50,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color.shade600, size: 24),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 14, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+          ),
+        ],
       ),
     );
   }

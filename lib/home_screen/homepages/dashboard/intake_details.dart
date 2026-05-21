@@ -5,6 +5,7 @@ import 'package:pie_chart/pie_chart.dart';
 import '../../../cores/constants/colors.dart';
 import '../../../cores/custom_datatypes/custom_classes.dart';
 import '../../../cores/daily_data/daily_data_services.dart';
+import '../../home_screen.dart' as nutrilens_test_home;
 
 class IntakeDetails extends StatefulWidget {
   final Intake selectedIntake;
@@ -426,10 +427,16 @@ class _IntakeDetailsState extends State<IntakeDetails> {
             Navigator.pop(context);
 
             if (response['status_ok']) {
+              if (!mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Added to your diary!')),
+                const SnackBar(content: Text('Added to your diary!')),
               );
-              Navigator.pop(context); // Go back after adding
+              
+              // Force the app to restart at HomeScreen so Dashboard refreshes its data!
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => const nutrilens_test_home.HomeScreen()),
+                (Route<dynamic> route) => false,
+              );
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Error: ${response['message']}')),
