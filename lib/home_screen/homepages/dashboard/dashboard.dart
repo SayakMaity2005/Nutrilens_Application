@@ -93,7 +93,7 @@ class _DashboardState extends State<Dashboard> {
   int _energyBurnedIntermediate = 0;
   List<dynamic> _dailyWorkouts = [];
   final WorkoutServices _workoutServices = WorkoutServices();
-  
+
   int _requiredWater = 2250;
   int _drankWater = 0;
   int _drankWaterCopy = 0;
@@ -360,12 +360,15 @@ class _DashboardState extends State<Dashboard> {
     }
 
     // Fetch workout data
-    final workoutResponse = await _workoutServices.getDailyWorkoutData(_selectedDate);
+    final workoutResponse = await _workoutServices.getDailyWorkoutData(
+      _selectedDate,
+    );
     if (mounted) {
       if (workoutResponse['status_ok'] && workoutResponse['data'] != null) {
         setState(() {
           _dailyWorkouts = workoutResponse['data']['workouts'] ?? [];
-          _energyBurnedIntermediate = (workoutResponse['data']['energy_burned'] ?? 0).toInt();
+          _energyBurnedIntermediate =
+              (workoutResponse['data']['energy_burned'] ?? 0).toInt();
         });
       } else {
         setState(() {
@@ -1561,8 +1564,14 @@ class _DashboardState extends State<Dashboard> {
               else
                 Container(
                   width: screenWidth,
-                  margin: EdgeInsetsGeometry.symmetric(horizontal: 16, vertical: 16),
-                  padding: EdgeInsetsGeometry.symmetric(horizontal: 16, vertical: 16),
+                  margin: EdgeInsetsGeometry.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
+                  padding: EdgeInsetsGeometry.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
@@ -1570,45 +1579,72 @@ class _DashboardState extends State<Dashboard> {
                   ),
                   child: Column(
                     children: [
-                      for (var workout in _dailyWorkouts)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      Container(
+                        height: 250,
+                        child: SingleChildScrollView(
+                          child: Column(
                             children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: Color(0xFFFFF0D4),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(Icons.directions_run, color: Color(0xFFFBAC50), size: 20),
+                              for (var workout in _dailyWorkouts)
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 8.0,
                                   ),
-                                  SizedBox(width: 12),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text(
-                                        workout['name'] ?? 'Workout',
-                                        style: AppTextStyle.heading6,
+                                      Row(
+                                        children: [
+                                          Container(
+                                            padding: EdgeInsets.all(8),
+                                            decoration: BoxDecoration(
+                                              color: Color(0xFFFFF0D4),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Icon(
+                                              Icons.directions_run,
+                                              color: Color(0xFFFBAC50),
+                                              size: 20,
+                                            ),
+                                          ),
+                                          SizedBox(width: 12),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              SizedBox(
+                                                width: screenWidth - 220,
+                                                child: Text(
+                                                  workout['name'] ?? 'Workout',
+                                                  style: AppTextStyle.heading6,
+                                                ),
+                                              ),
+                                              Text(
+                                                workout['duration'] != null
+                                                    ? '${workout['duration']} hrs'
+                                                    : '${workout['count']} times',
+                                                style: TextStyle(
+                                                  color: Colors.grey,
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
                                       ),
                                       Text(
-                                        "${workout['duration'] ?? 0} mins",
-                                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                                        "${workout['energy'] ?? 0} kcal",
+                                        style: AppTextStyle.heading6.copyWith(
+                                          color: Color(0xFFFBAC50),
+                                        ),
                                       ),
                                     ],
                                   ),
-                                ],
-                              ),
-                              Text(
-                                "${workout['energy'] ?? 0} kcal",
-                                style: AppTextStyle.heading6.copyWith(color: Color(0xFFFBAC50)),
-                              ),
+                                ),
                             ],
                           ),
                         ),
+                      ),
                       SizedBox(height: 12),
                       GestureDetector(
                         onTap: () async {
@@ -1631,7 +1667,9 @@ class _DashboardState extends State<Dashboard> {
                           alignment: Alignment.center,
                           child: Text(
                             '+  Add workout',
-                            style: AppTextStyle.heading6.copyWith(color: Colors.white),
+                            style: AppTextStyle.heading6.copyWith(
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
