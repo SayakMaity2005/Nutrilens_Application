@@ -145,18 +145,22 @@ class _ProgressPageState extends State<ProgressPage> {
         }
       }
 
-      setState(() {
-        _totalCalories = todayCals;
-        _totalCarbs = todayCarbs;
-        _totalProtein = todayProtein;
-        _totalFat = todayFat;
-        _waterIntake = todayWater;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _totalCalories = todayCals;
+          _totalCarbs = todayCarbs;
+          _totalProtein = todayProtein;
+          _totalFat = todayFat;
+          _waterIntake = todayWater;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
