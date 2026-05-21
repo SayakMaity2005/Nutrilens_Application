@@ -97,6 +97,7 @@ class _CustomRecipeShowState extends State<CustomRecipeShow> {
                       builder: (context) {
                         return IntakeDetails(
                           selectedIntake: _customRecipeList[i],
+                          showRecipeAndIngredients: true,
                         );
                       },
                     ),

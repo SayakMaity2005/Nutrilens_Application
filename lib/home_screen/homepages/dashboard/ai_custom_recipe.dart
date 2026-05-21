@@ -514,6 +514,7 @@ class _AiCustomRecipeState extends State<AiCustomRecipe>
                                 builder: (context) {
                                   return IntakeDetails(
                                     selectedIntake: selectedIntake,
+                                    showRecipeAndIngredients: true,
                                   );
                                 },
                               ),

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nutrilens_test/home_screen/homepages/settings/profile_detail_page.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -56,6 +57,21 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 20),
           _buildSectionHeader('Support'),
           _buildCardGroup([
+            _buildArrowItem('Contact Support (Email)', onTap: () async {
+              final Uri emailLaunchUri = Uri(
+                scheme: 'mailto',
+                path: 'rohitkumardebnath02@gmail.com',
+                query: 'subject=Nutrilens Support Request',
+              );
+              if (!await launchUrl(emailLaunchUri)) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Could not open email client.')),
+                  );
+                }
+              }
+            }),
+            _buildDivider(),
             _buildArrowItem('Suggestion'),
             _buildDivider(),
             _buildArrowItem('Report'),

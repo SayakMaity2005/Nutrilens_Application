@@ -104,32 +104,22 @@ class _ClientProgressPageState extends State<ClientProgressPage> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Stack(
-              children: [
-                SingleChildScrollView(
-                  padding: const EdgeInsets.only(left: 16, right: 16, bottom: 100),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const SizedBox(height: 10),
-                      _buildCalorieGoalCard(screenWidth),
-                      const SizedBox(height: 20),
-                      _buildTabSelector(),
-                      const SizedBox(height: 20),
-                      if (_selectedTabIndex == 0) _buildHeartHealthCard(),
-                      if (_selectedTabIndex == 1) _buildMealsChartCard(),
-                      if (_selectedTabIndex == 2) _buildDiversityCard(),
-                      if (_selectedTabIndex == 3) _buildMacrosPieChart(),
-                    ],
-                  ),
-                ),
-                Positioned(
-                  bottom: 20,
-                  left: 20,
-                  right: 20,
-                  child: _buildAnalyzeButton(),
-                ),
-              ],
+          : SingleChildScrollView(
+              padding: const EdgeInsets.only(left: 16, right: 16, bottom: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: 10),
+                  _buildCalorieGoalCard(screenWidth),
+                  const SizedBox(height: 20),
+                  _buildTabSelector(),
+                  const SizedBox(height: 20),
+                  if (_selectedTabIndex == 0) _buildHeartHealthCard(),
+                  if (_selectedTabIndex == 1) _buildMealsChartCard(),
+                  if (_selectedTabIndex == 2) _buildDiversityCard(),
+                  if (_selectedTabIndex == 3) _buildMacrosPieChart(),
+                ],
+              ),
             ),
     );
   }
@@ -837,32 +827,6 @@ class _ClientProgressPageState extends State<ClientProgressPage> {
     );
   }
 
-  Widget _buildAnalyzeButton() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [Color(0xFF2563EB), Color(0xFF3B82F6)]),
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(color: Colors.blue.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 5)),
-        ],
-      ),
-      child: const Center(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.auto_awesome, color: Colors.white, size: 20),
-            SizedBox(width: 8),
-            Text(
-              "Analyze your diet",
-              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildMacrosPieChart() {
     double totalCarbs = 0, totalProtein = 0, totalFat = 0;

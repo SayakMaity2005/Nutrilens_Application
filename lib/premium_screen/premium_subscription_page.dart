@@ -205,7 +205,7 @@ class _PremiumSubscriptionPageState extends State<PremiumSubscriptionPage> {
                         Icon(Icons.verified_user, color: Colors.green.shade600, size: 16),
                         const SizedBox(width: 5),
                         const Text(
-                          "Cancel in the Google Play Anytime",
+                          "Cancel in the Our Store Anytime",
                           style: TextStyle(
                             color: Colors.black54,
                             fontWeight: FontWeight.bold,
