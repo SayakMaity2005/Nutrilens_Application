@@ -106,12 +106,23 @@ class _AuthenticationState extends State<Authentication> {
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
     final screenWidth = screenSize.width;
+    final palette = Theme.of(context).extension<AppPalette>()!;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: true,
+        title: Text(_isSignIn ? "Welcome Back!" : "Create Account"),
+        titleTextStyle: GoogleFonts.nunito(
+          textStyle: TextStyle(
+            color: palette.headingBlueText,
+            fontSize: 28,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         leading: GestureDetector(
           onTap: () => Navigator.pop(context),
           child: Container(
@@ -121,7 +132,7 @@ class _AuthenticationState extends State<Authentication> {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 5,
                   offset: const Offset(0, 2),
                 )
@@ -143,7 +154,7 @@ class _AuthenticationState extends State<Authentication> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Colors.cyan.shade100.withOpacity(0.6),
+              Colors.cyan.shade100.withValues(alpha: 0.6),
               Colors.white,
               Colors.white,
             ],
@@ -158,15 +169,15 @@ class _AuthenticationState extends State<Authentication> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header Texts
-                Text(
-                  _isSignIn ? "Welcome Back!" : "Create Account",
-                  style: const TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF1E293B),
-                    letterSpacing: -0.5,
-                  ),
-                ),
+                // Text(
+                //   _isSignIn ? "Welcome Back!" : "Create Account",
+                //   style: const TextStyle(
+                //     fontSize: 32,
+                //     fontWeight: FontWeight.w800,
+                //     color: Color(0xFF1E293B),
+                //     letterSpacing: -0.5,
+                //   ),
+                // ),
                 const SizedBox(height: 8),
                 Text(
                   _isSignIn ? "Sign in to access your AI assistant and history." : "Join NutriLens to track your nutrition seamlessly.",
@@ -184,7 +195,7 @@ class _AuthenticationState extends State<Authentication> {
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
+                        color: Colors.black.withValues(alpha: 0.04),
                         blurRadius: 20,
                         offset: const Offset(0, 10),
                       ),
@@ -213,7 +224,7 @@ class _AuthenticationState extends State<Authentication> {
                                     color: _isSignIn ? Colors.white : Colors.transparent,
                                     borderRadius: BorderRadius.circular(25),
                                     boxShadow: _isSignIn
-                                        ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 2))]
+                                        ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 2))]
                                         : [],
                                   ),
                                   alignment: Alignment.center,
@@ -235,7 +246,7 @@ class _AuthenticationState extends State<Authentication> {
                                     color: !_isSignIn ? Colors.white : Colors.transparent,
                                     borderRadius: BorderRadius.circular(25),
                                     boxShadow: !_isSignIn
-                                        ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 2))]
+                                        ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 2))]
                                         : [],
                                   ),
                                   alignment: Alignment.center,
@@ -292,7 +303,7 @@ class _AuthenticationState extends State<Authentication> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: DropdownButtonFormField<String>(
-                                value: _selectedGender,
+                                initialValue: _selectedGender,
                                 decoration: InputDecoration(
                                   filled: true,
                                   fillColor: Colors.grey.shade50,
@@ -313,7 +324,7 @@ class _AuthenticationState extends State<Authentication> {
                         const SizedBox(height: 16),
                         Row(
                           children: [
-                            Expanded(child: _buildTextField("Height (cm)", Icons.height, _heightTextController, isNumber: true)),
+                            Expanded(child: _buildTextField("Height", Icons.height, _heightTextController, isNumber: true, suffixText: 'cm')),
                             const SizedBox(width: 12),
                             Expanded(child: _buildTextField("Weight (kg)", Icons.monitor_weight_outlined, _weightTextController, isNumber: true)),
                           ],
@@ -346,7 +357,7 @@ class _AuthenticationState extends State<Authentication> {
                             backgroundColor: Colors.blue.shade600,
                             elevation: 0,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                            shadowColor: Colors.blue.withOpacity(0.5),
+                            shadowColor: Colors.blue.withValues(alpha: 0.5),
                           ),
                           child: Text(
                             _isSignIn ? "Sign In" : "Create Account",
@@ -375,7 +386,7 @@ class _AuthenticationState extends State<Authentication> {
     );
   }
 
-  Widget _buildTextField(String hint, IconData icon, TextEditingController controller, {bool isObscure = false, bool isNumber = false}) {
+  Widget _buildTextField(String hint, IconData icon, TextEditingController controller, {bool isObscure = false, bool isNumber = false, String suffixText = ''}) {
     return TextField(
       controller: controller,
       obscureText: isObscure,
@@ -386,6 +397,8 @@ class _AuthenticationState extends State<Authentication> {
         hintText: hint,
         hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 15),
         prefixIcon: Icon(icon, color: Colors.grey.shade500, size: 22),
+        suffixText: suffixText,
+        suffixStyle: TextStyle(color: Colors.grey.shade500),
         filled: true,
         fillColor: Colors.grey.shade50,
         contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),

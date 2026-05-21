@@ -62,22 +62,23 @@ class _ProfilePageState extends State<ProfilePage> {
     final screenSize = MediaQuery.of(context).size;
     final screenHeight = screenSize.height;
     final screenWidth = screenSize.width;
+    final palette = Theme.of(context).extension<AppPalette>()!;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
-          _authorized ? "Profile" : "Sign In",
-          style: const TextStyle(
-            color: Color(0xFF1E293B),
-            fontSize: 22,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -0.5,
+        title: Text(_authorized ? "Profile" : "Sign In",),
+        titleTextStyle: GoogleFonts.nunito(
+          textStyle: TextStyle(
+            color: palette.headingBlueText,
+            fontSize: 26,
+            fontWeight: FontWeight.w700,
           ),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        scrolledUnderElevation: 0,
         leading: GestureDetector(
           onTap: () => Navigator.pop(context),
           child: Container(
@@ -87,7 +88,7 @@ class _ProfilePageState extends State<ProfilePage> {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 5,
                   offset: const Offset(0, 2),
                 )
@@ -135,7 +136,7 @@ class _ProfilePageState extends State<ProfilePage> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Colors.cyan.shade100.withOpacity(0.6),
+              Colors.cyan.shade100.withValues(alpha: 0.6),
               Colors.white,
               Colors.white,
             ],
@@ -165,7 +166,7 @@ class _ProfilePageState extends State<ProfilePage> {
               color: Colors.white,
               shape: BoxShape.circle,
               boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, 10)),
+                BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 20, offset: const Offset(0, 10)),
               ],
             ),
             child: Icon(Icons.person_outline_rounded, size: 80, color: Colors.blue.shade200),
@@ -182,8 +183,9 @@ class _ProfilePageState extends State<ProfilePage> {
             style: TextStyle(fontSize: 16, color: Color(0xFF64748B), height: 1.5),
           ),
           const SizedBox(height: 40),
-          SizedBox(
-            width: double.infinity,
+          Container(
+            margin: EdgeInsetsGeometry.symmetric(horizontal: 18),
+            width: screenWidth,
             height: 56,
             child: ElevatedButton(
               onPressed: () async {
@@ -194,7 +196,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 backgroundColor: Colors.blue.shade600,
                 elevation: 0,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                shadowColor: Colors.blue.withOpacity(0.5),
+                shadowColor: Colors.blue.withValues(alpha: 0.5),
               ),
               child: const Text("Sign In / Create Account", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
             ),
@@ -226,7 +228,7 @@ class _ProfilePageState extends State<ProfilePage> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 20, offset: const Offset(0, 10)),
+                BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 20, offset: const Offset(0, 10)),
               ],
             ),
             child: Column(
@@ -242,7 +244,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     shape: BoxShape.circle,
                     boxShadow: [
-                      BoxShadow(color: Colors.blue.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 8)),
+                      BoxShadow(color: Colors.blue.withValues(alpha: 0.3), blurRadius: 15, offset: const Offset(0, 8)),
                     ],
                   ),
                   child: Center(
@@ -307,7 +309,7 @@ class _ProfilePageState extends State<ProfilePage> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 15, offset: const Offset(0, 8)),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 15, offset: const Offset(0, 8)),
         ],
       ),
       child: Column(
