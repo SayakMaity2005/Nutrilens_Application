@@ -9,6 +9,8 @@ import 'package:nutrilens_test/home_screen/homepages/dashboard/ai_custom_recipe.
 import 'package:nutrilens_test/home_screen/homepages/dashboard/edit_budget.dart';
 import 'package:nutrilens_test/home_screen/homepages/dashboard/intake_select.dart';
 import 'package:nutrilens_test/home_screen/homepages/dashboard/water_details.dart';
+import 'package:nutrilens_test/cores/workout_data/workout_services.dart';
+import 'package:nutrilens_test/home_screen/homepages/dashboard/add_workout_sheet.dart';
 
 import '../../../cores/custom_datatypes/custom_classes.dart';
 import '../../../cores/user_operations/user_services.dart';
@@ -89,7 +91,9 @@ class _DashboardState extends State<Dashboard> {
   final WorkoutRound _workoutRound = WorkoutRound();
   int _energyBurned = 0;
   int _energyBurnedIntermediate = 0;
-
+  List<dynamic> _dailyWorkouts = [];
+  final WorkoutServices _workoutServices = WorkoutServices();
+  
   int _requiredWater = 2250;
   int _drankWater = 0;
   int _drankWaterCopy = 0;
@@ -353,6 +357,22 @@ class _DashboardState extends State<Dashboard> {
 
         _drankWater = 0;
       });
+    }
+
+    // Fetch workout data
+    final workoutResponse = await _workoutServices.getDailyWorkoutData(_selectedDate);
+    if (mounted) {
+      if (workoutResponse['status_ok'] && workoutResponse['data'] != null) {
+        setState(() {
+          _dailyWorkouts = workoutResponse['data']['workouts'] ?? [];
+          _energyBurnedIntermediate = (workoutResponse['data']['energy_burned'] ?? 0).toInt();
+        });
+      } else {
+        setState(() {
+          _dailyWorkouts = [];
+          _energyBurnedIntermediate = 0;
+        });
+      }
     }
   }
 
@@ -1463,7 +1483,7 @@ class _DashboardState extends State<Dashboard> {
                           duration: Duration(milliseconds: 500),
                           onEnd: () {
                             setState(() {
-                              _energyBurned = _workoutRound.totalEnergyBurned();
+                              _energyBurned = _energyBurnedIntermediate;
                             });
                           },
                           builder: (context, value, child) {
@@ -1478,53 +1498,146 @@ class _DashboardState extends State<Dashboard> {
                   ),
                 ],
               ),
-              Container(
-                // height: 120,
-                width: screenWidth,
-                margin: EdgeInsetsGeometry.symmetric(
-                  horizontal: 16,
-                  vertical: 16,
-                ),
-                padding: EdgeInsetsGeometry.symmetric(
-                  horizontal: 16,
-                  vertical: 24,
-                ),
-                decoration: BoxDecoration(
-                  color: Color(0xFFD6EBF6),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  spacing: 8,
-                  children: [
-                    Text(
-                      "You haven't uploaded any workout",
-                      style: AppTextStyle.heading5,
-                    ),
-                    Text(
-                      'You can search in our database',
-                      style: TextStyle(color: Color(0xFF555555)),
-                    ),
-                    Container(
-                      margin: EdgeInsetsGeometry.symmetric(vertical: 6),
-                      padding: EdgeInsetsGeometry.symmetric(
-                        horizontal: screenWidth / 2 - 100,
-                        vertical: 6,
+              if (_dailyWorkouts.isEmpty)
+                Container(
+                  width: screenWidth,
+                  margin: EdgeInsetsGeometry.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
+                  padding: EdgeInsetsGeometry.symmetric(
+                    horizontal: 16,
+                    vertical: 24,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Color(0xFFD6EBF6),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    spacing: 8,
+                    children: [
+                      Text(
+                        "You haven't uploaded any workout",
+                        style: AppTextStyle.heading5,
                       ),
-                      decoration: BoxDecoration(
-                        color: Color(0xFF17233C),
-                        borderRadius: BorderRadius.circular(20),
+                      Text(
+                        'You can search in our database',
+                        style: TextStyle(color: Color(0xFF555555)),
                       ),
-                      child: Text(
-                        '+  Add workout',
-                        style: AppTextStyle.heading6.copyWith(
-                          color: Colors.white,
+                      GestureDetector(
+                        onTap: () async {
+                          final result = await showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) => const AddWorkoutSheet(),
+                          );
+                          if (result == true) {
+                            getDailyData(); // Refresh on successful add
+                          }
+                        },
+                        child: Container(
+                          margin: EdgeInsetsGeometry.symmetric(vertical: 6),
+                          padding: EdgeInsetsGeometry.symmetric(
+                            horizontal: screenWidth / 2 - 100,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Color(0xFF17233C),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            '+  Add workout',
+                            style: AppTextStyle.heading6.copyWith(
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                )
+              else
+                Container(
+                  width: screenWidth,
+                  margin: EdgeInsetsGeometry.symmetric(horizontal: 16, vertical: 16),
+                  padding: EdgeInsetsGeometry.symmetric(horizontal: 16, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: BoxBorder.all(color: Color(0xFFE1E9FF), width: 1),
+                  ),
+                  child: Column(
+                    children: [
+                      for (var workout in _dailyWorkouts)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Color(0xFFFFF0D4),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(Icons.directions_run, color: Color(0xFFFBAC50), size: 20),
+                                  ),
+                                  SizedBox(width: 12),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        workout['name'] ?? 'Workout',
+                                        style: AppTextStyle.heading6,
+                                      ),
+                                      Text(
+                                        "${workout['duration'] ?? 0} mins",
+                                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              Text(
+                                "${workout['energy'] ?? 0} kcal",
+                                style: AppTextStyle.heading6.copyWith(color: Color(0xFFFBAC50)),
+                              ),
+                            ],
+                          ),
+                        ),
+                      SizedBox(height: 12),
+                      GestureDetector(
+                        onTap: () async {
+                          final result = await showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) => const AddWorkoutSheet(),
+                          );
+                          if (result == true) {
+                            getDailyData(); // Refresh
+                          }
+                        },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(vertical: 10),
+                          decoration: BoxDecoration(
+                            color: Color(0xFF17233C),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            '+  Add workout',
+                            style: AppTextStyle.heading6.copyWith(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
 
               SizedBox(height: 14),
               // Water section

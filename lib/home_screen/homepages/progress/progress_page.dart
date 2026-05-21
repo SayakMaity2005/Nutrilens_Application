@@ -6,6 +6,7 @@ import 'package:nutrilens_test/cores/constants/colors.dart';
 import 'package:nutrilens_test/cores/constants/text_styles.dart';
 import 'package:nutrilens_test/cores/daily_data/daily_data_services.dart';
 import 'package:nutrilens_test/cores/user_operations/user_services.dart';
+import 'package:nutrilens_test/cores/workout_data/workout_services.dart';
 
 class ProgressPage extends StatefulWidget {
   const ProgressPage({super.key});
@@ -35,13 +36,15 @@ class _ProgressPageState extends State<ProgressPage> {
   double _totalProtein = 0;
   double _totalFat = 0;
   double _waterIntake = 0;
+  double _totalBurnedCalories = 0;
 
   // Weekly Trend Data
   List<double> _weeklyCalories = List.filled(7, 0.0);
   List<double> _weeklyWater = List.filled(7, 0.0);
+  List<double> _weeklyBurnedCalories = List.filled(7, 0.0);
   List<double> _weeklyWeight = List.filled(7, 0.0);
   List<DateTime> _weeklyDates = [];
-  double _currentWeightLbs = 150.0;
+  double _currentWeightKg = 70.0;
   double _currentHeightCm = 170.0;
   double _userBMI = 23.5;
   String _bmiCategory = "Normal";
@@ -69,7 +72,7 @@ class _ProgressPageState extends State<ProgressPage> {
         final weightKg = (profile['weight'] ?? 70.0).toDouble();
         final heightCm = (profile['height'] ?? 170.0).toDouble();
         _currentHeightCm = heightCm;
-        _currentWeightLbs = weightKg * 2.20462;
+        _currentWeightKg = weightKg;
 
         final heightM = heightCm / 100;
         if (heightM > 0) {
@@ -88,18 +91,23 @@ class _ProgressPageState extends State<ProgressPage> {
 
       // 2. Fetch daily data for the last 7 days concurrently
       final List<Future<Map<String, dynamic>>> futures = [];
+      final List<Future<Map<String, dynamic>>> workoutFutures = [];
       for (final date in _weeklyDates) {
         futures.add(DailyDataServices().getDailyData(date));
+        workoutFutures.add(WorkoutServices().getDailyWorkoutData(date));
       }
 
       final results = await Future.wait(futures);
+      final workoutResults = await Future.wait(workoutFutures);
 
-      double todayCals = 0, todayCarbs = 0, todayProtein = 0, todayFat = 0, todayWater = 0;
+      double todayCals = 0, todayCarbs = 0, todayProtein = 0, todayFat = 0, todayWater = 0, todayBurned = 0;
 
       for (int i = 0; i < 7; i++) {
         final response = results[i];
+        final wResponse = workoutResults[i];
         double cals = 0;
         double water = 0;
+        double burned = 0;
 
         if (response['status_ok'] && response['data'] != null) {
           final data = response['data'];
@@ -117,15 +125,25 @@ class _ProgressPageState extends State<ProgressPage> {
           }
         }
 
+        if (wResponse['status_ok'] && wResponse['data'] != null) {
+          burned = (wResponse['data']['energy_burned'] ?? 0).toDouble();
+        }
+
         _weeklyCalories[i] = cals;
         _weeklyWater[i] = water;
-        // Generate smooth weight fluctuation ending at current weight
-        _weeklyWeight[i] = _currentWeightLbs + (sin(i * 1.5) * 0.6);
+        _weeklyBurnedCalories[i] = burned;
+        
+        double dailyWeight = i > 0 ? _weeklyWeight[i - 1] : _currentWeightKg;
+        if (response['status_ok'] && response['data'] != null && response['data']['weight'] != null) {
+          dailyWeight = (response['data']['weight']).toDouble();
+        }
+        _weeklyWeight[i] = dailyWeight;
 
         // Save today's values (today is index 6)
         if (i == 6) {
           todayCals = cals;
           todayWater = water;
+          todayBurned = burned;
           if (response['status_ok'] && response['data'] != null) {
             final data = response['data'];
             final meals = data['meals'] as Map<String, dynamic>? ?? {};
@@ -152,6 +170,7 @@ class _ProgressPageState extends State<ProgressPage> {
           _totalProtein = todayProtein;
           _totalFat = todayFat;
           _waterIntake = todayWater;
+          _totalBurnedCalories = todayBurned;
           _isLoading = false;
         });
       }
@@ -238,8 +257,8 @@ class _ProgressPageState extends State<ProgressPage> {
     if ((_weeklyDates as dynamic) == null || _weeklyDates.isEmpty) {
       _weeklyDates = List.generate(7, (index) => DateTime.now().subtract(Duration(days: 6 - index)));
     }
-    if ((_currentWeightLbs as dynamic) == null) {
-      _currentWeightLbs = 150.0;
+    if ((_currentWeightKg as dynamic) == null) {
+      _currentWeightKg = 70.0;
     }
     if ((_currentHeightCm as dynamic) == null) {
       _currentHeightCm = 170.0;
@@ -324,6 +343,105 @@ class _ProgressPageState extends State<ProgressPage> {
     );
   }
 
+  Widget _buildBurnedChart(double width) {
+    if (_isLoading) {
+      return const SizedBox(
+        height: 140,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final double maxVal = _weeklyBurnedCalories.reduce((a, b) => a > b ? a : b);
+    final double maxYVal = maxVal < 500 ? 1000 : maxVal * 1.2;
+
+    return SizedBox(
+      height: 140,
+      width: width,
+      child: BarChart(
+        BarChartData(
+          gridData: FlGridData(
+            show: true,
+            drawVerticalLine: false,
+            horizontalInterval: 500,
+            getDrawingHorizontalLine: (value) => FlLine(
+              color: Colors.grey.shade100,
+              strokeWidth: 1,
+            ),
+          ),
+          titlesData: FlTitlesData(
+            show: true,
+            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 22,
+                getTitlesWidget: (value, meta) {
+                  final index = value.toInt();
+                  if (index < 0 || index >= _weeklyDates.length) {
+                    return const SizedBox();
+                  }
+                  final date = _weeklyDates[index];
+                  final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 6.0),
+                    child: Text(
+                      weekdays[date.weekday - 1],
+                      style: TextStyle(
+                        color: Colors.grey.shade500,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 10,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 35,
+                getTitlesWidget: (value, meta) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 6.0),
+                    child: Text(
+                      "${value.toStringAsFixed(0)}",
+                      style: TextStyle(
+                        color: Colors.grey.shade500,
+                        fontSize: 9,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          borderData: FlBorderData(
+            show: false,
+          ),
+          barGroups: List.generate(7, (index) {
+            return BarChartGroupData(
+              x: index,
+              barRods: [
+                BarChartRodData(
+                  toY: _weeklyBurnedCalories[index],
+                  color: const Color(0xFFFBAC50), // Orange color for burned
+                  width: 14,
+                  borderRadius: BorderRadius.circular(4),
+                  backDrawRodData: BackgroundBarChartRodData(
+                    show: true,
+                    toY: maxYVal,
+                    color: Colors.grey.shade100,
+                  ),
+                ),
+              ],
+            );
+          }),
+        ),
+      ),
+    );
+  }
+
   Widget _buildCategorySelector(AppPalette palette) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -380,13 +498,13 @@ class _ProgressPageState extends State<ProgressPage> {
 
     String tipMessage = "You are at a healthy weight. Keep maintaining your lifestyle!";
     if (_bmiCategory == "Underweight") {
-      final double normalMinWeightLbs = 18.5 * (_currentHeightCm / 100) * (_currentHeightCm / 100) * 2.20462;
-      final double gainWeightLbs = normalMinWeightLbs - _currentWeightLbs;
-      tipMessage = "Gain ${gainWeightLbs.clamp(1.0, 100.0).toStringAsFixed(1)} lbs to achieve a healthy weight.";
+      final double normalMinWeightKg = 18.5 * (_currentHeightCm / 100) * (_currentHeightCm / 100);
+      final double gainWeightKg = normalMinWeightKg - _currentWeightKg;
+      tipMessage = "Gain ${gainWeightKg.clamp(1.0, 100.0).toStringAsFixed(1)} kg to achieve a healthy weight.";
     } else if (_bmiCategory == "Overweight" || _bmiCategory == "Obese") {
-      final double normalMaxWeightLbs = 24.9 * (_currentHeightCm / 100) * (_currentHeightCm / 100) * 2.20462;
-      final double loseWeightLbs = _currentWeightLbs - normalMaxWeightLbs;
-      tipMessage = "Lose ${loseWeightLbs.clamp(1.0, 200.0).toStringAsFixed(1)} lbs to achieve a healthy weight.";
+      final double normalMaxWeightKg = 24.9 * (_currentHeightCm / 100) * (_currentHeightCm / 100);
+      final double loseWeightKg = _currentWeightKg - normalMaxWeightKg;
+      tipMessage = "Lose ${loseWeightKg.clamp(1.0, 200.0).toStringAsFixed(1)} kg to achieve a healthy weight.";
     }
 
     return Container(
@@ -484,17 +602,70 @@ class _ProgressPageState extends State<ProgressPage> {
     );
   }
 
+  Future<void> _showLogWeightDialog() async {
+    final TextEditingController ctrl = TextEditingController(text: _currentWeightKg.toStringAsFixed(1));
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Log Weight"),
+          content: TextField(
+            controller: ctrl,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: const InputDecoration(
+              labelText: "Weight (kg)",
+              border: OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final w = double.tryParse(ctrl.text);
+                if (w != null && w > 0) {
+                  showDialog(context: context, barrierDismissible: false, builder: (_) => const Center(child: CircularProgressIndicator()));
+                  final response = await DailyDataServices().logWeight(w);
+                  Navigator.pop(context); // close loading
+                  if (response['status_ok']) {
+                    Navigator.pop(context, true);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(response['message'])));
+                  }
+                }
+              },
+              child: const Text("Save"),
+            ),
+          ],
+        );
+      }
+    );
+    if (result == true) {
+      _fetchDailyData();
+    }
+  }
+
   Widget _buildWeightCard(double width, AppPalette palette, {Key? key}) {
     return _buildTrendSection(
       key: key,
       title: "Weight",
-      currentValue: _currentWeightLbs.toStringAsFixed(1),
-      unit: "lbs",
+      currentValue: _currentWeightKg.toStringAsFixed(1),
+      unit: "kg",
       change: "0.0",
       isPositive: true,
       timeFrame: "Last 7 days",
       chart: _buildWeightChart(width - 40),
       message: "Getting started is the hardest part. You're ready for this!",
+      actionButton: GestureDetector(
+        onTap: _showLogWeightDialog,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(color: const Color(0xFF17233C), borderRadius: BorderRadius.circular(20)),
+          child: const Text("+ Log", style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+        ),
+      ),
     );
   }
 
@@ -511,14 +682,15 @@ class _ProgressPageState extends State<ProgressPage> {
   }
 
   Widget _buildCaloriesBurnedCard(double width, AppPalette palette, {Key? key}) {
+    bool hasData = _weeklyBurnedCalories.any((c) => c > 0);
     return _buildTrendSection(
       key: key,
       title: "Calories Burned",
-      currentValue: "0",
+      currentValue: _totalBurnedCalories.toStringAsFixed(0),
       unit: "kcal",
       timeFrame: "Last 7 days",
-      chart: _buildChartPlaceholder(width - 40, "No workout logs"),
-      message: "Keep it up! A few more days of logging will help us unlock your personalized trends.",
+      chart: hasData ? _buildBurnedChart(width - 40) : _buildChartPlaceholder(width - 40, "No workout logs"),
+      message: hasData ? "Great job burning those calories! Keep moving to hit your goals." : "Keep it up! A few more days of logging will help us unlock your personalized trends.",
     );
   }
 
@@ -954,6 +1126,7 @@ class _ProgressPageState extends State<ProgressPage> {
     required String timeFrame,
     required Widget chart,
     String? message,
+    Widget? actionButton,
   }) {
     return Container(
       key: key,
@@ -971,7 +1144,8 @@ class _ProgressPageState extends State<ProgressPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(title, style: AppTextStyle.heading4.copyWith(fontWeight: FontWeight.w800)),
-              Text("More >", style: AppTextStyle.smallBoldText.copyWith(color: Colors.grey.shade400)),
+              if (actionButton != null) actionButton
+              else Text("More >", style: AppTextStyle.smallBoldText.copyWith(color: Colors.grey.shade400)),
             ],
           ),
           const SizedBox(height: 10),

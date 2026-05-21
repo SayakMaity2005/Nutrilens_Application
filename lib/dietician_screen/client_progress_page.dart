@@ -115,6 +115,8 @@ class _ClientProgressPageState extends State<ClientProgressPage> {
                   _buildTabSelector(),
                   const SizedBox(height: 20),
                   if (_selectedTabIndex == 0) _buildHeartHealthCard(),
+                  if (_selectedTabIndex == 0) const SizedBox(height: 20),
+                  if (_selectedTabIndex == 0) _buildWorkoutsCard(),
                   if (_selectedTabIndex == 1) _buildMealsChartCard(),
                   if (_selectedTabIndex == 2) _buildDiversityCard(),
                   if (_selectedTabIndex == 3) _buildMacrosPieChart(),
@@ -907,6 +909,142 @@ class _ClientProgressPageState extends State<ClientProgressPage> {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWorkoutsCard() {
+    double totalBurned = (_progressData?["energy_burned"] ?? 0.0).toDouble();
+    List<dynamic> workouts = _progressData?["workouts"] ?? [];
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.fitness_center, color: Colors.orange, size: 24),
+              const SizedBox(width: 8),
+              Text(
+                "Activity & Workouts",
+                style: GoogleFonts.nunito(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF1E293B),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                totalBurned.toStringAsFixed(0),
+                style: GoogleFonts.nunito(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w900,
+                  color: const Color(0xFFFBAC50),
+                  height: 1,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 6.0, left: 4.0),
+                child: Text(
+                  " kcal burned",
+                  style: GoogleFonts.nunito(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (workouts.isNotEmpty) ...[
+            const SizedBox(height: 20),
+            Divider(color: Colors.grey.shade200),
+            const SizedBox(height: 10),
+            ...workouts.map((w) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12.0),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.directions_run, color: Colors.orange, size: 20),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            w["name"] ?? "Workout",
+                            style: GoogleFonts.nunito(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF1E293B),
+                            ),
+                          ),
+                          if (w["duration"] != null)
+                            Text(
+                              "${w["duration"]} mins",
+                              style: GoogleFonts.nunito(
+                                fontSize: 13,
+                                color: Colors.grey.shade500,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      "${(w["energy"] ?? 0).toStringAsFixed(0)} kcal",
+                      style: GoogleFonts.nunito(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF1E293B),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ] else ...[
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                "No workouts logged today.",
+                style: GoogleFonts.nunito(
+                  color: Colors.grey.shade500,
+                  fontSize: 14,
+                ),
+              ),
+            )
+          ]
         ],
       ),
     );

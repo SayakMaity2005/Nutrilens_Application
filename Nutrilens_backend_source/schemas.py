@@ -187,6 +187,7 @@ class DailyDataUser(BaseModel):
     daily_target: DailyTarget
     meals: Meals # 4 types of meal
     water: float = 0       # in ml
+    weight: float | None = None # in kg
 
 
 

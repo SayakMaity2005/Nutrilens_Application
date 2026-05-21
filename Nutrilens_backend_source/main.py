@@ -7,7 +7,7 @@ from Nutrilens_backend_source.routers.daily_data import add_meal, add_water, get
 from Nutrilens_backend_source.routers.groq_api import make_recipe
 from Nutrilens_backend_source.routers.custom_recipe import add_custom_recipe, get_all_custom_recipe, delete_custom_recipe
 from Nutrilens_backend_source.routers.user_operations import get_user, update_profile, update_user_deatails, update_user_daily_target, get_nudges
-from Nutrilens_backend_source.routers.daily_data import add_meal, add_water, get_daily_data, get_default_intakes, analyze_food
+from Nutrilens_backend_source.routers.daily_data import add_meal, add_water, get_daily_data, get_default_intakes, analyze_food, log_weight
 from Nutrilens_backend_source.routers.dietician import register_dietician, get_clients, get_client_progress, meetings, list_dieticians, update_client_targets, nudges
 from Nutrilens_backend_source.routers.workout_data import add_workout, get_default_workouts, get_daily_worout_data
 
@@ -37,6 +37,7 @@ app.include_router(add_water.router)
 app.include_router(get_daily_data.router)
 app.include_router(get_daily_data_list.router)
 app.include_router(get_default_intakes.router)
+app.include_router(log_weight.router)
 
 #groq prompt
 app.include_router(make_recipe.router)

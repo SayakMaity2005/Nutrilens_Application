@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from Nutrilens_backend_source.auth import get_current_active_user
 from Nutrilens_backend_source.schemas import UserInDB, UserRole
 from Nutrilens_backend_source.database.db import (
-    users_daily_data_collection, dietician_profiles_collection
+    users_daily_data_collection, dietician_profiles_collection, daily_workout_collection
 )
 
 router = APIRouter(prefix="/dietician", tags=["Dietician"])
@@ -66,8 +66,14 @@ async def get_client_progress(
         "date": target_date
     })
 
+    # Fetch workout data
+    workout_data = await daily_workout_collection.find_one({
+        "user_id": client_id,
+        "date": target_date
+    })
+
     if not daily_data:
-        return {
+        daily_data = {
             "date": target_date.strftime("%Y-%m-%d"),
             "meals": {
                 "breakfast": {"meal_type": "breakfast", "consumed_intakes": []},
@@ -80,8 +86,12 @@ async def get_client_progress(
                 "energy": 2000, "carbs": 250, "protein": 150, "fat": 44, "water": 2250
             }
         }
+    else:
+        # Clean up MongoDB _id for JSON serialization
+        daily_data["_id"] = str(daily_data["_id"])
 
-    # Clean up MongoDB _id for JSON serialization
-    daily_data["_id"] = str(daily_data["_id"])
+    # Inject workout data
+    daily_data["workouts"] = workout_data.get("workouts", []) if workout_data else []
+    daily_data["energy_burned"] = workout_data.get("energy_burned", 0.0) if workout_data else 0.0
 
     return daily_data

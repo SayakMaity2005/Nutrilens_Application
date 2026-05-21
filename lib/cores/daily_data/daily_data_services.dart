@@ -164,4 +164,30 @@ class DailyDataServices {
       return {'status_ok': false, 'message': 'Water add error: $e'};
     }
   }
+
+  Future<Map<String, dynamic>> logWeight(double weight) async {
+    String? token = await storage.read(key: "access_token");
+    final date = DateTime.now();
+    String dateStr = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+    try {
+      final response = await http.post(
+        Uri.parse("$_baseUrl/daily_data/log_weight"),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token"
+        },
+        body: jsonEncode({
+          "weight": weight,
+          "date": dateStr
+        }),
+      );
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return {'status_ok': true, 'message': data['message'] ?? 'Weight logged successfully'};
+      }
+      return {'status_ok': false, 'message': data['detail'] ?? 'Failed to log weight'};
+    } catch (e) {
+      return {'status_ok': false, 'message': e.toString()};
+    }
+  }
 }
