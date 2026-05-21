@@ -39,9 +39,10 @@ async def add_workout_in_daily_data(
 
         # new daily data to stored in db
         new_users_daily_workout = DailyWorkoutDataUser(
-            user_id = current_user.id, # set the cuurent_user's id
-            date = today,              # set date to today date
-            workouts = [workout]       # attach the workout
+            user_id = current_user.id,      # set the cuurent_user's id
+            date = today,                   # set date to today date
+            energy_burned = workout.energy, # total burned energy
+            workouts = [workout]            # attach the workout
         )
 
         try:
@@ -60,7 +61,10 @@ async def add_workout_in_daily_data(
             await users_daily_workout_collection.update_one(
                 {"_id": users_daily_workout_dict["_id"], "user_id": current_user.id, "date": today},
                 # to add anything in list in db, this is the process
-                {"$push": {"workouts": workout.model_dump()}}
+                {
+                    "$push": {"workouts": workout.model_dump()},
+                    "$inc": {"energy_burned": workout.energy}
+                }
             )
         except Exception as e:
             raise HTTPException(

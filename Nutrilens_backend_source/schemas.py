@@ -205,6 +205,7 @@ class DailyWorkoutDataUser(BaseModel):
     # id: str = Field(alias="_id")
     user_id: str
     date: datetime
+    energy_burned: float = 0.0
     workouts: list[Workout]
 
 
