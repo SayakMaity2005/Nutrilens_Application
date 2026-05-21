@@ -190,6 +190,25 @@ class DailyDataUser(BaseModel):
 
 
 
+# Workout data
+# Workout template
+class Workout(BaseModel):
+    name: str
+    duration: float | None = None
+    timestamp: datetime | None = None
+    count: int | None = None
+    energy: float
+
+# User Daily workout data
+# Daily  User data
+class DailyWorkoutDataUser(BaseModel):
+    # id: str = Field(alias="_id")
+    user_id: str
+    date: datetime
+    energy_burned: float = 0.0
+    workouts: list[Workout]
+
+
 # =============================================
 # Dietician-specific Schemas
 # =============================================
