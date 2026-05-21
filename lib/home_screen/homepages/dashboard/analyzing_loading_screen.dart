@@ -125,7 +125,8 @@ class _AnalyzingLoadingScreenState extends State<AnalyzingLoadingScreen>
           ),
         );
       } else {
-        _showError("Analysis failed: ${response.statusCode}\n${response.body}");
+        // _showError("Analysis failed: ${response.statusCode}\n${response.body}");
+        _showError("Analysis failed: \nwe are facing some traffic, please try again after sometime");
       }
     } catch (e) {
       _showError("Connection error: $e");
@@ -266,15 +267,15 @@ class _AnalyzingLoadingScreenState extends State<AnalyzingLoadingScreen>
                 ),
               ),
 
-              SizedBox(height: 180,),
+              // SizedBox(height: 180,),
 
               // Bottom Section
-              // AnimatedSwitcher(
-              //   duration: const Duration(milliseconds: 300),
-              //   child: _showProAds
-              //       ? _buildPricingSection()
-              //       : _buildLoadingState(),
-              // ),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: _showProAds
+                    ? _buildPricingSection()
+                    : _buildLoadingState(),
+              ),
             ],
           ),
         ),
