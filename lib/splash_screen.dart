@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:nutrilens_test/home_screen/home_screen.dart';
+import 'package:nutrilens_test/initial_screens/input_screen.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -49,12 +51,15 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     _controller.forward();
 
     // Navigate to HomeScreen after animation and a tiny delay
-    Timer(const Duration(milliseconds: 3200), () {
+    Timer(const Duration(milliseconds: 3200), () async {
+      String? token = await FlutterSecureStorage().read(key: "access_token");
+      
       if (mounted) {
         Navigator.pushReplacement(
           context,
           PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) => const HomeScreen(),
+            pageBuilder: (context, animation, secondaryAnimation) => 
+                token != null ? const HomeScreen() : const InputScreen(),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return FadeTransition(opacity: animation, child: child);
             },

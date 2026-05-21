@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:nutrilens_test/initial_screens/input_data_pages/dob_input.dart';
 import 'package:nutrilens_test/initial_screens/input_data_pages/gender_selection.dart';
 import 'package:nutrilens_test/initial_screens/input_data_pages/height_input.dart';
+import 'package:nutrilens_test/initial_screens/input_data_pages/weight_input.dart';
+import 'package:nutrilens_test/profile_screen/authentication.dart';
+import 'package:nutrilens_test/home_screen/home_screen.dart';
+
+import 'package:nutrilens_test/cores/constants/colors.dart';
+import 'package:nutrilens_test/cores/constants/text_styles.dart';
 
 class InputScreen extends StatefulWidget {
   const InputScreen({super.key});
@@ -61,19 +67,64 @@ class _InputScreenState extends State<InputScreen> {
   }
 
   // Take action when child WeightInput page trigger
-  void onWeightInput(double weight) {
-    _inputData['weight'] = weight; // height along with it's unit concatenated
-    _pageController.animateToPage(
-      _index + 1,
-      duration: Duration(milliseconds: 200),
-      curve: Curves.easeOut,
+  void onWeightInput(double weight) async {
+    _inputData['weight'] = weight;
+    
+    // Final step: navigate to Authentication screen for account creation
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => Authentication(
+          initialIsSignIn: false,
+          initialInputData: _inputData,
+        ),
+      ),
     );
+
+    if (result == true) {
+      if (!context.mounted) return;
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        (route) => false,
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
+    final palette = Theme.of(context).extension<AppPalette>()!;
+    
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: TextButton(
+              onPressed: () async {
+                final result = await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const Authentication(initialIsSignIn: true),
+                  ),
+                );
+                if (result == true) {
+                  if (!context.mounted) return;
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (context) => const HomeScreen()),
+                    (route) => false,
+                  );
+                }
+              },
+              child: Text(
+                "Sign In",
+                style: AppTextStyle.heading5.copyWith(color: palette.selectColor1),
+              ),
+            ),
+          ),
+        ],
+      ),
       body: PageView(
         onPageChanged: (index) {
           if (_inputData.length <= _index && index > _index) {
@@ -96,9 +147,9 @@ class _InputScreenState extends State<InputScreen> {
           ),
           DobInput(inputData: _inputData, onInput: onDobInput),
           HeightInput(inputData: _inputData, onInput: onHeightInput),
-          GenderSelection(
+          WeightInput(
             inputData: _inputData,
-            onSelection: onGenderSelection,
+            onInput: onWeightInput,
           ),
         ],
       ),

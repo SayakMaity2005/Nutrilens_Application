@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:nutrilens_test/cores/constants/text_styles.dart';
-
-import '../../cores/constants/colors.dart';
-import '../../custom_widget_library/animated_button.dart';
-import '../../custom_widget_library/customized_text_field.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class HeightInput extends StatefulWidget {
   final Map<String, dynamic> inputData;
@@ -28,7 +24,6 @@ class _HeightInputState extends State<HeightInput> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _unitInCm = true;
     _cmTextController = TextEditingController();
@@ -36,28 +31,22 @@ class _HeightInputState extends State<HeightInput> {
     _inTextController = TextEditingController();
     _ftNode = FocusNode();
     _inNode = FocusNode();
-    // extract height
+    
     String? height = widget.inputData['height'];
-    if (height == null) {
-      _unitInCm = true;
-    } else {
+    if (height != null) {
       if (height.contains('cm')) {
         _unitInCm = true;
         _cmTextController.text = height.substring(0, height.indexOf('cm'));
       } else {
         _unitInCm = false;
         _ftTextController.text = height.substring(0, height.indexOf('ft'));
-        _inTextController.text = height.substring(
-          height.indexOf('ft') + 2,
-          height.indexOf('in'),
-        );
+        _inTextController.text = height.substring(height.indexOf('ft') + 2, height.indexOf('in'));
       }
     }
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _cmTextController.dispose();
     _ftTextController.dispose();
     _inTextController.dispose();
@@ -66,241 +55,268 @@ class _HeightInputState extends State<HeightInput> {
     super.dispose();
   }
 
-  // bool _checkValidation() {
-  //   if(_unitInCm) {
-  //     double heightCm = double.parse(_cmTextController.text);
-  //     if(heightCm <= 10 || heightCm > 350) return false;
-  //     return true;
-  //   } else {
-  //     double heightFt = double.parse(_ftTextController.text);
-  //     double heightIn = double.parse(_inTextController.text);
-  //     if((heightFt < 1 && heightIn < 5) || heightFt > 12 || heightIn > 12)  return false;
-  //     return true;
-  //     }
-  //   }
-  // }
-
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    final screenSize = MediaQuery.of(context).size;
-    final screenHeight = screenSize.height;
-    final screenWidth = screenSize.width;
-    final palette = Theme.of(context).extension<AppPalette>()!;
+    final screenSize = MediaQuery.sizeOf(context);
 
     return Container(
-      height: screenHeight,
-      width: screenWidth,
+      height: screenSize.height,
+      width: screenSize.width,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [palette.topGradient2, Colors.transparent],
-          begin: Alignment.topCenter,
-          end: Alignment.center,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.teal.shade50,
+            Colors.white,
+            Colors.green.shade50,
+          ],
+          stops: const [0.0, 0.5, 1.0],
         ),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        spacing: 20,
-        children: [
-          const Text("What's your height?", style: AppTextStyle.heading3),
-          if (_unitInCm)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  height: 70,
-                  width: 80,
-                  child: CustomizedTextField(
-                    controller: _cmTextController,
-                    // focusNode: _dateFocus,
-                    // nextNode: _monthFocus,
-                    maxLength: 6,
-                    maxVal: 350,
-                    minVal: 10,
-                    textAlign: TextAlign.center,
-                    hintText: 'Cm',
-                  ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Main Card
+              Container(
+                padding: const EdgeInsets.all(32),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(32),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 24,
+                      offset: const Offset(0, 12),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          if (!_unitInCm)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              spacing: 20,
-              children: [
-                SizedBox(
-                  height: 70,
-                  width: 100,
-                  child: CustomizedTextField(
-                    controller: _ftTextController,
-                    focusNode: _ftNode,
-                    nextNode: _inNode,
-                    maxLength: 2,
-                    maxVal: 12,
-                    minVal: 0,
-                    textAlign: TextAlign.center,
-                    hintText: 'Feet',
-                  ),
-                ),
-                SizedBox(
-                  height: 70,
-                  width: 100,
-                  child: CustomizedTextField(
-                    controller: _inTextController,
-                    focusNode: _inNode,
-                    prevNode: _ftNode,
-                    maxLength: 5,
-                    maxVal: 12,
-                    // minVal: 1,
-                    textAlign: TextAlign.center,
-                    hintText: 'Inches',
-                  ),
-                ),
-              ],
-            ),
-          Container(
-            height: 50,
-            width: 200,
-            decoration: BoxDecoration(
-              color: palette.unselectColor1,
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Stack(
-              children: [
-                Center(
-                  child: SizedBox(
-                    height: 38,
-                    width: 188,
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: AnimatedSlide(
-                        offset: _unitInCm ? Offset(0, 0) : Offset(1, 0),
-                        duration: Duration(milliseconds: 300),
-                        curve: Curves.easeOutExpo,
-                        child: Container(
-                          height: 38,
-                          width: 94,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(25),
-                            gradient: LinearGradient(
-                              colors: [
-                                palette.selectColor2,
-                                palette.selectColor3,
-                              ],
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.teal.shade50,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.height_rounded,
+                        size: 48,
+                        color: Colors.teal.shade400,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      "What's your height?",
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.nunito(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF1E293B),
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    
+                    // Unit Toggle
+                    Container(
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => setState(() => _unitInCm = true),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: _unitInCm ? Colors.white : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(24),
+                                  boxShadow: _unitInCm
+                                      ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 2))]
+                                      : [],
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  "Centimeters",
+                                  style: GoogleFonts.nunito(
+                                    color: _unitInCm ? Colors.teal.shade600 : const Color(0xFF64748B),
+                                    fontWeight: _unitInCm ? FontWeight.w800 : FontWeight.w600,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
-                          // child: Center(child: Text('ft/in')),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => setState(() => _unitInCm = false),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: !_unitInCm ? Colors.white : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(24),
+                                  boxShadow: !_unitInCm
+                                      ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 2))]
+                                      : [],
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  "Feet / Inches",
+                                  style: GoogleFonts.nunito(
+                                    color: !_unitInCm ? Colors.teal.shade600 : const Color(0xFF64748B),
+                                    fontWeight: !_unitInCm ? FontWeight.w800 : FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Inputs
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      child: _unitInCm
+                          ? _buildDateInput(
+                              controller: _cmTextController,
+                              focusNode: FocusNode(),
+                              hint: 'cm',
+                              maxLength: 3,
+                              width: 120,
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _buildDateInput(
+                                  controller: _ftTextController,
+                                  focusNode: _ftNode,
+                                  nextNode: _inNode,
+                                  hint: 'ft',
+                                  maxLength: 1,
+                                  width: 80,
+                                ),
+                                const SizedBox(width: 16),
+                                _buildDateInput(
+                                  controller: _inTextController,
+                                  focusNode: _inNode,
+                                  prevNode: _ftNode,
+                                  hint: 'in',
+                                  maxLength: 2,
+                                  width: 80,
+                                ),
+                              ],
+                            ),
+                    ),
+                    const SizedBox(height: 40),
+
+                    // Next Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: ElevatedButton(
+                        onPressed: _handleNext,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.teal.shade500,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          shadowColor: Colors.teal.withValues(alpha: 0.5),
+                        ),
+                        child: Text(
+                          "Next",
+                          style: GoogleFonts.nunito(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-                Align(
-                  alignment: Alignment.center,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _unitInCm = true;
-                          });
-                        },
-                        child: Container(
-                          height: 38,
-                          width: 94,
-                          decoration: BoxDecoration(
-                            // color: palette.selectColor2,
-                            borderRadius: BorderRadius.circular(25),
-                            // gradient: _unitInCm
-                            //     ? LinearGradient(
-                            //         colors: [
-                            //           palette.selectColor2,
-                            //           palette.selectColor3,
-                            //         ],
-                            //       )
-                            //     : null,
-                          ),
-                          child: Center(child: Text('cm')),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _unitInCm = false;
-                          });
-                        },
-                        child: Container(
-                          height: 38,
-                          width: 94,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(25),
-                            // gradient: !_unitInCm
-                            //     ? LinearGradient(
-                            //         colors: [
-                            //           palette.selectColor2,
-                            //           palette.selectColor3,
-                            //         ],
-                            //       )
-                            //     : null,
-                          ),
-                          child: Center(child: Text('ft/in')),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
+        ),
+      ),
+    );
+  }
 
-          SizedBox(height: 200, width: 10),
-          AnimatedButton(
-            onTap: () {
-              if ((_unitInCm && _cmTextController.text.length <= 1) ||
-                  (!_unitInCm &&
-                      (_ftTextController.text.length <= 1 &&
-                      _inTextController.text.length <= 1) )) {
-                final errorSnackBar = SnackBar(
-                  content: Text(
-                    'Please fill correctly!',
-                    style: AppTextStyle.primaryText.copyWith(
-                      color: Color(0xFF53121B),
-                    ),
-                  ),
-                  behavior: SnackBarBehavior.floating,
-                  margin: EdgeInsetsGeometry.symmetric(
-                    horizontal: 20,
-                    vertical: 10,
-                  ),
-                  backgroundColor: Color(0xC2D599A2),
-                  showCloseIcon: true,
-                  closeIconColor: Color(0xFF53121B),
-                );
-                ScaffoldMessenger.of(context).showSnackBar(errorSnackBar);
-                return;
-              }
-              double heightFeet = double.parse(_ftTextController.text);
-              double heightInch = double.parse(_inTextController.text);
-              // if(heightInch==12)
-              String height = _unitInCm
-                  ? '${_cmTextController.text}cm'
-                  : '${_ftTextController.text}ft${_inTextController.text}in';
-              widget.onInput(height);
-            },
-
-            height: 50,
-            width: 220,
-            decoration: BoxDecoration(
-              color: palette.selectColor3,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Center(
-              child: Text('Next', style: AppTextStyle.heading5),
-            ),
+  Widget _buildDateInput({
+    required TextEditingController controller,
+    required FocusNode focusNode,
+    FocusNode? nextNode,
+    FocusNode? prevNode,
+    required String hint,
+    required int maxLength,
+    required double width,
+  }) {
+    return SizedBox(
+      width: width,
+      child: TextField(
+        controller: controller,
+        focusNode: focusNode,
+        keyboardType: TextInputType.number,
+        textAlign: TextAlign.center,
+        maxLength: maxLength,
+        style: GoogleFonts.nunito(
+          fontSize: 24,
+          fontWeight: FontWeight.w700,
+          color: const Color(0xFF334155),
+        ),
+        onChanged: (value) {
+          if (value.isEmpty && prevNode != null) {
+            FocusScope.of(context).requestFocus(prevNode);
+          } else if (value.length == maxLength && nextNode != null) {
+            FocusScope.of(context).requestFocus(nextNode);
+          }
+        },
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: GoogleFonts.nunito(color: Colors.grey.shade400, fontSize: 20, fontWeight: FontWeight.w600),
+          counterText: "",
+          filled: true,
+          fillColor: Colors.grey.shade50,
+          contentPadding: const EdgeInsets.symmetric(vertical: 16),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
           ),
-          SizedBox(height: 10, width: 10),
-        ],
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: Colors.teal.shade300, width: 2),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _handleNext() {
+    if ((_unitInCm && _cmTextController.text.isEmpty) ||
+        (!_unitInCm && (_ftTextController.text.isEmpty || _inTextController.text.isEmpty))) {
+      _showError('Please enter your complete height');
+      return;
+    }
+    
+    String height = _unitInCm
+        ? '${_cmTextController.text}cm'
+        : '${_ftTextController.text}ft${_inTextController.text}in';
+    widget.onInput(height);
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: GoogleFonts.nunito(color: Colors.white, fontWeight: FontWeight.w600),
+        ),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        backgroundColor: Colors.red.shade400,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }

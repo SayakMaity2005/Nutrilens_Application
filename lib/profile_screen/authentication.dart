@@ -10,7 +10,14 @@ import '../cores/dietician/dietician_services.dart';
 import '../custom_widget_library/animated_button.dart';
 
 class Authentication extends StatefulWidget {
-  const Authentication({super.key});
+  final bool initialIsSignIn;
+  final Map<String, dynamic>? initialInputData;
+  
+  const Authentication({
+    super.key, 
+    this.initialIsSignIn = true, 
+    this.initialInputData,
+  });
 
   @override
   State<Authentication> createState() => _AuthenticationState();
@@ -18,7 +25,7 @@ class Authentication extends StatefulWidget {
 
 class _AuthenticationState extends State<Authentication> {
   String _headingText = 'Sign In';
-  bool _isSignIn = true;
+  late bool _isSignIn;
   bool _isDietician = false;
 
   late TextEditingController _usernameTextController;
@@ -73,6 +80,7 @@ class _AuthenticationState extends State<Authentication> {
   @override
   void initState() {
     super.initState();
+    _isSignIn = widget.initialIsSignIn;
     _usernameTextController = TextEditingController();
     _passwordTextController = TextEditingController();
     _confirmPasswordTextController = TextEditingController();
@@ -85,6 +93,28 @@ class _AuthenticationState extends State<Authentication> {
 
     _heightTextController = TextEditingController();
     _weightTextController = TextEditingController();
+    
+    if (widget.initialInputData != null) {
+      if (widget.initialInputData!['gender'] != null) {
+        _selectedGender = widget.initialInputData!['gender'].toString().replaceFirst(
+          widget.initialInputData!['gender'].toString()[0], 
+          widget.initialInputData!['gender'].toString()[0].toUpperCase()
+        );
+      }
+      _selectedDate = widget.initialInputData!['dob'];
+      _weightTextController.text = widget.initialInputData!['weight']?.toString() ?? '';
+      
+      String? heightStr = widget.initialInputData!['height'];
+      if (heightStr != null) {
+        if (heightStr.contains('cm')) {
+          _heightTextController.text = heightStr.substring(0, heightStr.indexOf('cm'));
+        } else if (heightStr.contains('ft') && heightStr.contains('in')) {
+          double ft = double.tryParse(heightStr.substring(0, heightStr.indexOf('ft'))) ?? 0;
+          double inch = double.tryParse(heightStr.substring(heightStr.indexOf('ft') + 2, heightStr.indexOf('in'))) ?? 0;
+          _heightTextController.text = ((ft * 30.48) + (inch * 2.54)).toStringAsFixed(1);
+        }
+      }
+    }
   }
 
   @override
@@ -272,7 +302,7 @@ class _AuthenticationState extends State<Authentication> {
                       if (!_isSignIn) const SizedBox(height: 16),
                       if (!_isSignIn) _buildTextField("Email", Icons.email_outlined, _emailTextController),
                       
-                      if (!_isSignIn && !_isDietician) ...[
+                      if (!_isSignIn && !_isDietician && widget.initialInputData == null) ...[
                         const SizedBox(height: 16),
                         Row(
                           children: [
