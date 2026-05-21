@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from Nutrilens_backend_source.auth import get_current_active_user
 from Nutrilens_backend_source.schemas import UserInDB, UserRole
 from Nutrilens_backend_source.database.db import (
-    users_daily_data_collection, dietician_profiles_collection, daily_workout_collection
+    users_daily_data_collection, dietician_profiles_collection, users_daily_workout_collection
 )
 
 router = APIRouter(prefix="/dietician", tags=["Dietician"])
@@ -67,7 +67,7 @@ async def get_client_progress(
     })
 
     # Fetch workout data
-    workout_data = await daily_workout_collection.find_one({
+    workout_data = await users_daily_workout_collection.find_one({
         "user_id": client_id,
         "date": target_date
     })
