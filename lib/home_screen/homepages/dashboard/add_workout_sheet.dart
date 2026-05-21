@@ -75,6 +75,7 @@ class _AddWorkoutSheetState extends State<AddWorkoutSheet> {
       "duration": duration,
       "energy": energy,
       "count": 1,
+      "timestamp": DateTime.now().toIso8601String(),
     };
 
     final response = await _workoutServices.addWorkout(workoutData);

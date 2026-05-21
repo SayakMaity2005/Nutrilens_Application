@@ -15,13 +15,12 @@ async def add_workout_in_daily_data(
     workout: Workout,
     current_user: Annotated[UserInDB, Depends(get_current_active_user)],
 ):
-    # give timestamp to workout data
-    workout.timestamp = datetime.now()
+    # use frontend timestamp if provided to avoid timezone drift, otherwise default to server now
+    if workout.timestamp is None:
+        workout.timestamp = datetime.now()
 
-    # pymongo does not support date so I had to make the date (of daily_data) as datetime type with min time
-    # this make date with min time 00.00.00 like 2026-05-16 00:00:00
-
-    today: datetime = datetime.combine(datetime.now().date(), datetime.min.time())
+    # Get the correct local date from the timestamp
+    today: datetime = datetime.combine(workout.timestamp.date(), datetime.min.time())
     
     try:
         # try to fetch daily data from mongo db
