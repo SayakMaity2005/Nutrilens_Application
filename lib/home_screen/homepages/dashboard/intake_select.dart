@@ -829,7 +829,7 @@ class _AllTabState extends State<AllTab> with AutomaticKeepAliveClientMixin {
                   context,
                   MaterialPageRoute(
                     builder: (context) {
-                      return IntakeDetails(selectedIntake: selectedIntake);
+                      return IntakeDetails(selectedIntake: selectedIntake, showRecipeAndIngredients: true,);
                     },
                   ),
                 );

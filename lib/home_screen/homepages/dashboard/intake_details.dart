@@ -141,7 +141,7 @@ class _IntakeDetailsState extends State<IntakeDetails> {
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.02),
+                    color: Colors.black.withValues(alpha: 0.02),
                     blurRadius: 15,
                     offset: const Offset(0, 5),
                   )
@@ -252,7 +252,7 @@ class _IntakeDetailsState extends State<IntakeDetails> {
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.02),
+                    color: Colors.black.withValues(alpha: 0.02),
                     blurRadius: 15,
                     offset: const Offset(0, 5),
                   )
@@ -305,7 +305,7 @@ class _IntakeDetailsState extends State<IntakeDetails> {
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.02),
+                      color: Colors.black.withValues(alpha: 0.02),
                       blurRadius: 15,
                       offset: const Offset(0, 5),
                     )
@@ -357,7 +357,7 @@ class _IntakeDetailsState extends State<IntakeDetails> {
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.02),
+                      color: Colors.black.withValues(alpha: 0.02),
                       blurRadius: 15,
                       offset: const Offset(0, 5),
                     )
@@ -386,7 +386,7 @@ class _IntakeDetailsState extends State<IntakeDetails> {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Colors.blue.withOpacity(0.3),
+              color: Colors.blue.withValues(alpha: 0.3),
               blurRadius: 20,
               offset: const Offset(0, 10),
             )
@@ -438,7 +438,7 @@ class _IntakeDetailsState extends State<IntakeDetails> {
 
             if (response['status_ok']) {
               if (!mounted) return;
-              _showSnackBar('Added to your progress!');
+              _showSnackBar('Added to your Meal!');
 
               // Force the app to restart at HomeScreen so Dashboard refreshes its data!
               Navigator.of(context).pushAndRemoveUntil(
