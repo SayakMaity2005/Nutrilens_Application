@@ -32,6 +32,8 @@ class _AiCustomRecipeState extends State<AiCustomRecipe>
   ];
   int _currIntakeRoundIndex = 1;
 
+  bool _isLoading = false;
+
   late TextEditingController _textEditingController;
 
   @override
@@ -471,56 +473,67 @@ class _AiCustomRecipeState extends State<AiCustomRecipe>
                           if (_textEditingController.text.isEmpty) {
                             return;
                           }
-                          final response = await GroqServices().makeRecipe(
-                            _textEditingController.text,
-                          );
-                          print('///////////// ${response['message']} ///////////');
-                          _showSnackBar(response['message']);
-                          if (response['data'] != null) {
-                            Intake selectedIntake = Intake(
-                              name: response['data']['data']['name'],
-                              type: response['data']['data']['type'],
-                              unit: 'g',
-                              quantity: response['data']['data']['quantity'],
-                              energyPerUnit:
-                                  response['data']['data']['energy_per_unit'],
-                              carbsPerUnit:
-                                  response['data']['data']['carbs_per_unit'],
-                              proteinPerUnit:
-                                  response['data']['data']['protein_per_unit'],
-                              fatPerUnit:
-                                  response['data']['data']['fat_per_unit'],
-                              ingredients: List<String>.from(
-                                response['data']['data']['ingredients'],
-                              ),
-                              recipe: response['data']['data']['recipe'],
+                          if(_isLoading) {
+                            return;
+                          }
+                          try {
+                            _isLoading = true;
+                            final response = await GroqServices().makeRecipe(
+                              _textEditingController.text,
                             );
 
-                            final saveRes = await CustomRecipe().addRecipe(
-                              _intakeRounds[_currIntakeRoundIndex].name,
-                              selectedIntake,
-                            );
-
-                            _showSnackBar(saveRes['message']);
-
-                            if (saveRes['status_ok']) {
-                              print(
-                                '////////////// ${saveRes['message']} ///////////',
+                            print('///////////// ${response['message']} ///////////');
+                            _showSnackBar(response['message']);
+                            if (response['data'] != null) {
+                              Intake selectedIntake = Intake(
+                                name: response['data']['data']['name'],
+                                type: response['data']['data']['type'],
+                                unit: 'g',
+                                quantity: response['data']['data']['quantity'],
+                                energyPerUnit:
+                                response['data']['data']['energy_per_unit'],
+                                carbsPerUnit:
+                                response['data']['data']['carbs_per_unit'],
+                                proteinPerUnit:
+                                response['data']['data']['protein_per_unit'],
+                                fatPerUnit:
+                                response['data']['data']['fat_per_unit'],
+                                ingredients: List<String>.from(
+                                  response['data']['data']['ingredients'],
+                                ),
+                                recipe: response['data']['data']['recipe'],
                               );
-                            } else {}
 
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) {
-                                  return IntakeDetails(
-                                    selectedIntake: selectedIntake,
-                                    showRecipeAndIngredients: true,
-                                  );
-                                },
-                              ),
-                            );
+                              final saveRes = await CustomRecipe().addRecipe(
+                                _intakeRounds[_currIntakeRoundIndex].name,
+                                selectedIntake,
+                              );
+
+                              _showSnackBar(saveRes['message']);
+
+                              if (saveRes['status_ok']) {
+                                print(
+                                  '////////////// ${saveRes['message']} ///////////',
+                                );
+                              } else {}
+
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return IntakeDetails(
+                                      selectedIntake: selectedIntake,
+                                      showRecipeAndIngredients: true,
+                                    );
+                                  },
+                                ),
+                              );
+                            }
                           }
                           // print(response['data']['data']['name']);
+                          finally {
+                            _isLoading = false;
+                          }
+
                         },
                         width: screenWidth,
                         decoration: BoxDecoration(
