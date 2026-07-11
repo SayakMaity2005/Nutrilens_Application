@@ -44,8 +44,15 @@ async def make_custom_recipe(
 ):
 
     prompt = f"""
-        Generate a healthy recipe using ONLY:
+        Generate a healthy recipe using the following ingredients as the primary base:
         {user_prompt}
+
+        You may assume that basic pantry staples (like salt, pepper, oil, water, garlic, common spices) are available and can be used.
+
+        CRITICAL RULES FOR INGREDIENTS:
+        - If the user provides ingredients that are completely incompatible or unappetizing together (e.g., banana and mutton), use your culinary expertise to select only the ingredients that work well together and ignore the rest.
+        - If the input contains non-food items, ignore them completely.
+        - If no sensible recipe can be made from the input, set "success" to false and provide a polite explanation in "error_message" stating why.
 
         Return ONLY raw valid JSON.
 
@@ -55,16 +62,18 @@ async def make_custom_recipe(
         JSON format:
 
         {{
+            "success": bool,           # true if a valid recipe could be made, false if ingredients are entirely unusable
+            "error_message": "str",    # If success is false, explain why. If true, leave as empty string.
             "name": "str",
             "type": "str",
 
-            "quantity": float,         # in gram
-            "energy_per_unit": float,  # per gram
-            "carbs_per_unit": float,   # per gram
-            "protein_per_unit": float, # per gram
-            "fat_per_unit": float,     # per gram
+            "quantity": float,         # total weight of the recipe in grams
+            "energy_per_unit": float,  # calories per gram
+            "carbs_per_unit": float,   # carbs per gram
+            "protein_per_unit": float, # protein per gram
+            "fat_per_unit": float,     # fat per gram
             "ingredients": ["str"],
-            "recipe": "str"
+            "recipe": "str"            # highly detailed, numbered step-by-step instructions
         }}
     """
 
@@ -77,13 +86,15 @@ async def make_custom_recipe(
                 model=
                     "llama-3.3-70b-versatile",
 
+                response_format={"type": "json_object"},
+
                 messages=[
 
                     {
                         "role": "system",
 
                         "content":
-                            "You are a nutrition expert."
+                            "You are a nutrition and culinary expert."
                     },
 
                     {
@@ -106,6 +117,11 @@ async def make_custom_recipe(
 
         recipe = json.loads(result)
 
+        if not recipe.get("success", True):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=recipe.get("error_message", "Could not generate a sensible recipe from those ingredients.")
+            )
 
         return {
             "message":
